@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">Dr VPN</string>
+    <string name="home_tab_home">Inicio</string>
+    <string name="home_tab_proxies">Servidores</string>
+    <string name="home_tap_to_connect">Toca para conectar</string>
+    <string name="home_connected">Conectado</string>
+    <string name="home_no_server">Ningún servidor seleccionado</string>
+    <string name="home_current_server">Servidor</string>
+    <string name="region_iran">Irán</string>
+    <string name="region_china">China</string>
+    <string name="region_russia">Rusia</string>
+    <string name="region_other">Otros países</string>
+    <string name="onboarding_select_country">Selecciona tu país</string>
+    <string name="onboarding_country_hint">Los sitios locales de tu país se abrirán sin la VPN.</string>
+    <string name="onboarding_select_language">Elige el idioma de la app</string>
+    <string name="onboarding_next">Siguiente</string>
+    <string name="onboarding_back">Atrás</string>
+    <string name="onboarding_start">Empezar</string>
+    <string name="onboarding_drawer_title">País e idioma</string>
+    <string name="ping_filter_show_all">Mostrar servidores sin ping</string>
+    <string name="ping_filter_test_all">Probar todos</string>
+    <string name="advanced_scan_title">Modo avanzado (internet nacional)</string>
+    <string name="advanced_scan_warning">Este modo es para condiciones de internet nacional. La app escanea un rango de IP para encontrar una IP limpia y un puerto abierto; esto genera mucho tráfico y puede tardar varios minutos. Para evitar problemas, apaga y enciende (reinicia) los datos de tu SIM cada 3 horas. ¿Continuar?</string>
+    <string name="advanced_scan_understood">Entendido</string>
+    <string name="advanced_scan_hint">Escanea el rango de IP en los puertos indicados y lista las IP:puerto accesibles con su latencia. Toca un resultado para copiarlo.</string>
+    <string name="advanced_scan_range">Rango de IP (p. ej. 1.2.3.0/24)</string>
+    <string name="advanced_scan_ports">Puertos (separados por comas)</string>
+    <string name="advanced_scan_start">Iniciar escaneo</string>
+    <string name="advanced_scan_stop">Detener</string>
+    <string name="advanced_scan_found">%d encontrados</string>
+    <string name="advanced_scan_preset_server">Servidor</string>
+    <string name="advanced_scan_preset_cloudflare">Cloudflare</string>
+    <string name="advanced_scan_preset_world">Mundo</string>
+    <string name="advanced_scan_note_world">El escaneo del mundo entero usa una muestra aleatoria de rangos; para encontrar una IP limpia, Cloudflare es la mejor opción.</string>
+    <string name="advanced_scan_resume">Reanudar</string>
+    <string name="title_theme">Tema</string>
+    <string-array name="drvpn_theme">
+        <item>Simple (predeterminado)</item>
+        <item>Neumorfismo</item>
+        <item>Glassmorfismo</item>
+    </string-array>
+</resources>

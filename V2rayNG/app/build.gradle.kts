@@ -139,7 +139,8 @@ android {
             "fa",
             "ar",
             "bn",
-            "bqi-rIR"
+            "bqi-rIR",
+            "es"
         )
     }
 
