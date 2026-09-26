@@ -581,7 +581,7 @@
     <string name="ping_filter_show_all">পিং ছাড়া সার্ভার দেখান</string>
     <string name="ping_filter_test_all">সব পিং করুন</string>
     <string name="advanced_scan_title">উন্নত মোড (জাতীয় ইন্টারনেট)</string>
-    <string name="advanced_scan_warning">এই মোডটি জাতীয় ইন্টারনেট পরিস্থিতির জন্য। অ্যাপটি একটি পরিষ্কার IP ও খোলা পোর্ট খুঁজতে IP রেঞ্জ স্ক্যান করে; এতে কয়েক মিনিট লাগতে পারে এবং সংযোগ ধীর হতে পারে। চালিয়ে যাবেন?</string>
+    <string name="advanced_scan_warning">এই মোডটি জাতীয় ইন্টারনেট পরিস্থিতির জন্য। অ্যাপটি পরিষ্কার IP ও খোলা পোর্ট খুঁজতে IP রেঞ্জ স্ক্যান করে; এতে প্রচুর ট্রাফিক তৈরি হয় ও কয়েক মিনিট লাগতে পারে। সমস্যা এড়াতে প্রতি ৩ ঘণ্টায় সিমের ডেটা একবার বন্ধ করে চালু (রিসেট) করুন। চালিয়ে যাবেন?</string>
     <string name="advanced_scan_understood">বুঝেছি</string>
     <string name="advanced_scan_hint">নির্দিষ্ট পোর্টে IP রেঞ্জ স্ক্যান করে পৌঁছানো যায় এমন IP:port লেটেন্সিসহ দেখায়। কপি করতে একটি ফলাফলে ট্যাপ করুন।</string>
     <string name="advanced_scan_range">IP রেঞ্জ (যেমন 1.2.3.0/24)</string>

@@ -579,7 +579,7 @@
     <string name="ping_filter_show_all">Hiện máy chủ không có ping</string>
     <string name="ping_filter_test_all">Ping tất cả</string>
     <string name="advanced_scan_title">Chế độ nâng cao (internet quốc gia)</string>
-    <string name="advanced_scan_warning">Chế độ này dành cho điều kiện internet quốc gia. Ứng dụng quét dải IP để tìm IP sạch và cổng mở; có thể mất vài phút và khiến kết nối chậm hơn. Tiếp tục?</string>
+    <string name="advanced_scan_warning">Chế độ này dành cho điều kiện internet quốc gia. Ứng dụng quét dải IP để tìm IP sạch và cổng mở; việc này tạo lưu lượng lớn và có thể mất vài phút. Để tránh sự cố, hãy tắt rồi bật lại (đặt lại) dữ liệu SIM mỗi 3 giờ. Tiếp tục?</string>
     <string name="advanced_scan_understood">Đã hiểu</string>
     <string name="advanced_scan_hint">Quét dải IP trên các cổng đã cho và liệt kê IP:cổng truy cập được kèm độ trễ. Chạm vào kết quả để sao chép.</string>
     <string name="advanced_scan_range">Dải IP (vd 1.2.3.0/24)</string>

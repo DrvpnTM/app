@@ -581,7 +581,7 @@
     <string name="ping_filter_show_all">نمایش سرورهای بدون پینگ</string>
     <string name="ping_filter_test_all">تست پینگ همه</string>
     <string name="advanced_scan_title">حالت پیشرفته (نت ملی)</string>
-    <string name="advanced_scan_warning">این حالت برای شرایط نت ملی است. برنامه رنج IP را اسکن می‌کند تا IP و پورت تمیز پیدا کند و این کار ممکن است چند دقیقه طول بکشد و اتصال دیرتر برقرار شود. آیا ادامه می‌دهید؟</string>
+    <string name="advanced_scan_warning">این حالت برای شرایط نت ملی است. برنامه رنج IP را اسکن می‌کند تا IP و پورت تمیز پیدا کند و این کار ترافیک زیادی می‌سازد و ممکن است چند دقیقه طول بکشد. برای اینکه مشکلی پیش نیاید، بهتر است هر ۳ ساعت اینترنت سیم‌کارت خود را یک بار خاموش و روشن (ریست) کنید. آیا ادامه می‌دهید؟</string>
     <string name="advanced_scan_understood">متوجه شدم</string>
     <string name="advanced_scan_hint">رنج IP سرور را روی پورت‌های داده‌شده اسکن می‌کند و IP:پورت‌های قابل دسترس را با پینگ نشان می‌دهد. روی هر نتیجه بزنید تا کپی شود.</string>
     <string name="advanced_scan_range">رنج IP (مثلاً 1.2.3.0/24)</string>

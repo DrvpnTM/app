@@ -579,7 +579,7 @@
     <string name="ping_filter_show_all">显示无延迟结果的节点</string>
     <string name="ping_filter_test_all">全部测延迟</string>
     <string name="advanced_scan_title">高级模式（国家内网）</string>
-    <string name="advanced_scan_warning">此模式用于国家内网环境。应用会扫描 IP 段以寻找干净 IP 和开放端口，可能需要几分钟并使连接变慢。是否继续？</string>
+    <string name="advanced_scan_warning">此模式用于国家内网环境。应用会扫描 IP 段以寻找干净 IP 和开放端口；这会产生大量流量并可能需要几分钟。为避免问题，请每 3 小时将 SIM 卡数据关闭再打开（重置）一次。是否继续？</string>
     <string name="advanced_scan_understood">我知道了</string>
     <string name="advanced_scan_hint">在指定端口上扫描 IP 段，列出可连接的 IP:端口及延迟。点击结果即可复制。</string>
     <string name="advanced_scan_range">IP 段（如 1.2.3.0/24）</string>
