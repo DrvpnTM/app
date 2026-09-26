@@ -38,9 +38,28 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    // Release signing key is provided privately by CI (never committed). If it is absent,
+    // fall back to the debug key so local/PR builds still produce an installable APK.
+    val drvpnKeystore = file(System.getenv("DRVPN_KEYSTORE_FILE") ?: "drvpn-release.jks")
+    val drvpnStorePass = System.getenv("DRVPN_KEYSTORE_PASSWORD")
+    val drvpnHasKey = drvpnKeystore.exists() && !drvpnStorePass.isNullOrEmpty()
+
+    signingConfigs {
+        create("drvpn") {
+            if (drvpnHasKey) {
+                storeFile = drvpnKeystore
+                storePassword = drvpnStorePass
+                keyAlias = System.getenv("DRVPN_KEY_ALIAS") ?: "drvpn"
+                keyPassword = System.getenv("DRVPN_KEY_PASSWORD") ?: drvpnStorePass
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
+            signingConfig = if (drvpnHasKey) signingConfigs.getByName("drvpn")
+            else signingConfigs.getByName("debug")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

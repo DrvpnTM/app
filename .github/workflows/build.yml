@@ -50,21 +50,31 @@ jobs:
           curl -fsSL -o V2rayNG/app/libs/libv2ray.aar \
             "https://github.com/2dust/AndroidLibXrayLite/releases/download/${LIBV2RAY_TAG}/libv2ray.aar"
 
+      - name: Decode release keystore
+        if: ${{ secrets.DRVPN_KEYSTORE_BASE64 != '' }}
+        run: |
+          echo "${{ secrets.DRVPN_KEYSTORE_BASE64 }}" | base64 -d > "$RUNNER_TEMP/drvpn-release.jks"
+          echo "DRVPN_KEYSTORE_FILE=$RUNNER_TEMP/drvpn-release.jks" >> "$GITHUB_ENV"
+
       - name: Build APK
         working-directory: V2rayNG
+        env:
+          DRVPN_KEYSTORE_PASSWORD: ${{ secrets.DRVPN_KEYSTORE_PASSWORD }}
+          DRVPN_KEY_ALIAS: ${{ secrets.DRVPN_KEY_ALIAS }}
+          DRVPN_KEY_PASSWORD: ${{ secrets.DRVPN_KEY_PASSWORD }}
         run: |
           echo "sdk.dir=${ANDROID_HOME}" > local.properties
           chmod 755 gradlew
-          ./gradlew --no-daemon assemblePlaystoreDebug
+          ./gradlew --no-daemon assemblePlaystoreRelease
 
       - name: Upload universal APK
         uses: actions/upload-artifact@v4
         with:
           name: DrVPN-universal
-          path: V2rayNG/app/build/outputs/apk/playstore/debug/*universal*.apk
+          path: V2rayNG/app/build/outputs/apk/playstore/release/*universal*.apk
 
       - name: Upload arm64-v8a APK
         uses: actions/upload-artifact@v4
         with:
           name: DrVPN-arm64-v8a
-          path: V2rayNG/app/build/outputs/apk/playstore/debug/*arm64-v8a*.apk
+          path: V2rayNG/app/build/outputs/apk/playstore/release/*arm64-v8a*.apk
