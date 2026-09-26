@@ -142,7 +142,7 @@ class AdvancedScanActivity : BaseComponentActivity() {
                 if (progress.total > 0) {
                     Spacer(Modifier.height(12.dp))
                     LinearProgressIndicator(
-                        progress = { progress.done.toFloat() / progress.total.coerceAtLeast(1) },
+                        progress = { (progress.done.toFloat() / progress.total.coerceAtLeast(1L)).coerceIn(0f, 1f) },
                         modifier = Modifier.fillMaxWidth(),
                     )
                     Spacer(Modifier.height(4.dp))
