@@ -593,4 +593,5 @@
     <string name="advanced_scan_preset_cloudflare">Cloudflare</string>
     <string name="advanced_scan_preset_world">বিশ্ব</string>
     <string name="advanced_scan_note_world">সমগ্র-বিশ্ব স্ক্যান রেঞ্জের এলোমেলো নমুনা ব্যবহার করে; পরিষ্কার IP খুঁজতে Cloudflare সেরা।</string>
+    <string name="advanced_scan_resume">পুনরায় শুরু</string>
 </resources>

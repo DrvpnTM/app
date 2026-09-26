@@ -591,4 +591,5 @@
     <string name="advanced_scan_preset_cloudflare">Cloudflare</string>
     <string name="advanced_scan_preset_world">Toàn cầu</string>
     <string name="advanced_scan_note_world">Quét toàn cầu dùng mẫu ngẫu nhiên của các dải; để tìm IP sạch, Cloudflare là lựa chọn tốt nhất.</string>
+    <string name="advanced_scan_resume">Tiếp tục</string>
 </resources>

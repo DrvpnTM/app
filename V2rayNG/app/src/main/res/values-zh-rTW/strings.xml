@@ -591,4 +591,5 @@
     <string name="advanced_scan_preset_cloudflare">Cloudflare</string>
     <string name="advanced_scan_preset_world">全球</string>
     <string name="advanced_scan_note_world">全球掃描使用隨機抽樣的 IP 範圍；要找乾淨 IP，Cloudflare 是最佳選擇。</string>
+    <string name="advanced_scan_resume">繼續</string>
 </resources>

@@ -597,4 +597,5 @@
     <string name="advanced_scan_preset_cloudflare">Cloudflare</string>
     <string name="advanced_scan_preset_world">Весь мир</string>
     <string name="advanced_scan_note_world">Сканирование всего мира использует случайную выборку диапазонов; для поиска чистого IP лучший выбор — Cloudflare.</string>
+    <string name="advanced_scan_resume">Продолжить</string>
 </resources>
