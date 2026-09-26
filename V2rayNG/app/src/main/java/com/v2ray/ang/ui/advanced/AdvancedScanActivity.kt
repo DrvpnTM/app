@@ -117,6 +117,18 @@ class AdvancedScanActivity : BaseComponentActivity() {
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.fillMaxWidth(),
                 )
+                Spacer(Modifier.height(8.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedButton(onClick = viewModel::useServerRange, enabled = !progress.running) {
+                        Text(getString(R.string.advanced_scan_preset_server))
+                    }
+                    OutlinedButton(onClick = viewModel::useCloudflareRanges, enabled = !progress.running) {
+                        Text(getString(R.string.advanced_scan_preset_cloudflare))
+                    }
+                    OutlinedButton(onClick = viewModel::useWorldRange, enabled = !progress.running) {
+                        Text(getString(R.string.advanced_scan_preset_world))
+                    }
+                }
                 Spacer(Modifier.height(12.dp))
                 if (progress.running) {
                     OutlinedButton(onClick = viewModel::stopScan, modifier = Modifier.fillMaxWidth()) {

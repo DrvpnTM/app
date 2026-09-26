@@ -589,4 +589,8 @@
     <string name="advanced_scan_start">Start scan</string>
     <string name="advanced_scan_stop">Stop</string>
     <string name="advanced_scan_found">%d found</string>
+    <string name="advanced_scan_preset_server">Server</string>
+    <string name="advanced_scan_preset_cloudflare">Cloudflare</string>
+    <string name="advanced_scan_preset_world">World</string>
+    <string name="advanced_scan_note_world">Whole-world scan uses a random sample of ranges; for finding a clean IP, Cloudflare is the best choice.</string>
 </resources>

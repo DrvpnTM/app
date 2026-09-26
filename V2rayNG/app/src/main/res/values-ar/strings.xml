@@ -597,4 +597,8 @@
     <string name="advanced_scan_start">بدء الفحص</string>
     <string name="advanced_scan_stop">إيقاف</string>
     <string name="advanced_scan_found">تم العثور على %d</string>
+    <string name="advanced_scan_preset_server">الخادم</string>
+    <string name="advanced_scan_preset_cloudflare">Cloudflare</string>
+    <string name="advanced_scan_preset_world">العالم</string>
+    <string name="advanced_scan_note_world">يستخدم فحص العالم عينة عشوائية من النطاقات؛ للعثور على IP نظيف، Cloudflare هو الخيار الأفضل.</string>
 </resources>

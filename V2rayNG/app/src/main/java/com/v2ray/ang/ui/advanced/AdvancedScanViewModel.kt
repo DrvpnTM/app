@@ -33,6 +33,19 @@ class AdvancedScanViewModel(application: Application) : BaseViewModel(applicatio
         _ports.value = value
     }
 
+    fun useCloudflareRanges() {
+        _range.value = CleanIpScanner.CLOUDFLARE_RANGES.joinToString(",")
+    }
+
+    fun useServerRange() {
+        _range.value = defaultRange()
+    }
+
+    /** "Whole world": every routable IPv4 block, sampled down at scan time. */
+    fun useWorldRange() {
+        _range.value = "0.0.0.0/0"
+    }
+
     /** Uses the selected server's address to suggest a /24 range to scan. */
     private fun defaultRange(): String {
         val guid = MmkvManager.getSelectServer() ?: return ""
