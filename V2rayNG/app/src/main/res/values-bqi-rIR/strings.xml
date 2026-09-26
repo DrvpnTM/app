@@ -593,4 +593,5 @@
     <string name="advanced_scan_preset_cloudflare">کلودفلر</string>
     <string name="advanced_scan_preset_world">کل دنیا</string>
     <string name="advanced_scan_note_world">اسکن کل دنیا از روی نمونه‌ای تصادفی از رنج‌ها انجام می‌شود؛ برای پیدا کردن IP تمیز، «کلودفلر» بهترین گزینه است.</string>
+    <string name="advanced_scan_resume">ادامه</string>
 </resources>

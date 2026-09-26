@@ -55,6 +55,7 @@ class AdvancedScanActivity : BaseComponentActivity() {
         val progress by viewModel.progress.collectAsStateWithLifecycle()
         val range by viewModel.range.collectAsStateWithLifecycle()
         val ports by viewModel.ports.collectAsStateWithLifecycle()
+        val resumeIndex by viewModel.resumeIndex.collectAsStateWithLifecycle()
         val clipboard = LocalClipboardManager.current
         var showWarning by remember {
             mutableStateOf(!MmkvManager.decodeSettingsBool(AppConfig.PREF_DRVPN_ADVANCED, false))
@@ -136,7 +137,7 @@ class AdvancedScanActivity : BaseComponentActivity() {
                     }
                 } else {
                     Button(onClick = viewModel::startScan, modifier = Modifier.fillMaxWidth()) {
-                        Text(getString(R.string.advanced_scan_start))
+                        Text(getString(if (resumeIndex > 0) R.string.advanced_scan_resume else R.string.advanced_scan_start))
                     }
                 }
                 if (progress.total > 0) {

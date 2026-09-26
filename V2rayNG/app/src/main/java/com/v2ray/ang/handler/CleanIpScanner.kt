@@ -17,10 +17,10 @@ import java.net.Socket
 /**
  * Dr VPN "Advanced (national internet)" clean-IP scanner.
  *
- * Given one or more IPv4 CIDR ranges and a set of ports, it TCP-connects to EVERY address:port in
- * the range (no sampling), measures the connect delay, and reports the reachable ones sorted by
- * latency. Addresses are streamed rather than materialised, so even very large ranges do not run
- * out of memory; the user stops the scan when they have enough results.
+ * Given one or more IPv4 CIDR ranges and a set of ports, it TCP-connects to every IP in the range
+ * (no sampling), measures the connect delay and reports the reachable ones sorted by latency.
+ * Addresses are streamed, and the scan position is checkpointed so an interrupted scan resumes from
+ * where it stopped — important for national-internet use where a full scan may run for a long time.
  */
 object CleanIpScanner {
 
@@ -48,6 +48,7 @@ object CleanIpScanner {
     private const val CONNECT_TIMEOUT_MS = 1000
     private const val CONCURRENCY = 256
     private const val MAX_RESULTS = 200
+    private const val CHECKPOINT_EVERY = 256
 
     private data class Block(val network: Long, val count: Long)
 
@@ -81,7 +82,10 @@ object CleanIpScanner {
     private fun parseRanges(rangesText: String): List<Block> =
         rangesText.split(",", " ", "\n", "\t").mapNotNull { parseCidr(it) }
 
-    /** Lazily yields every host address across all blocks, so nothing large is held in memory. */
+    /** Total number of host addresses in [rangesText], for the UI counter (1 … N). */
+    fun totalHosts(rangesText: String): Long = parseRanges(rangesText).sumOf { it.count }
+
+    /** Lazily yields every host address across all blocks in order, so nothing large is in memory. */
     private fun hostSequence(blocks: List<Block>): Sequence<String> = sequence {
         for (b in blocks) {
             var i = 0L
@@ -92,54 +96,85 @@ object CleanIpScanner {
         }
     }
 
+    /**
+     * Scans from host index [startIndex] onward. [onCheckpoint] is called periodically and at the
+     * end with the next index to resume from, so the caller can persist it. Cancelling the coroutine
+     * stops the scan; the last checkpoint marks where to resume.
+     */
     suspend fun scan(
         rangesText: String,
         ports: List<Int>,
+        startIndex: Long,
         progress: MutableStateFlow<Progress>,
+        onCheckpoint: (Long) -> Unit,
     ) = withContext(Dispatchers.IO) {
         val blocks = parseRanges(rangesText)
         if (blocks.isEmpty() || ports.isEmpty()) {
             progress.value = Progress(error = "invalid", running = false)
             return@withContext
         }
-        val total = blocks.sumOf { it.count } * ports.size
-        progress.value = Progress(total = total, running = true)
+        val total = blocks.sumOf { it.count }
+        val existing = progress.value.found
+        progress.value = Progress(done = startIndex, total = total, found = existing, running = true)
         val semaphore = Semaphore(CONCURRENCY)
-        var done = 0L
-        val found = ArrayList<Result>()
+        var launched = startIndex
+        var completed = startIndex
+        val found = ArrayList(existing)
         val lock = Any()
-        coroutineScope {
-            val scope: CoroutineScope = this
-            outer@ for (host in hostSequence(blocks)) {
-                for (port in ports) {
+        try {
+            coroutineScope {
+                val scope: CoroutineScope = this
+                var index = 0L
+                for (host in hostSequence(blocks)) {
+                    if (index < startIndex) {
+                        index++
+                        continue
+                    }
                     coroutineContext.ensureActive()
-                    semaphore.acquire() // throttle before launching so we never create billions of jobs
+                    semaphore.acquire()
+                    launched++
                     scope.launch {
                         try {
-                            val r = probe(host, port)
+                            val r = probeHost(host, ports)
                             synchronized(lock) {
-                                done++
+                                completed++
                                 if (r != null && found.size < MAX_RESULTS) found.add(r)
-                                if (done % 64 == 0L || r != null) {
+                                if (completed % CHECKPOINT_EVERY == 0L || r != null) {
                                     progress.value = progress.value.copy(
-                                        done = done,
+                                        done = completed,
                                         found = found.sortedBy { it.latencyMs }.take(50),
                                         running = true,
                                     )
+                                    onCheckpoint(completed)
                                 }
                             }
                         } finally {
                             semaphore.release()
                         }
                     }
+                    index++
                 }
             }
+        } finally {
+            val reachedEnd = completed >= total
+            progress.value = progress.value.copy(
+                done = completed,
+                found = found.sortedBy { it.latencyMs }.take(50),
+                running = false,
+            )
+            // On completion, reset resume point; otherwise remember it for next time.
+            onCheckpoint(if (reachedEnd) 0L else completed)
         }
-        progress.value = progress.value.copy(
-            done = done,
-            found = found.sortedBy { it.latencyMs }.take(50),
-            running = false,
-        )
+    }
+
+    /** Probes each port for one host; returns the reachable port with the lowest delay, or null. */
+    private fun probeHost(ip: String, ports: List<Int>): Result? {
+        var best: Result? = null
+        for (port in ports) {
+            val r = probe(ip, port) ?: continue
+            if (best == null || r.latencyMs < best.latencyMs) best = r
+        }
+        return best
     }
 
     private fun probe(ip: String, port: Int): Result? {
