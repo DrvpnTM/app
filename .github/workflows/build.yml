@@ -54,10 +54,15 @@ jobs:
             "https://github.com/2dust/AndroidLibXrayLite/releases/download/${LIBV2RAY_TAG}/libv2ray.aar"
 
       - name: Decode release keystore
-        if: ${{ secrets.DRVPN_KEYSTORE_BASE64 != '' }}
+        env:
+          DRVPN_KEYSTORE_BASE64: ${{ secrets.DRVPN_KEYSTORE_BASE64 }}
         run: |
-          echo "${{ secrets.DRVPN_KEYSTORE_BASE64 }}" | base64 -d > "$RUNNER_TEMP/drvpn-release.jks"
-          echo "DRVPN_KEYSTORE_FILE=$RUNNER_TEMP/drvpn-release.jks" >> "$GITHUB_ENV"
+          if [ -n "$DRVPN_KEYSTORE_BASE64" ]; then
+            echo "$DRVPN_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/drvpn-release.jks"
+            echo "DRVPN_KEYSTORE_FILE=$RUNNER_TEMP/drvpn-release.jks" >> "$GITHUB_ENV"
+          else
+            echo "No release keystore secret; will fall back to debug signing."
+          fi
 
       - name: Build APK
         working-directory: V2rayNG
