@@ -63,17 +63,22 @@ jobs:
           curl -fsSL -o V2rayNG/app/libs/libv2ray.aar \
             "https://github.com/2dust/AndroidLibXrayLite/releases/download/${LIBV2RAY_TAG}/libv2ray.aar"
 
-      - name: Decode release keystore
+      - name: Decrypt release keystore
         env:
-          DRVPN_KEYSTORE_BASE64: ${{ secrets.DRVPN_KEYSTORE_BASE64 }}
+          DRVPN_KEYSTORE_ENC_PASSWORD: ${{ secrets.DRVPN_KEYSTORE_ENC_PASSWORD }}
         run: |
-          if [ -n "$DRVPN_KEYSTORE_BASE64" ]; then
-            # Strip any whitespace/newlines that may have crept into the pasted secret.
-            printf '%s' "$DRVPN_KEYSTORE_BASE64" | tr -d '[:space:]' | base64 -d > "$RUNNER_TEMP/drvpn-release.jks"
-            echo "DRVPN_KEYSTORE_FILE=$RUNNER_TEMP/drvpn-release.jks" >> "$GITHUB_ENV"
-            echo "Decoded release keystore ($(wc -c < "$RUNNER_TEMP/drvpn-release.jks") bytes)."
+          if [ -n "$DRVPN_KEYSTORE_ENC_PASSWORD" ] && [ -f V2rayNG/app/drvpn-release.jks.enc ]; then
+            if openssl enc -d -aes-256-cbc -pbkdf2 \
+                 -in V2rayNG/app/drvpn-release.jks.enc \
+                 -out "$RUNNER_TEMP/drvpn-release.jks" \
+                 -pass pass:"$DRVPN_KEYSTORE_ENC_PASSWORD"; then
+              echo "DRVPN_KEYSTORE_FILE=$RUNNER_TEMP/drvpn-release.jks" >> "$GITHUB_ENV"
+              echo "Decrypted release keystore ($(wc -c < "$RUNNER_TEMP/drvpn-release.jks") bytes)."
+            else
+              echo "Keystore decryption failed (wrong password?); falling back to debug signing."
+            fi
           else
-            echo "No release keystore secret; will fall back to debug signing."
+            echo "No keystore password secret; will fall back to debug signing."
           fi
 
       - name: Build APK
