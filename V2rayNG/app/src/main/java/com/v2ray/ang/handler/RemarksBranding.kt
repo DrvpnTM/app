@@ -16,7 +16,7 @@ object RemarksBranding {
 
     fun apply(remarks: String?): String {
         if (remarks.isNullOrBlank()) return SITE
-        var result = remarks
+        var result: String = remarks
         patterns.forEach { result = it.replace(result, SITE) }
         // Collapse repeats such as "drvpn.net | drvpn.net".
         result = Regex("""(${Regex.escape(SITE)})(?:[\s|_\-–—:/]*${Regex.escape(SITE)})+""").replace(result, SITE)
