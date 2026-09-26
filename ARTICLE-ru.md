@@ -41,3 +41,5 @@ VPN стал повседневным инструментом: свободны
 ## Купить подписку и скачать
 
 ### 🌐 [drvpn.net](https://drvpn.net/)
+
+### 📢 [Telegram: @drVPN_net](https://t.me/drVPN_net)

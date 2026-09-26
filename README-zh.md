@@ -5,6 +5,7 @@
 **Dr VPN** 是一款简单、开源的 Android VPN 应用，界面类似 Hiddify：一个大的连接按钮、当前订阅卡片和已选节点卡片。
 
 - 🌐 网站：[drvpn.net](https://drvpn.net/)
+- 📢 Telegram 频道：[@drVPN_net](https://t.me/drVPN_net)
 - 📄 文章：[如何购买 VPN 订阅 + Dr VPN 介绍](ARTICLE-zh.md)
 
 ## ✨ 功能

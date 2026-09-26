@@ -5,6 +5,7 @@
 **Dr VPN** သည် Android အတွက် ရိုးရှင်းပြီး open-source ဖြစ်သော VPN အက်ပ်ဖြစ်သည်။ Hiddify ပုံစံ ဒီဇိုင်းဖြင့် ချိတ်ဆက်ရန် ခလုတ်ကြီးတစ်ခု၊ အသုံးပြုနေသော subscription ကတ်နှင့် ရွေးထားသော server ကတ် ပါဝင်သည်။
 
 - 🌐 ဝက်ဘ်ဆိုက်: [drvpn.net](https://drvpn.net/)
+- 📢 Telegram channel: [@drVPN_net](https://t.me/drVPN_net)
 - 📄 ဆောင်းပါး: [VPN subscription ဝယ်နည်း + Dr VPN မိတ်ဆက်](ARTICLE-my.md)
 
 ## ✨ လုပ်ဆောင်ချက်များ

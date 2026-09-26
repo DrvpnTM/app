@@ -41,3 +41,5 @@ When you buy a subscription you get access to servers. Usually you receive one o
 ## Buy a subscription and download
 
 ### 🌐 [drvpn.net](https://drvpn.net/)
+
+### 📢 [Telegram: @drVPN_net](https://t.me/drVPN_net)

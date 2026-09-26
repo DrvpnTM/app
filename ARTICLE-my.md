@@ -41,3 +41,5 @@ Subscription ဝယ်လျှင် server များကို အသုံ�
 ## Subscription ဝယ်ရန်နှင့် ဒေါင်းလုဒ်
 
 ### 🌐 [drvpn.net](https://drvpn.net/)
+
+### 📢 [Telegram: @drVPN_net](https://t.me/drVPN_net)
