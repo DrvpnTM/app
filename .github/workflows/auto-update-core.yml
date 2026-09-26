@@ -52,11 +52,15 @@ jobs:
           # 1) point the build at the new core
           sed -i "s|LIBV2RAY_TAG: .*|LIBV2RAY_TAG: ${latest}|" .github/workflows/build.yml
 
-          # 2) bump the app version: versionName follows the core version, versionCode +1
+          # 2) bump the app's OWN version: patch +1 (e.g. 0.0.1 -> 0.0.2), versionCode +1.
+          #    The app version is independent of the Xray core version.
           gradle=V2rayNG/app/build.gradle.kts
           code=$(grep -oE 'versionCode = [0-9]+' "$gradle" | grep -oE '[0-9]+')
           newcode=$((code + 1))
-          ver=${latest#v}
+          cur=$(grep -oE 'versionName = "[^"]+"' "$gradle" | sed -E 's/.*"([^"]+)".*/\1/')
+          major=$(echo "$cur" | cut -d. -f1); minor=$(echo "$cur" | cut -d. -f2); patch=$(echo "$cur" | cut -d. -f3)
+          major=${major:-0}; minor=${minor:-0}; patch=${patch:-0}
+          ver="${major}.${minor}.$((patch + 1))"
           sed -i "s|versionCode = ${code}|versionCode = ${newcode}|" "$gradle"
           sed -i "s|versionName = \"[^\"]*\"|versionName = \"${ver}\"|" "$gradle"
 
