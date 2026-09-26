@@ -425,6 +425,7 @@ object AngConfigManager {
                 if (!matched) return null
             }
 
+            config.remarks = RemarksBranding.apply(config.remarks)
             config.subscriptionId = subid
             config.description = generateDescription(config)
 

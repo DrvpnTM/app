@@ -352,7 +352,7 @@ private fun ServerListItem(
                 .padding(start = 8.dp, end = 12.dp, top = 8.dp, bottom = 8.dp)
         ) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Text(row.remarks, Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge.copy(lineBreak = LineBreak.Paragraph), maxLines = 2, overflow = TextOverflow.Ellipsis)
+                Text(if (row.flag.isEmpty()) row.remarks else "${row.flag} ${row.remarks}", Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge.copy(lineBreak = LineBreak.Paragraph), maxLines = 2, overflow = TextOverflow.Ellipsis)
                 if (doubleColumnDisplay) {
                     IconButton(onClick = { actions.more(row.guid, row.profile) }, Modifier.size(36.dp)) {
                         Icon(

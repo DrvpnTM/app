@@ -18,6 +18,8 @@ import com.v2ray.ang.extension.delay
 import com.v2ray.ang.extension.isComplexType
 import com.v2ray.ang.extension.matchesPattern
 import com.v2ray.ang.extension.moveItem
+import com.v2ray.ang.handler.ServerCountryManager
+import com.v2ray.ang.handler.SettingsManager
 import com.v2ray.ang.ui.base.BaseViewModel
 import com.v2ray.ang.util.LogUtil
 import kotlinx.coroutines.CancellationException
@@ -117,6 +119,8 @@ class MainViewModel(
     private val autoPingedGroups: MutableSet<String> = ConcurrentHashMap.newKeySet()
     private var autoPingWatchJob: Job? = null
 
+    private val countryLookupJobs = ConcurrentHashMap<String, Job>()
+
     // ---------- Service events ----------
     init {
         collectServiceEvents()
@@ -162,7 +166,12 @@ class MainViewModel(
                         ""
                     } else {
                         withContext(ioDispatcher) {
-                            runCatching { dataSource.decodeServerConfig(guid)?.remarks.orEmpty() }
+                            runCatching {
+                                dataSource.decodeServerConfig(guid)?.let { profile ->
+                                    val flag = serverFlag(profile)
+                                    if (flag.isEmpty()) profile.remarks else "$flag ${profile.remarks}"
+                                }.orEmpty()
+                            }
                                 .onFailure { LogUtil.e(AppConfig.TAG, "Failed to resolve selected server name", it) }
                                 .getOrDefault("")
                         }
@@ -456,6 +465,22 @@ class MainViewModel(
             rows = visibleRows(allRows),
             allRows = allRows
         )
+        resolveServerCountries(groupId, filteredServers)
+    }
+
+    /** Looks up server countries in the background and adds flags to the rows once known. */
+    private fun resolveServerCountries(groupId: String, servers: List<ServersCache>) {
+        val hosts = servers.mapNotNull { it.profile.server?.takeIf { host -> host.isNotBlank() } }
+            .filter { ServerCountryManager.countryCode(it) == null }
+        if (hosts.isEmpty() || countryLookupJobs[groupId]?.isActive == true) return
+        countryLookupJobs[groupId] = viewModelScope.launch(ioDispatcher) {
+            val port = if (uiState.value.isRunning) SettingsManager.getHttpPort() else 0
+            if (!ServerCountryManager.resolveMissing(hosts, port)) return@launch
+            mutableServerGroupState(groupId).update { current ->
+                val allRows = current.allRows.map { it.copy(flag = serverFlag(it.profile)) }
+                current.copy(rows = visibleRows(allRows), allRows = allRows)
+            }
+        }
     }
 
     /** Hides servers without a successful ping unless the user ticked "show servers without ping". */
