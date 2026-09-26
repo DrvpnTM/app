@@ -604,4 +604,15 @@
         <item>Неоморфизм</item>
         <item>Гласморфизм</item>
     </string-array>
+    <string name="advanced_scan_apply">Применить</string>
+    <string name="advanced_scan_applied">Применено к выбранному серверу</string>
+    <string name="advanced_scan_no_selected">Сначала выберите сервер</string>
+    <string name="title_app_log">Журнал</string>
+    <string name="app_log_empty">Пока пусто</string>
+    <string name="advanced_scan_options">Параметры</string>
+    <string name="advanced_scan_status_running">Поиск чистого маршрута…</string>
+    <string name="advanced_scan_status_idle">Готово</string>
+    <string name="advanced_scan_log_started">Сканирование начато</string>
+    <string name="advanced_scan_log_finished">Сканирование завершено</string>
+    <string name="advanced_scan_log_stopped">Сканирование остановлено</string>
 </resources>

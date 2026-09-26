@@ -598,4 +598,15 @@
         <item>Neumorphism</item>
         <item>Glassmorphism</item>
     </string-array>
+    <string name="advanced_scan_apply">Áp dụng</string>
+    <string name="advanced_scan_applied">Đã áp dụng cho máy chủ đã chọn</string>
+    <string name="advanced_scan_no_selected">Hãy chọn một máy chủ trước</string>
+    <string name="title_app_log">Nhật ký</string>
+    <string name="app_log_empty">Chưa có gì</string>
+    <string name="advanced_scan_options">Tùy chọn</string>
+    <string name="advanced_scan_status_running">Đang tìm tuyến sạch…</string>
+    <string name="advanced_scan_status_idle">Sẵn sàng</string>
+    <string name="advanced_scan_log_started">Bắt đầu quét</string>
+    <string name="advanced_scan_log_finished">Quét xong</string>
+    <string name="advanced_scan_log_stopped">Đã dừng quét</string>
 </resources>

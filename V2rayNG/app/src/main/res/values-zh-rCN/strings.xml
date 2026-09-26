@@ -598,4 +598,15 @@
         <item>新拟态</item>
         <item>玻璃拟态</item>
     </string-array>
+    <string name="advanced_scan_apply">应用</string>
+    <string name="advanced_scan_applied">已应用到所选节点</string>
+    <string name="advanced_scan_no_selected">请先选择一个节点</string>
+    <string name="title_app_log">日志</string>
+    <string name="app_log_empty">暂无记录</string>
+    <string name="advanced_scan_options">选项</string>
+    <string name="advanced_scan_status_running">正在寻找干净线路…</string>
+    <string name="advanced_scan_status_idle">就绪</string>
+    <string name="advanced_scan_log_started">扫描开始</string>
+    <string name="advanced_scan_log_finished">扫描完成</string>
+    <string name="advanced_scan_log_stopped">扫描已停止</string>
 </resources>

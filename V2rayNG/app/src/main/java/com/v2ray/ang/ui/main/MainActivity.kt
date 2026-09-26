@@ -30,6 +30,7 @@ import com.v2ray.ang.ui.base.HelperBaseComponentActivity
 import com.v2ray.ang.ui.checkupdate.CheckUpdateActivity
 import com.v2ray.ang.ui.logcat.LogcatActivity
 import com.v2ray.ang.ui.advanced.AdvancedScanActivity
+import com.v2ray.ang.ui.log.AppLogActivity
 import com.v2ray.ang.ui.onboarding.OnboardingActivity
 import com.v2ray.ang.ui.perappproxy.PerAppProxyActivity
 import com.v2ray.ang.ui.routing.RoutingSettingActivity
@@ -156,6 +157,7 @@ class MainActivity : HelperBaseComponentActivity() {
             MainDestination.About -> Intent(this, AboutActivity::class.java)
             MainDestination.RegionLanguage -> Intent(this, OnboardingActivity::class.java)
             MainDestination.Advanced -> Intent(this, AdvancedScanActivity::class.java)
+            MainDestination.AppLogView -> Intent(this, AppLogActivity::class.java)
             MainDestination.Promotion -> {
                 Utils.openUri(
                     this,
