@@ -5,6 +5,7 @@ import com.v2ray.ang.dto.entities.ServersCache
 import com.v2ray.ang.extension.isComplexType
 import com.v2ray.ang.extension.nullIfBlank
 import com.v2ray.ang.handler.AngConfigManager
+import com.v2ray.ang.handler.ServerCountryManager
 
 internal data class ServerRowUiModel(
     val guid: String,
@@ -14,6 +15,8 @@ internal data class ServerRowUiModel(
     val typeDescription: String,
     val testDelayMillis: Long,
     val subscriptionBadge: String,
+    /** Country flag emoji of the server address, empty when unknown. */
+    val flag: String = "",
 )
 
 internal data class ServerGroupUiState(
@@ -38,7 +41,15 @@ internal fun buildServerRowUiModel(
         typeDescription = serverProtocolDescription(profile),
         testDelayMillis = server.testDelayMillis,
         subscriptionBadge = subscriptionRemarks.firstOrNull()?.toString().orEmpty(),
+        flag = serverFlag(profile),
     )
+}
+
+internal fun serverFlag(profile: ProfileItem): String {
+    // Many sellers already put a flag at the start of the name; don't show two.
+    val first = profile.remarks.codePointAt(0).takeIf { profile.remarks.isNotEmpty() }
+    if (first != null && first in 0x1F1E6..0x1F1FF) return ""
+    return ServerCountryManager.flag(profile.server).orEmpty()
 }
 
 private fun serverProtocolDescription(profile: ProfileItem): String {
