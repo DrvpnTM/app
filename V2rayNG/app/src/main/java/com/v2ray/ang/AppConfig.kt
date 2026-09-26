@@ -60,6 +60,7 @@ object AppConfig {
     const val PREF_DRVPN_ONBOARDING_DONE = "pref_drvpn_onboarding_done"
     const val PREF_DRVPN_REGION = "pref_drvpn_region"
     const val PREF_DRVPN_SHOW_NO_PING = "pref_drvpn_show_no_ping"
+    const val PREF_DRVPN_ADVANCED = "pref_drvpn_advanced"
     const val PREF_UI_MODE_NIGHT = "pref_ui_mode_night"
     const val PREF_DYNAMIC_COLOR = "pref_dynamic_color"
     const val PREF_IPV6_ENABLED = "pref_ipv6_enabled"

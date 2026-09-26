@@ -83,6 +83,9 @@
             android:name=".ui.onboarding.OnboardingActivity"
             android:exported="false" />
         <activity
+            android:name=".ui.advanced.AdvancedScanActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.server.ServerVmessActivity"
             android:exported="false"
             android:windowSoftInputMode="stateUnchanged|adjustResize" />
