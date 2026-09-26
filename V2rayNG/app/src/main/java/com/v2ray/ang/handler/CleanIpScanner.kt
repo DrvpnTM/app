@@ -2,32 +2,33 @@ package com.v2ray.ang.handler
 
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.util.LogUtil
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
-import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.coroutineContext
 import java.net.InetSocketAddress
 import java.net.Socket
-import kotlin.random.Random
 
 /**
  * Dr VPN "Advanced (national internet)" clean-IP scanner.
  *
- * Given one or more IPv4 CIDR ranges and a set of ports, it TCP-connects to sampled address:port
- * pairs and reports the reachable ones with latency. Clean-IP scanning targets the CDN ranges that
- * front a config (e.g. Cloudflare); scanning the whole internet from a phone is infeasible and would
- * not find the user's proxy, so large ranges are randomly sampled down to [SAMPLE_LIMIT].
+ * Given one or more IPv4 CIDR ranges and a set of ports, it TCP-connects to EVERY address:port in
+ * the range (no sampling), measures the connect delay, and reports the reachable ones sorted by
+ * latency. Addresses are streamed rather than materialised, so even very large ranges do not run
+ * out of memory; the user stops the scan when they have enough results.
  */
 object CleanIpScanner {
 
     data class Result(val ip: String, val port: Int, val latencyMs: Long)
 
     data class Progress(
-        val done: Int = 0,
-        val total: Int = 0,
+        val done: Long = 0,
+        val total: Long = 0,
         val found: List<Result> = emptyList(),
         val running: Boolean = false,
         val error: String? = null,
@@ -44,15 +45,12 @@ object CleanIpScanner {
         "104.24.0.0/14", "172.64.0.0/13", "131.0.72.0/22",
     )
 
-    /** Addresses probed per scan; the union of ranges is randomly sampled down to this. */
-    const val SAMPLE_LIMIT = 2048
-
     private const val CONNECT_TIMEOUT_MS = 1000
     private const val CONCURRENCY = 256
+    private const val MAX_RESULTS = 200
 
     private data class Block(val network: Long, val count: Long)
 
-    /** Parses one IPv4 CIDR ("1.2.3.0/24") or bare IP ("/32") into a Block, or null if invalid. */
     private fun parseCidr(cidr: String): Block? {
         val trimmed = cidr.trim()
         if (trimmed.isEmpty()) return null
@@ -80,40 +78,18 @@ object CleanIpScanner {
     private fun ipString(v: Long): String =
         "${(v shr 24) and 0xFF}.${(v shr 16) and 0xFF}.${(v shr 8) and 0xFF}.${v and 0xFF}"
 
-    /**
-     * Turns comma/space/newline-separated CIDRs into up to [SAMPLE_LIMIT] distinct host IPs.
-     * When the total space is small it returns all of it; when large it samples at random.
-     */
-    fun buildHosts(rangesText: String): List<String> {
-        val blocks = rangesText.split(",", " ", "\n", "\t")
-            .mapNotNull { parseCidr(it) }
-        if (blocks.isEmpty()) return emptyList()
-        val total = blocks.sumOf { it.count }
-        if (total <= 0L) return emptyList()
-        if (total <= SAMPLE_LIMIT) {
-            val out = ArrayList<String>(total.toInt())
-            blocks.forEach { b -> for (i in 0 until b.count) out.add(ipString(b.network + i)) }
-            return out.distinct()
+    private fun parseRanges(rangesText: String): List<Block> =
+        rangesText.split(",", " ", "\n", "\t").mapNotNull { parseCidr(it) }
+
+    /** Lazily yields every host address across all blocks, so nothing large is held in memory. */
+    private fun hostSequence(blocks: List<Block>): Sequence<String> = sequence {
+        for (b in blocks) {
+            var i = 0L
+            while (i < b.count) {
+                yield(ipString(b.network + i))
+                i++
+            }
         }
-        // Sample random offsets across the concatenated address space of all blocks.
-        val prefixSums = LongArray(blocks.size)
-        var acc = 0L
-        for (i in blocks.indices) {
-            acc += blocks[i].count
-            prefixSums[i] = acc
-        }
-        val seen = HashSet<String>(SAMPLE_LIMIT * 2)
-        var attempts = 0
-        val maxAttempts = SAMPLE_LIMIT * 4
-        while (seen.size < SAMPLE_LIMIT && attempts < maxAttempts) {
-            attempts++
-            val r = (Random.nextDouble() * total).toLong().coerceIn(0, total - 1)
-            val bi = prefixSums.indexOfFirst { r < it }
-            val block = blocks[bi]
-            val offsetBase = if (bi == 0) 0L else prefixSums[bi - 1]
-            seen.add(ipString(block.network + (r - offsetBase)))
-        }
-        return seen.toList()
     }
 
     suspend fun scan(
@@ -121,42 +97,46 @@ object CleanIpScanner {
         ports: List<Int>,
         progress: MutableStateFlow<Progress>,
     ) = withContext(Dispatchers.IO) {
-        val hosts = buildHosts(rangesText)
-        if (hosts.isEmpty() || ports.isEmpty()) {
+        val blocks = parseRanges(rangesText)
+        if (blocks.isEmpty() || ports.isEmpty()) {
             progress.value = Progress(error = "invalid", running = false)
             return@withContext
         }
-        val total = hosts.size * ports.size
+        val total = blocks.sumOf { it.count } * ports.size
         progress.value = Progress(total = total, running = true)
         val semaphore = Semaphore(CONCURRENCY)
-        var done = 0
+        var done = 0L
         val found = ArrayList<Result>()
         val lock = Any()
         coroutineScope {
-            for (host in hosts) {
+            val scope: CoroutineScope = this
+            outer@ for (host in hostSequence(blocks)) {
                 for (port in ports) {
-                    launch {
-                        semaphore.withPermit {
+                    coroutineContext.ensureActive()
+                    semaphore.acquire() // throttle before launching so we never create billions of jobs
+                    scope.launch {
+                        try {
                             val r = probe(host, port)
                             synchronized(lock) {
                                 done++
-                                if (r != null) found.add(r)
-                                if (done % 32 == 0 || r != null || done == total) {
-                                    progress.value = Progress(
+                                if (r != null && found.size < MAX_RESULTS) found.add(r)
+                                if (done % 64 == 0L || r != null) {
+                                    progress.value = progress.value.copy(
                                         done = done,
-                                        total = total,
                                         found = found.sortedBy { it.latencyMs }.take(50),
-                                        running = done < total,
+                                        running = true,
                                     )
                                 }
                             }
+                        } finally {
+                            semaphore.release()
                         }
                     }
                 }
             }
         }
         progress.value = progress.value.copy(
-            done = total,
+            done = done,
             found = found.sortedBy { it.latencyMs }.take(50),
             running = false,
         )
