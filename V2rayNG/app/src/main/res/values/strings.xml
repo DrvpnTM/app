@@ -580,4 +580,13 @@
     <string name="onboarding_drawer_title">Country &amp; language</string>
     <string name="ping_filter_show_all">Show servers without ping</string>
     <string name="ping_filter_test_all">Ping all</string>
+    <string name="advanced_scan_title">Advanced (national internet)</string>
+    <string name="advanced_scan_warning">This mode is for national-internet conditions. The app scans an IP range to find a clean IP and open port; it can take a few minutes and make connecting slower. Continue?</string>
+    <string name="advanced_scan_understood">Understood</string>
+    <string name="advanced_scan_hint">Scans the IP range on the given ports and lists reachable IP:port with latency. Tap a result to copy it.</string>
+    <string name="advanced_scan_range">IP range (e.g. 1.2.3.0/24)</string>
+    <string name="advanced_scan_ports">Ports (comma separated)</string>
+    <string name="advanced_scan_start">Start scan</string>
+    <string name="advanced_scan_stop">Stop</string>
+    <string name="advanced_scan_found">%d found</string>
 </resources>

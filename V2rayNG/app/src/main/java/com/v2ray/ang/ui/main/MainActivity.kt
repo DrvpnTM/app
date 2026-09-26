@@ -29,6 +29,7 @@ import com.v2ray.ang.ui.backup.BackupActivity
 import com.v2ray.ang.ui.base.HelperBaseComponentActivity
 import com.v2ray.ang.ui.checkupdate.CheckUpdateActivity
 import com.v2ray.ang.ui.logcat.LogcatActivity
+import com.v2ray.ang.ui.advanced.AdvancedScanActivity
 import com.v2ray.ang.ui.onboarding.OnboardingActivity
 import com.v2ray.ang.ui.perappproxy.PerAppProxyActivity
 import com.v2ray.ang.ui.routing.RoutingSettingActivity
@@ -154,6 +155,7 @@ class MainActivity : HelperBaseComponentActivity() {
             MainDestination.BackupRestore -> Intent(this, BackupActivity::class.java)
             MainDestination.About -> Intent(this, AboutActivity::class.java)
             MainDestination.RegionLanguage -> Intent(this, OnboardingActivity::class.java)
+            MainDestination.Advanced -> Intent(this, AdvancedScanActivity::class.java)
             MainDestination.Promotion -> {
                 Utils.openUri(
                     this,
