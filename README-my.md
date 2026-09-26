@@ -33,4 +33,4 @@
 
 ## 📜 လိုင်စင်နှင့် ကျေးဇူးတင်လွှာ
 
-**GPL-3.0** ဖြင့် open-source ဖြစ်သည် ([LICENSE](LICENSE))။ Dr VPN သည် [v2rayNG](https://github.com/2dust/v2rayNG) ကို အခြေခံပြီး [Xray-core](https://github.com/XTLS/Xray-core) နှင့် [hev-socks5-tunnel](https://github.com/heiher/hev-socks5-tunnel) ကို အသုံးပြုသည်။ ၎င်းတို့၏ ဖန်တီးသူများကို ကျေးဇူးတင်ပါသည်။
+**GPL-3.0** ဖြင့် open-source ဖြစ်သည် ([LICENSE](LICENSE))။ [Xray-core](https://github.com/XTLS/Xray-core) engine ကို အသုံးပြုသည်။

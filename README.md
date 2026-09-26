@@ -40,17 +40,12 @@
 ```bash
 # نیازمندی‌ها: JDK 21، Android SDK (platform 37)، Android NDK 29
 export NDK_HOME=/path/to/android-ndk
-bash compile-hevtun.sh && cp -r libs V2rayNG/app/
-curl -fsSL -o V2rayNG/app/libs/libv2ray.aar \
-  https://github.com/2dust/AndroidLibXrayLite/releases/download/v26.9.9/libv2ray.aar
-cd V2rayNG && ./gradlew assemblePlaystoreDebug
+کد این برنامه متن‌باز و تحت مجوز **GPL-3.0** است ([LICENSE](LICENSE)) و از هسته [Xray-core](https://github.com/XTLS/Xray-core) استفاده می‌کند.
 ```
 
 ## 📜 مجوز و تشکر
 
 این برنامه متن‌باز و تحت مجوز **GPL-3.0** است (فایل [LICENSE](LICENSE)).
-Dr VPN بر پایه پروژه متن‌باز [v2rayNG](https://github.com/2dust/v2rayNG) ساخته شده و از
-[Xray-core](https://github.com/XTLS/Xray-core) و [hev-socks5-tunnel](https://github.com/heiher/hev-socks5-tunnel) استفاده می‌کند.
 از سازندگان این پروژه‌ها سپاسگزاریم.
 
 </div>
