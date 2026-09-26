@@ -594,4 +594,10 @@
     <string name="advanced_scan_preset_world">کل دنیا</string>
     <string name="advanced_scan_note_world">اسکن کل دنیا از روی نمونه‌ای تصادفی از رنج‌ها انجام می‌شود؛ برای پیدا کردن IP تمیز، «کلودفلر» بهترین گزینه است.</string>
     <string name="advanced_scan_resume">ادامه</string>
+    <string name="title_theme">پوسته</string>
+    <string-array name="drvpn_theme">
+        <item>ساده (پیش‌فرض)</item>
+        <item>نیومورفیک</item>
+        <item>گلس‌مورفیک</item>
+    </string-array>
 </resources>
