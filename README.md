@@ -8,6 +8,7 @@
 یک دکمه بزرگ برای اتصال، کارت اشتراک فعال و کارت سرور انتخاب‌شده.
 
 - 🌐 سایت: [drvpn.net](https://drvpn.net/)
+- 📢 کانال تلگرام: [@drVPN_net](https://t.me/drVPN_net)
 - 📄 مقاله: [راهنمای خرید اشتراک وی پی ان و معرفی Dr VPN](ARTICLE-fa.md) — [English](ARTICLE-en.md) · [中文](ARTICLE-zh.md) · [Русский](ARTICLE-ru.md) · [မြန်မာ](ARTICLE-my.md)
 
 ## ✨ امکانات

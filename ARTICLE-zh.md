@@ -41,3 +41,5 @@ VPN 已成为许多人的日常工具：自由访问互联网、在公共 Wi-Fi 
 ## 购买订阅与下载
 
 ### 🌐 [drvpn.net](https://drvpn.net/)
+
+### 📢 [Telegram: @drVPN_net](https://t.me/drVPN_net)

@@ -5,6 +5,7 @@
 **Dr VPN** is a simple, open-source VPN app for Android with a Hiddify-style look: one big connect button, the active subscription card and the selected server card.
 
 - 🌐 Website: [drvpn.net](https://drvpn.net/)
+- 📢 Telegram channel: [@drVPN_net](https://t.me/drVPN_net)
 - 📄 Article: [How to buy a VPN subscription + meet Dr VPN](ARTICLE-en.md)
 
 ## ✨ Features
