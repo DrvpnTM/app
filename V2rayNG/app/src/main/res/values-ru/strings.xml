@@ -593,4 +593,8 @@
     <string name="advanced_scan_start">Начать скан</string>
     <string name="advanced_scan_stop">Стоп</string>
     <string name="advanced_scan_found">Найдено: %d</string>
+    <string name="advanced_scan_preset_server">Сервер</string>
+    <string name="advanced_scan_preset_cloudflare">Cloudflare</string>
+    <string name="advanced_scan_preset_world">Весь мир</string>
+    <string name="advanced_scan_note_world">Сканирование всего мира использует случайную выборку диапазонов; для поиска чистого IP лучший выбор — Cloudflare.</string>
 </resources>

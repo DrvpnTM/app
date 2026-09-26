@@ -587,4 +587,8 @@
     <string name="advanced_scan_start">Bắt đầu quét</string>
     <string name="advanced_scan_stop">Dừng</string>
     <string name="advanced_scan_found">Tìm thấy %d</string>
+    <string name="advanced_scan_preset_server">Máy chủ</string>
+    <string name="advanced_scan_preset_cloudflare">Cloudflare</string>
+    <string name="advanced_scan_preset_world">Toàn cầu</string>
+    <string name="advanced_scan_note_world">Quét toàn cầu dùng mẫu ngẫu nhiên của các dải; để tìm IP sạch, Cloudflare là lựa chọn tốt nhất.</string>
 </resources>

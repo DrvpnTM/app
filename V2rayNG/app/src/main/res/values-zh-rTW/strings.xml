@@ -587,4 +587,8 @@
     <string name="advanced_scan_start">開始掃描</string>
     <string name="advanced_scan_stop">停止</string>
     <string name="advanced_scan_found">找到 %d 個</string>
+    <string name="advanced_scan_preset_server">伺服器</string>
+    <string name="advanced_scan_preset_cloudflare">Cloudflare</string>
+    <string name="advanced_scan_preset_world">全球</string>
+    <string name="advanced_scan_note_world">全球掃描使用隨機抽樣的 IP 範圍；要找乾淨 IP，Cloudflare 是最佳選擇。</string>
 </resources>
