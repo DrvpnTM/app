@@ -594,4 +594,10 @@
     <string name="advanced_scan_preset_world">World</string>
     <string name="advanced_scan_note_world">Whole-world scan uses a random sample of ranges; for finding a clean IP, Cloudflare is the best choice.</string>
     <string name="advanced_scan_resume">Resume</string>
+    <string name="title_theme">Theme</string>
+    <string-array name="drvpn_theme">
+        <item>Simple (default)</item>
+        <item>Neumorphism</item>
+        <item>Glassmorphism</item>
+    </string-array>
 </resources>

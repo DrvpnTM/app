@@ -598,4 +598,10 @@
     <string name="advanced_scan_preset_world">Весь мир</string>
     <string name="advanced_scan_note_world">Сканирование всего мира использует случайную выборку диапазонов; для поиска чистого IP лучший выбор — Cloudflare.</string>
     <string name="advanced_scan_resume">Продолжить</string>
+    <string name="title_theme">Тема</string>
+    <string-array name="drvpn_theme">
+        <item>Простая (по умолч.)</item>
+        <item>Неоморфизм</item>
+        <item>Гласморфизм</item>
+    </string-array>
 </resources>

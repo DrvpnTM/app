@@ -131,6 +131,16 @@ object ThemeManager {
     )
     val dynamicColorEnabled: StateFlow<Boolean> = _dynamicColorEnabled.asStateFlow()
 
+    private val _themeStyle = MutableStateFlow(
+        MmkvManager.decodeSettingsString(AppConfig.PREF_DRVPN_THEME, "default") ?: "default"
+    )
+    val themeStyle: StateFlow<String> = _themeStyle.asStateFlow()
+
+    fun setThemeStyle(style: String) {
+        MmkvManager.encodeSettings(AppConfig.PREF_DRVPN_THEME, style)
+        _themeStyle.value = style
+    }
+
     fun setThemeMode(mode: String) {
         MmkvManager.encodeSettings(AppConfig.PREF_UI_MODE_NIGHT, mode)
         _themeMode.value = mode
@@ -159,6 +169,80 @@ fun resolveDarkTheme(): Boolean {
     }
 }
 
+
+// Dr VPN theme styles. Beyond the default blue, "neomorph" is a soft low-contrast palette and
+// "glass" a cool translucent-looking one; they change colors app-wide (full soft-shadow / blur
+// effects are approximated through the color scheme).
+private val NeoLight = LightColor.copy(
+    primary = Color(0xFF5B6B89),
+    onPrimary = Color(0xFFFFFFFF),
+    primaryContainer = Color(0xFFD9E0EC),
+    onPrimaryContainer = Color(0xFF1B2536),
+    background = Color(0xFFE6EBF2),
+    onBackground = Color(0xFF2C3444),
+    surface = Color(0xFFE6EBF2),
+    onSurface = Color(0xFF2C3444),
+    surfaceContainerLowest = Color(0xFFDDE3EC),
+    surfaceContainerLow = Color(0xFFE2E8F0),
+    surfaceContainer = Color(0xFFEAEFF6),
+    surfaceContainerHigh = Color(0xFFF0F4FA),
+    surfaceContainerHighest = Color(0xFFF6F9FD),
+    surfaceTint = Color(0xFF5B6B89),
+)
+private val NeoDark = DarkColor.copy(
+    primary = Color(0xFF9DB2D4),
+    onPrimary = Color(0xFF1B2536),
+    primaryContainer = Color(0xFF33405A),
+    onPrimaryContainer = Color(0xFFD9E0EC),
+    background = Color(0xFF262A31),
+    onBackground = Color(0xFFDCE1EA),
+    surface = Color(0xFF262A31),
+    onSurface = Color(0xFFDCE1EA),
+    surfaceContainerLowest = Color(0xFF20242A),
+    surfaceContainerLow = Color(0xFF2A2F37),
+    surfaceContainer = Color(0xFF2F343D),
+    surfaceContainerHigh = Color(0xFF373D47),
+    surfaceContainerHighest = Color(0xFF414852),
+    surfaceTint = Color(0xFF9DB2D4),
+)
+private val GlassLight = LightColor.copy(
+    primary = Color(0xFF2E7BE0),
+    primaryContainer = Color(0xFFCFE3FB),
+    onPrimaryContainer = Color(0xFF07284D),
+    background = Color(0xFFEAF2FC),
+    onBackground = Color(0xFF14202E),
+    surface = Color(0xFFF1F7FE),
+    onSurface = Color(0xFF14202E),
+    surfaceContainerLowest = Color(0xFFE4EEFA),
+    surfaceContainerLow = Color(0xFFEAF2FC),
+    surfaceContainer = Color(0xFFF0F6FE),
+    surfaceContainerHigh = Color(0xFFF6FAFF),
+    surfaceContainerHighest = Color(0xFFFBFDFF),
+    surfaceTint = Color(0xFF2E7BE0),
+)
+private val GlassDark = DarkColor.copy(
+    primary = Color(0xFF74B2FF),
+    onPrimary = Color(0xFF00274F),
+    primaryContainer = Color(0xFF0C3E75),
+    onPrimaryContainer = Color(0xFFD3E6FF),
+    background = Color(0xFF0D1826),
+    onBackground = Color(0xFFDCE7F5),
+    surface = Color(0xFF122238),
+    onSurface = Color(0xFFDCE7F5),
+    surfaceContainerLowest = Color(0xFF0B1523),
+    surfaceContainerLow = Color(0xFF13233A),
+    surfaceContainer = Color(0xFF182B45),
+    surfaceContainerHigh = Color(0xFF1F3552),
+    surfaceContainerHighest = Color(0xFF274060),
+    surfaceTint = Color(0xFF74B2FF),
+)
+
+fun themeColorScheme(style: String, dark: Boolean) = when (style) {
+    "neomorph" -> if (dark) NeoDark else NeoLight
+    "glass" -> if (dark) GlassDark else GlassLight
+    else -> if (dark) DarkColor else LightColor
+}
+
 val LocalDarkTheme = compositionLocalOf { false }
 
 @Composable
@@ -167,14 +251,14 @@ fun AppTheme(
     content: @Composable () -> Unit
 ) {
     val dynamicColor by ThemeManager.dynamicColorEnabled.collectAsState()
+    val themeStyle by ThemeManager.themeStyle.collectAsState()
     val context = LocalContext.current
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
 
-        darkTheme -> DarkColor
-        else -> LightColor
+        else -> themeColorScheme(themeStyle, darkTheme)
     }
     val snackbarController = rememberAppSnackbarController()
 

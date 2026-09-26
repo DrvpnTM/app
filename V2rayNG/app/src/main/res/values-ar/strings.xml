@@ -602,4 +602,10 @@
     <string name="advanced_scan_preset_world">العالم</string>
     <string name="advanced_scan_note_world">يستخدم فحص العالم عينة عشوائية من النطاقات؛ للعثور على IP نظيف، Cloudflare هو الخيار الأفضل.</string>
     <string name="advanced_scan_resume">استئناف</string>
+    <string name="title_theme">المظهر</string>
+    <string-array name="drvpn_theme">
+        <item>بسيط (افتراضي)</item>
+        <item>نيومورفيزم</item>
+        <item>جلاسمورفيزم</item>
+    </string-array>
 </resources>

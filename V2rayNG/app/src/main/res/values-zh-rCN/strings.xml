@@ -592,4 +592,10 @@
     <string name="advanced_scan_preset_world">全球</string>
     <string name="advanced_scan_note_world">全球扫描使用随机抽样的 IP 段；要找干净 IP，Cloudflare 是最佳选择。</string>
     <string name="advanced_scan_resume">继续</string>
+    <string name="title_theme">主题</string>
+    <string-array name="drvpn_theme">
+        <item>简约（默认）</item>
+        <item>新拟态</item>
+        <item>玻璃拟态</item>
+    </string-array>
 </resources>

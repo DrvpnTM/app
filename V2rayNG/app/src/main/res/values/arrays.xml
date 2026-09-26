@@ -222,4 +222,9 @@
     </string-array>
 
 
+    <string-array name="drvpn_theme_value" translatable="false">
+        <item>default</item>
+        <item>neomorph</item>
+        <item>glass</item>
+    </string-array>
 </resources>
