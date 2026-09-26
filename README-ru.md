@@ -33,4 +33,4 @@
 
 ## 📜 Лицензия и благодарности
 
-Открытый код под лицензией **GPL-3.0** ([LICENSE](LICENSE)). Dr VPN основан на [v2rayNG](https://github.com/2dust/v2rayNG) и использует [Xray-core](https://github.com/XTLS/Xray-core) и [hev-socks5-tunnel](https://github.com/heiher/hev-socks5-tunnel). Спасибо их авторам.
+Открытый код под лицензией **GPL-3.0** ([LICENSE](LICENSE)); использует движок [Xray-core](https://github.com/XTLS/Xray-core).

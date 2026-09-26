@@ -25,7 +25,7 @@ Al comprar una suscripción obtienes acceso a servidores. Normalmente recibes un
 **Dr VPN** es una app VPN para Android **gratuita y de código abierto**, hecha para ser simple: cualquiera debería poder conectarse en segundos.
 
 - **Simple como Hiddify:** la pantalla principal es un gran botón de conexión más tu suscripción y tu servidor.
-- **Potente como v2rayNG:** basada en v2rayNG y Xray-core; admite VLESS, VMess, Trojan, Shadowsocks, Hysteria2 y WireGuard.
+- **Potente como :** basada en Xray-core; admite VLESS, VMess, Trojan, Shadowsocks, Hysteria2 y WireGuard.
 - **Solo servidores que funcionan:** se hace ping automáticamente y los caídos se ocultan.
 - **Banderas de países** para saber a dónde estás conectado.
 - **Proxy por app, varios idiomas, temas y modo oscuro.**

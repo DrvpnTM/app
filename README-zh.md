@@ -33,4 +33,4 @@
 
 ## 📜 许可与致谢
 
-本项目以 **GPL-3.0** 开源（[LICENSE](LICENSE)）。Dr VPN 基于 [v2rayNG](https://github.com/2dust/v2rayNG)，并使用 [Xray-core](https://github.com/XTLS/Xray-core) 和 [hev-socks5-tunnel](https://github.com/heiher/hev-socks5-tunnel)。感谢这些项目的作者。
+本项目以 **GPL-3.0** 开源（[LICENSE](LICENSE)），使用 [Xray-core](https://github.com/XTLS/Xray-core) 内核。

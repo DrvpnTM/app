@@ -25,7 +25,7 @@ VPN 已成为许多人的日常工具：自由访问互联网、在公共 Wi-Fi 
 **Dr VPN** 是一款 **免费开源** 的 Android VPN 应用，目标是简单：任何人都能在几秒内连接。
 
 - **像 Hiddify 一样简单：** 首页只有一个大连接按钮，加上你的订阅和节点。
-- **像 v2rayNG 一样强大：** 基于 v2rayNG 和 Xray-core，支持 VLESS、VMess、Trojan、Shadowsocks、Hysteria2、WireGuard。
+- **像  一样强大：** 基于  Xray-core，支持 VLESS、VMess、Trojan、Shadowsocks、Hysteria2、WireGuard。
 - **只显示可用节点：** 自动测速，隐藏失效节点。
 - **国家旗帜：** 一眼看出连接到哪个国家。
 - **分应用代理、多语言、深色模式。**

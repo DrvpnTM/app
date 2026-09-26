@@ -34,4 +34,4 @@ Cada cambio se compila automáticamente con GitHub Actions: abre la pestaña **A
 
 ## 📜 Licencia y créditos
 
-Código abierto bajo **GPL-3.0** ([LICENSE](LICENSE)). Dr VPN se basa en [v2rayNG](https://github.com/2dust/v2rayNG) y usa [Xray-core](https://github.com/XTLS/Xray-core) y [hev-socks5-tunnel](https://github.com/heiher/hev-socks5-tunnel). Gracias a sus autores.
+Código abierto bajo **GPL-3.0** ([LICENSE](LICENSE)); usa el motor [Xray-core](https://github.com/XTLS/Xray-core).
