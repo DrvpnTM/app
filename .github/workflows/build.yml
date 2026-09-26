@@ -64,6 +64,7 @@ jobs:
             "https://github.com/2dust/AndroidLibXrayLite/releases/download/${LIBV2RAY_TAG}/libv2ray.aar"
 
       - name: Decrypt release keystore
+        id: keystore
         env:
           DRVPN_KEYSTORE_ENC_PASSWORD: ${{ secrets.DRVPN_KEYSTORE_ENC_PASSWORD }}
         run: |
@@ -73,6 +74,7 @@ jobs:
                  -out "$RUNNER_TEMP/drvpn-release.jks" \
                  -pass pass:"$DRVPN_KEYSTORE_ENC_PASSWORD"; then
               echo "DRVPN_KEYSTORE_FILE=$RUNNER_TEMP/drvpn-release.jks" >> "$GITHUB_ENV"
+              echo "signed=true" >> "$GITHUB_OUTPUT"
               echo "Decrypted release keystore ($(wc -c < "$RUNNER_TEMP/drvpn-release.jks") bytes)."
             else
               echo "Keystore decryption failed (wrong password?); falling back to debug signing."
@@ -111,7 +113,7 @@ jobs:
           echo "version=$ver" >> "$GITHUB_OUTPUT"
 
       - name: Publish release
-        if: ${{ github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/') }}
+        if: ${{ steps.keystore.outputs.signed == 'true' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')) }}
         uses: softprops/action-gh-release@v2
         with:
           files: V2rayNG/app/build/outputs/apk/playstore/release/*.apk
