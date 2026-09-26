@@ -1,0 +1,58 @@
+name: Auto-update Xray core
+
+# Checks for a newer Xray core (AndroidLibXrayLite release) on a schedule. When one appears,
+# it bumps the pinned core tag and the app version, then tags a release so the app updates itself.
+on:
+  schedule:
+    - cron: "17 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check latest Xray core and bump
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          latest=$(curl -fsSL -H "Authorization: Bearer $GH_TOKEN" \
+            https://api.github.com/repos/2dust/AndroidLibXrayLite/releases/latest \
+            | grep -oE '"tag_name":[[:space:]]*"[^"]+"' | head -1 | sed -E 's/.*"([^"]+)"$/\1/')
+          if [ -z "$latest" ]; then echo "Could not read latest tag"; exit 0; fi
+          current=$(grep -oE 'LIBV2RAY_TAG: [^ ]+' .github/workflows/build.yml | awk '{print $2}')
+          echo "current=$current latest=$latest"
+          if [ "$latest" = "$current" ]; then
+            echo "Already on the latest core; nothing to do."
+            exit 0
+          fi
+
+          # 1) point the build at the new core
+          sed -i "s|LIBV2RAY_TAG: .*|LIBV2RAY_TAG: ${latest}|" .github/workflows/build.yml
+
+          # 2) bump the app version: versionName follows the core version, versionCode +1
+          gradle=V2rayNG/app/build.gradle.kts
+          code=$(grep -oE 'versionCode = [0-9]+' "$gradle" | grep -oE '[0-9]+')
+          newcode=$((code + 1))
+          ver=${latest#v}
+          sed -i "s|versionCode = ${code}|versionCode = ${newcode}|" "$gradle"
+          sed -i "s|versionName = \"[^\"]*\"|versionName = \"${ver}\"|" "$gradle"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .github/workflows/build.yml "$gradle"
+          git commit -m "Auto-update Xray core to ${latest} and bump app to ${ver} (${newcode})"
+          git push origin HEAD:main
+
+          # 3) tag a release so the in-app updater picks it up (build.yml builds + publishes on tag)
+          git tag "v${ver}"
+          git push origin "v${ver}"
