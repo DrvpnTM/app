@@ -589,7 +589,7 @@
     <string name="ping_filter_show_all">إظهار الخوادم بدون استجابة</string>
     <string name="ping_filter_test_all">اختبار الكل</string>
     <string name="advanced_scan_title">الوضع المتقدم (الإنترنت الوطني)</string>
-    <string name="advanced_scan_warning">هذا الوضع مخصص لظروف الإنترنت الوطني. يفحص التطبيق نطاق IP للعثور على IP نظيف ومنفذ مفتوح، وقد يستغرق دقائق ويجعل الاتصال أبطأ. هل تريد المتابعة؟</string>
+    <string name="advanced_scan_warning">هذا الوضع مخصص لظروف الإنترنت الوطني. يفحص التطبيق نطاق IP للعثور على IP نظيف ومنفذ مفتوح؛ هذا ينشئ حركة بيانات كثيفة وقد يستغرق دقائق. لتجنب المشاكل، أطفئ بيانات شريحتك ثم أعد تشغيلها كل 3 ساعات. هل تريد المتابعة؟</string>
     <string name="advanced_scan_understood">فهمت</string>
     <string name="advanced_scan_hint">يفحص نطاق IP على المنافذ المحددة ويعرض IP:المنفذ القابلة للوصول مع زمن الاستجابة. اضغط على نتيجة لنسخها.</string>
     <string name="advanced_scan_range">نطاق IP (مثل 1.2.3.0/24)</string>
