@@ -30,6 +30,7 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '21'
+          cache: 'gradle'
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
@@ -42,10 +43,19 @@ jobs:
           echo "y" | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --channel=0 --install "ndk;${NDK_VERSION}"
           echo "NDK_HOME=$ANDROID_HOME/ndk/${NDK_VERSION}" >> "$GITHUB_ENV"
 
+      - name: Cache libhevtun
+        id: cache-libhevtun
+        uses: actions/cache@v4
+        with:
+          path: libs
+          key: libhevtun-${{ env.NDK_VERSION }}-${{ hashFiles('compile-hevtun.sh', '.gitmodules') }}
+
       - name: Build libhevtun
-        run: |
-          bash compile-hevtun.sh
-          cp -r libs V2rayNG/app/
+        if: steps.cache-libhevtun.outputs.cache-hit != 'true'
+        run: bash compile-hevtun.sh
+
+      - name: Copy libhevtun
+        run: cp -r libs V2rayNG/app/
 
       - name: Download libv2ray.aar
         run: |
