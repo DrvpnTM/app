@@ -40,4 +40,15 @@
         <item>Neumorfismo</item>
         <item>Glassmorfismo</item>
     </string-array>
+    <string name="advanced_scan_apply">Aplicar</string>
+    <string name="advanced_scan_applied">Aplicado al servidor seleccionado</string>
+    <string name="advanced_scan_no_selected">Primero selecciona un servidor</string>
+    <string name="title_app_log">Registro</string>
+    <string name="app_log_empty">Nada registrado aún</string>
+    <string name="advanced_scan_options">Opciones</string>
+    <string name="advanced_scan_status_running">Buscando una ruta limpia…</string>
+    <string name="advanced_scan_status_idle">Listo</string>
+    <string name="advanced_scan_log_started">Escaneo iniciado</string>
+    <string name="advanced_scan_log_finished">Escaneo finalizado</string>
+    <string name="advanced_scan_log_stopped">Escaneo detenido</string>
 </resources>

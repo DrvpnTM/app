@@ -600,4 +600,15 @@
         <item>Neumorphism</item>
         <item>Glassmorphism</item>
     </string-array>
+    <string name="advanced_scan_apply">Apply</string>
+    <string name="advanced_scan_applied">Applied to the selected server</string>
+    <string name="advanced_scan_no_selected">Select a server first</string>
+    <string name="title_app_log">Log</string>
+    <string name="app_log_empty">Nothing logged yet</string>
+    <string name="advanced_scan_options">Options</string>
+    <string name="advanced_scan_status_running">Finding a clean route…</string>
+    <string name="advanced_scan_status_idle">Ready</string>
+    <string name="advanced_scan_log_started">Scan started</string>
+    <string name="advanced_scan_log_finished">Scan finished</string>
+    <string name="advanced_scan_log_stopped">Scan stopped</string>
 </resources>

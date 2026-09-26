@@ -19,6 +19,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -30,6 +31,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.animation.AnimatedVisibility
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.handler.MmkvManager
 import androidx.compose.ui.Alignment
@@ -42,6 +44,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.v2ray.ang.R
+import com.v2ray.ang.core.LauncherManager
 import com.v2ray.ang.extension.toastSuccess
 import com.v2ray.ang.ui.base.BaseComponentActivity
 import com.v2ray.ang.ui.compose.AppTopBar
@@ -94,40 +97,51 @@ class AdvancedScanActivity : BaseComponentActivity() {
                     .padding(innerPadding)
                     .padding(16.dp)
             ) {
+                // Friendly headline; the technical range/port controls are hidden under "options".
                 Text(
-                    text = getString(R.string.advanced_scan_hint),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Spacer(Modifier.height(12.dp))
-                OutlinedTextField(
-                    value = range,
-                    onValueChange = viewModel::setRange,
-                    label = { Text(getString(R.string.advanced_scan_range)) },
-                    singleLine = true,
-                    enabled = !progress.running,
-                    modifier = Modifier.fillMaxWidth(),
+                    text = getString(
+                        if (progress.running) R.string.advanced_scan_status_running
+                        else R.string.advanced_scan_status_idle
+                    ),
+                    style = MaterialTheme.typography.titleMedium,
                 )
                 Spacer(Modifier.height(8.dp))
-                OutlinedTextField(
-                    value = ports,
-                    onValueChange = viewModel::setPorts,
-                    label = { Text(getString(R.string.advanced_scan_ports)) },
-                    singleLine = true,
-                    enabled = !progress.running,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                Spacer(Modifier.height(8.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedButton(onClick = viewModel::useServerRange, enabled = !progress.running) {
-                        Text(getString(R.string.advanced_scan_preset_server))
-                    }
-                    OutlinedButton(onClick = viewModel::useCloudflareRanges, enabled = !progress.running) {
-                        Text(getString(R.string.advanced_scan_preset_cloudflare))
-                    }
-                    OutlinedButton(onClick = viewModel::useWorldRange, enabled = !progress.running) {
-                        Text(getString(R.string.advanced_scan_preset_world))
+                var showOptions by remember { mutableStateOf(false) }
+                TextButton(onClick = { showOptions = !showOptions }) {
+                    Text(getString(R.string.advanced_scan_options))
+                }
+                AnimatedVisibility(visible = showOptions) {
+                    Column {
+                        OutlinedTextField(
+                            value = range,
+                            onValueChange = viewModel::setRange,
+                            label = { Text(getString(R.string.advanced_scan_range)) },
+                            singleLine = true,
+                            enabled = !progress.running,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        OutlinedTextField(
+                            value = ports,
+                            onValueChange = viewModel::setPorts,
+                            label = { Text(getString(R.string.advanced_scan_ports)) },
+                            singleLine = true,
+                            enabled = !progress.running,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            OutlinedButton(onClick = viewModel::useServerRange, enabled = !progress.running) {
+                                Text(getString(R.string.advanced_scan_preset_server))
+                            }
+                            OutlinedButton(onClick = viewModel::useCloudflareRanges, enabled = !progress.running) {
+                                Text(getString(R.string.advanced_scan_preset_cloudflare))
+                            }
+                            OutlinedButton(onClick = viewModel::useWorldRange, enabled = !progress.running) {
+                                Text(getString(R.string.advanced_scan_preset_world))
+                            }
+                        }
                     }
                 }
                 Spacer(Modifier.height(12.dp))
@@ -190,6 +204,13 @@ class AdvancedScanActivity : BaseComponentActivity() {
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.primary,
                                 )
+                                FilledTonalButton(onClick = {
+                                    if (viewModel.applyToSelectedServer(r.ip, r.port)) {
+                                        LauncherManager.restartService(this@AdvancedScanActivity)
+                                    }
+                                }) {
+                                    Text(getString(R.string.advanced_scan_apply))
+                                }
                             }
                         }
                     }

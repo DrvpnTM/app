@@ -608,4 +608,15 @@
         <item>نيومورفيزم</item>
         <item>جلاسمورفيزم</item>
     </string-array>
+    <string name="advanced_scan_apply">تطبيق</string>
+    <string name="advanced_scan_applied">تم التطبيق على الخادم المحدد</string>
+    <string name="advanced_scan_no_selected">اختر خادمًا أولاً</string>
+    <string name="title_app_log">السجل</string>
+    <string name="app_log_empty">لا شيء مُسجّل بعد</string>
+    <string name="advanced_scan_options">خيارات</string>
+    <string name="advanced_scan_status_running">جارٍ إيجاد مسار نظيف…</string>
+    <string name="advanced_scan_status_idle">جاهز</string>
+    <string name="advanced_scan_log_started">بدأ الفحص</string>
+    <string name="advanced_scan_log_finished">انتهى الفحص</string>
+    <string name="advanced_scan_log_stopped">تم إيقاف الفحص</string>
 </resources>

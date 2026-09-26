@@ -600,4 +600,15 @@
         <item>নিউমরফিজম</item>
         <item>গ্লাসমরফিজম</item>
     </string-array>
+    <string name="advanced_scan_apply">প্রয়োগ</string>
+    <string name="advanced_scan_applied">নির্বাচিত সার্ভারে প্রয়োগ হয়েছে</string>
+    <string name="advanced_scan_no_selected">প্রথমে একটি সার্ভার নির্বাচন করুন</string>
+    <string name="title_app_log">লগ</string>
+    <string name="app_log_empty">এখনও কিছু লগ হয়নি</string>
+    <string name="advanced_scan_options">বিকল্প</string>
+    <string name="advanced_scan_status_running">পরিষ্কার রুট খোঁজা হচ্ছে…</string>
+    <string name="advanced_scan_status_idle">প্রস্তুত</string>
+    <string name="advanced_scan_log_started">স্ক্যান শুরু</string>
+    <string name="advanced_scan_log_finished">স্ক্যান সম্পন্ন</string>
+    <string name="advanced_scan_log_stopped">স্ক্যান বন্ধ</string>
 </resources>

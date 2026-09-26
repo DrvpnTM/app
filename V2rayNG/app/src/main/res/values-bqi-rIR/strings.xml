@@ -600,4 +600,15 @@
         <item>نیومورفیک</item>
         <item>گلس‌مورفیک</item>
     </string-array>
+    <string name="advanced_scan_apply">اعمال</string>
+    <string name="advanced_scan_applied">روی سرور انتخاب‌شده اعمال شد</string>
+    <string name="advanced_scan_no_selected">ابتدا یک سرور انتخاب کنید</string>
+    <string name="title_app_log">گزارش</string>
+    <string name="app_log_empty">فعلاً چیزی ثبت نشده</string>
+    <string name="advanced_scan_options">تنظیمات</string>
+    <string name="advanced_scan_status_running">در حال یافتن مسیر تمیز…</string>
+    <string name="advanced_scan_status_idle">آماده</string>
+    <string name="advanced_scan_log_started">اسکن شروع شد</string>
+    <string name="advanced_scan_log_finished">اسکن کامل شد</string>
+    <string name="advanced_scan_log_stopped">اسکن متوقف شد</string>
 </resources>

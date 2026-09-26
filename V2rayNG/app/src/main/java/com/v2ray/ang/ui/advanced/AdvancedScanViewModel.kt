@@ -3,9 +3,13 @@ package com.v2ray.ang.ui.advanced
 import android.app.Application
 import androidx.lifecycle.viewModelScope
 import com.v2ray.ang.AppConfig
+import com.v2ray.ang.handler.AppLog
 import com.v2ray.ang.handler.CleanIpScanner
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.ui.base.BaseViewModel
+import com.v2ray.ang.R
+import com.v2ray.ang.extension.toast
+import com.v2ray.ang.extension.toastSuccess
 import com.v2ray.ang.util.Utils
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,6 +33,8 @@ class AdvancedScanViewModel(application: Application) : BaseViewModel(applicatio
     val resumeIndex: StateFlow<Long> = _resumeIndex.asStateFlow()
 
     private var scanJob: Job? = null
+
+    private fun log(text: String) = AppLog.add(text)
 
     init {
         // Show the total for the current range up front so the counter reads 1 … N.
@@ -86,8 +92,23 @@ class AdvancedScanViewModel(application: Application) : BaseViewModel(applicatio
         val rangeText = _range.value
         val start = _resumeIndex.value
         MmkvManager.encodeSettings(AppConfig.PREF_DRVPN_SCAN_RANGE, rangeText)
+        log(app.getString(R.string.advanced_scan_log_started))
+        var lastFound = progress.value.found.size
         scanJob?.cancel()
         scanJob = viewModelScope.launch {
+            launch {
+                progress.collect { p ->
+                    if (p.found.size > lastFound) {
+                        p.found.drop(lastFound).forEach { r ->
+                            log("${r.ip}:${r.port} · ${r.latencyMs} ms")
+                        }
+                        lastFound = p.found.size
+                    }
+                    if (!p.running && p.total > 0 && p.done >= p.total) {
+                        log(app.getString(R.string.advanced_scan_log_finished))
+                    }
+                }
+            }
             CleanIpScanner.scan(rangeText, ports, start, progress) { next ->
                 _resumeIndex.value = next
                 MmkvManager.encodeSettings(AppConfig.PREF_DRVPN_SCAN_OFFSET, next.toString())
@@ -99,6 +120,29 @@ class AdvancedScanViewModel(application: Application) : BaseViewModel(applicatio
         scanJob?.cancel()
         scanJob = null
         progress.value = progress.value.copy(running = false)
+        log(app.getString(R.string.advanced_scan_log_stopped))
+    }
+
+    /**
+     * Rewrites the currently selected server's address/port to [ip]:[port] and reports whether the
+     * caller should restart the service. Returns true on success.
+     */
+    fun applyToSelectedServer(ip: String, port: Int): Boolean {
+        val guid = MmkvManager.getSelectServer()
+        if (guid == null) {
+            toast(R.string.advanced_scan_no_selected)
+            return false
+        }
+        val profile = MmkvManager.decodeServerConfig(guid)
+        if (profile == null) {
+            toast(R.string.advanced_scan_no_selected)
+            return false
+        }
+        profile.server = ip
+        profile.serverPort = port.toString()
+        MmkvManager.encodeServerConfig(guid, profile)
+        toastSuccess(R.string.advanced_scan_applied)
+        return true
     }
 
     override fun onCleared() {

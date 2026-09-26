@@ -598,4 +598,15 @@
         <item>新擬態</item>
         <item>玻璃擬態</item>
     </string-array>
+    <string name="advanced_scan_apply">套用</string>
+    <string name="advanced_scan_applied">已套用到所選節點</string>
+    <string name="advanced_scan_no_selected">請先選擇一個節點</string>
+    <string name="title_app_log">日誌</string>
+    <string name="app_log_empty">暫無記錄</string>
+    <string name="advanced_scan_options">選項</string>
+    <string name="advanced_scan_status_running">正在尋找乾淨線路…</string>
+    <string name="advanced_scan_status_idle">就緒</string>
+    <string name="advanced_scan_log_started">掃描開始</string>
+    <string name="advanced_scan_log_finished">掃描完成</string>
+    <string name="advanced_scan_log_stopped">掃描已停止</string>
 </resources>
