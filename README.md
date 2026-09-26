@@ -1,3 +1,5 @@
+🌐 [فارسی](README.md) | [English](README-en.md) | [中文](README-zh.md) | [Русский](README-ru.md) | [မြန်မာ](README-my.md)
+
 # Dr VPN (دکتر وی پی ان)
 
 <div dir="rtl">
@@ -6,7 +8,7 @@
 یک دکمه بزرگ برای اتصال، کارت اشتراک فعال و کارت سرور انتخاب‌شده.
 
 - 🌐 سایت: [drvpn.net](https://drvpn.net/)
-- 📄 مقاله: [راهنمای خرید اشتراک وی پی ان و معرفی Dr VPN](ARTICLE-fa.md)
+- 📄 مقاله: [راهنمای خرید اشتراک وی پی ان و معرفی Dr VPN](ARTICLE-fa.md) — [English](ARTICLE-en.md) · [中文](ARTICLE-zh.md) · [Русский](ARTICLE-ru.md) · [မြန်မာ](ARTICLE-my.md)
 
 ## ✨ امکانات
 
