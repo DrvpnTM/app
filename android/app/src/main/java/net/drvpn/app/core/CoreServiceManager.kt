@@ -11,6 +11,9 @@ import android.os.Build
 import android.os.ParcelFileDescriptor
 import android.system.OsConstants
 import androidx.core.content.ContextCompat
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.delay
 import net.drvpn.app.AppConfig
 import net.drvpn.app.contracts.IDialerService
 import net.drvpn.app.contracts.ServiceControl
@@ -45,6 +48,8 @@ import java.lang.ref.SoftReference
 import java.net.InetSocketAddress
 
 object CoreServiceManager {
+    private const val WATCHDOG_INTERVAL_MS = 60_000L
+
 
     private val coreController: CoreController = CoreNativeManager.newCoreController(CoreCallback())
     private val mMsgReceive = ReceiveMessageHandler()
@@ -123,6 +128,62 @@ object CoreServiceManager {
         currentVpnInterface = vpnInterface
         launchCore(service, vpnInterface)
         startNetworkMonitor(service)
+        startWatchdog()
+    }
+
+    // ---------- Dr VPN: background auto-reconnect ----------
+    private val watchdogScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private var watchdogJob: Job? = null
+
+    /**
+     * Runs in the VPN process, so it works with the app closed. Every minute the link is tested;
+     * after two failures in a row the fastest other pinged server of the same subscription is
+     * selected and the core is reloaded in place (the VPN interface stays up, nothing leaks).
+     */
+    private fun startWatchdog() {
+        watchdogJob?.cancel()
+        watchdogJob = watchdogScope.launch {
+            var failures = 0
+            while (isActive) {
+                delay(WATCHDOG_INTERVAL_MS)
+                if (!isRunning() || isReloading) continue
+                if (!MmkvManager.decodeSettingsBool(AppConfig.PREF_DRVPN_AUTO_RECONNECT, true)) {
+                    failures = 0
+                    continue
+                }
+                val ok = runCatching { coreController.measureDelay(SettingsManager.getDelayTestUrl()) >= 0 }.getOrDefault(false) ||
+                        runCatching { coreController.measureDelay(SettingsManager.getDelayTestUrl(true)) >= 0 }.getOrDefault(false)
+                if (ok) {
+                    failures = 0
+                    continue
+                }
+                failures++
+                LogUtil.w(AppConfig.TAG, "Watchdog: connection check failed ($failures)")
+                if (failures < 2) continue
+                failures = 0
+                val next = nextBestServer() ?: continue
+                LogUtil.i(AppConfig.TAG, "Watchdog: switching to $next")
+                MmkvManager.setSelectServer(next)
+                withContext(Dispatchers.Main) {
+                    if (reloadCore()) {
+                        getService()?.let { MessageHelper.sendMsg2UI(it, AppConfig.MSG_AUTO_SWITCHED, next) }
+                        NotificationManager.showNotification(MmkvManager.decodeServerConfig(next))
+                    }
+                }
+            }
+        }
+    }
+
+    /** Fastest server with a successful saved ping in the current subscription, other than the current one. */
+    private fun nextBestServer(): String? {
+        val current = MmkvManager.getSelectServer() ?: return null
+        val subId = MmkvManager.decodeServerConfig(current)?.subscriptionId.orEmpty()
+        return MmkvManager.decodeServerList(subId)
+            .asSequence()
+            .filter { it != current }
+            .mapNotNull { guid -> MmkvManager.decodeServerAffiliationInfo(guid)?.testDelayMillis?.takeIf { it > 0L }?.let { guid to it } }
+            .minByOrNull { it.second }
+            ?.first
     }
 
     @Throws(Exception::class)
@@ -191,6 +252,8 @@ object CoreServiceManager {
      */
     fun stopCoreLoop(): Boolean {
         connectionTestScope.coroutineContext.cancelChildren()
+        watchdogJob?.cancel()
+        watchdogJob = null
         val service = getService() ?: return false
 
         networkMonitor?.unregister()

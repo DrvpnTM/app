@@ -638,4 +638,11 @@
     <string name="usage_month">Tháng này</string>
     <string name="usage_last7">7 ngày qua</string>
     <string name="usage_note">Lưu lượng đi qua Dr VPN trên điện thoại này.</string>
+    <string name="onboarding_add_sub_title">Thêm gói đăng ký</string>
+    <string name="onboarding_add_sub_hint">Dán liên kết đăng ký bạn nhận từ drvpn.net. Bạn cũng có thể thêm sau bằng nút +.</string>
+    <string name="onboarding_paste">Dán từ bộ nhớ tạm</string>
+    <string name="onboarding_skip">Để sau</string>
+    <string name="per_app_iran_direct">Ứng dụng Iran không qua VPN</string>
+    <string name="per_app_iran_done">%1$d ứng dụng Iran giờ không qua VPN</string>
+    <string name="per_app_iran_none">Không tìm thấy ứng dụng Iran</string>
 </resources>

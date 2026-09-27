@@ -1,0 +1,13 @@
+{
+  "enabled": false,
+  "id": "welcome-1",
+  "title": {
+    "fa": "به Dr VPN خوش آمدید",
+    "en": "Welcome to Dr VPN"
+  },
+  "message": {
+    "fa": "برای خرید و تمدید اشتراک به سایت drvpn.net سر بزنید.",
+    "en": "Visit drvpn.net to buy or renew your subscription."
+  },
+  "link": "https://drvpn.net"
+}

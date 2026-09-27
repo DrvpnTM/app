@@ -57,6 +57,7 @@ import net.drvpn.app.util.Utils
 private enum class PerAppMenuAction(@StringRes val labelRes: Int) {
     SelectAll(R.string.menu_item_select_all),
     InvertSelection(R.string.menu_item_invert_selection),
+    IranianAppsDirect(R.string.per_app_iran_direct),
     SelectProxyApps(R.string.menu_item_select_proxy_app),
     ImportSelection(R.string.menu_item_import_proxy_app),
     ExportSelection(R.string.menu_item_export_proxy_app)
@@ -93,6 +94,7 @@ class PerAppProxyActivity : BaseComponentActivity() {
             onSelectAll = { viewModel.selectAll() },
             onInvertSelection = { viewModel.invertSelection() },
             onSelectProxyAuto = { viewModel.selectProxyAppAuto(this) },
+            onIranianAppsDirect = { viewModel.bypassIranianApps(this) },
             onImportProxyApp = {
                 val content = Utils.getClipboard(applicationContext)
                 viewModel.importProxyApp(content, this)
@@ -121,6 +123,7 @@ fun PerAppProxyScreen(
     onSelectAll: () -> Unit,
     onInvertSelection: () -> Unit,
     onSelectProxyAuto: () -> Unit,
+    onIranianAppsDirect: () -> Unit,
     onImportProxyApp: () -> Unit,
     onExportProxyApp: () -> Unit
 ) {
@@ -180,6 +183,7 @@ fun PerAppProxyScreen(
                                 when (action) {
                                     PerAppMenuAction.SelectAll -> onSelectAll()
                                     PerAppMenuAction.InvertSelection -> onInvertSelection()
+                                    PerAppMenuAction.IranianAppsDirect -> onIranianAppsDirect()
                                     PerAppMenuAction.SelectProxyApps -> onSelectProxyAuto()
                                     PerAppMenuAction.ImportSelection -> onImportProxyApp()
                                     PerAppMenuAction.ExportSelection -> onExportProxyApp()

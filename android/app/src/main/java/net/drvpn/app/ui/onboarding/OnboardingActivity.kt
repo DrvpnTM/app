@@ -42,6 +42,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import net.drvpn.app.R
+import net.drvpn.app.ui.compose.IosGroupShape
+import net.drvpn.app.ui.compose.iosFieldColors
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.material3.TextField
 import net.drvpn.app.enums.Language
 import net.drvpn.app.enums.Region
 import net.drvpn.app.handler.AppLocaleManager
@@ -67,7 +71,7 @@ class OnboardingActivity : BaseComponentActivity() {
             AppLocaleManager.setApplicationLanguage(code)
         }
 
-        BackHandler(enabled = uiState.step == OnboardingStep.Language) {
+        BackHandler(enabled = uiState.step != OnboardingStep.Country) {
             viewModel.onAction(OnboardingAction.Back)
         }
 
@@ -100,8 +104,11 @@ private fun OnboardingScreen(state: OnboardingUiState, onAction: (OnboardingActi
         Spacer(Modifier.height(24.dp))
         Text(
             text = stringResource(
-                if (state.step == OnboardingStep.Country) R.string.onboarding_select_country
-                else R.string.onboarding_select_language
+                when (state.step) {
+                    OnboardingStep.Country -> R.string.onboarding_select_country
+                    OnboardingStep.Language -> R.string.onboarding_select_language
+                    OnboardingStep.Subscription -> R.string.onboarding_add_sub_title
+                }
             ),
             style = MaterialTheme.typography.titleMedium,
             textAlign = TextAlign.Center,
@@ -129,6 +136,12 @@ private fun OnboardingScreen(state: OnboardingUiState, onAction: (OnboardingActi
                 onSelect = { onAction(OnboardingAction.SelectLanguage(it)) },
                 modifier = Modifier.weight(1f),
             )
+
+            OnboardingStep.Subscription -> SubscriptionStep(
+                link = state.subLink,
+                onLinkChange = { onAction(OnboardingAction.SetSubLink(it)) },
+                modifier = Modifier.weight(1f),
+            )
         }
 
         Row(
@@ -138,7 +151,7 @@ private fun OnboardingScreen(state: OnboardingUiState, onAction: (OnboardingActi
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            if (state.step == OnboardingStep.Language) {
+            if (state.step != OnboardingStep.Country) {
                 TextButton(onClick = { onAction(OnboardingAction.Back) }) {
                     Text(stringResource(R.string.onboarding_back))
                 }
@@ -147,20 +160,24 @@ private fun OnboardingScreen(state: OnboardingUiState, onAction: (OnboardingActi
             Button(
                 onClick = {
                     onAction(
-                        if (state.step == OnboardingStep.Country) OnboardingAction.Next
-                        else OnboardingAction.Finish
+                        if (state.step == OnboardingStep.Subscription) OnboardingAction.Finish
+                        else OnboardingAction.Next
                     )
                 },
                 enabled = !state.isSaving && when (state.step) {
                     OnboardingStep.Country -> state.region != null
                     OnboardingStep.Language -> state.languageCode != null
+                    OnboardingStep.Subscription -> true
                 },
                 contentPadding = PaddingValues(horizontal = 32.dp, vertical = 12.dp),
             ) {
                 Text(
                     stringResource(
-                        if (state.step == OnboardingStep.Country) R.string.onboarding_next
-                        else R.string.onboarding_start
+                        when {
+                            state.step != OnboardingStep.Subscription -> R.string.onboarding_next
+                            state.subLink.isBlank() -> R.string.onboarding_skip
+                            else -> R.string.onboarding_start
+                        }
                     )
                 )
             }
@@ -228,6 +245,38 @@ private fun OptionRow(leading: String?, label: String, selected: Boolean, onClic
                 modifier = Modifier.weight(1f),
             )
             RadioButton(selected = selected, onClick = null)
+        }
+    }
+}
+
+@Composable
+private fun SubscriptionStep(link: String, onLinkChange: (String) -> Unit, modifier: Modifier = Modifier) {
+    val clipboard = LocalClipboardManager.current
+    Column(modifier = modifier.fillMaxWidth()) {
+        Text(
+            text = stringResource(R.string.onboarding_add_sub_hint),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(Modifier.height(16.dp))
+        TextField(
+            value = link,
+            onValueChange = onLinkChange,
+            placeholder = { Text("https://…  /  vless://…") },
+            maxLines = 4,
+            colors = iosFieldColors(),
+            shape = IosGroupShape,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(Modifier.height(12.dp))
+        Button(
+            onClick = { clipboard.getText()?.text?.let { onLinkChange(it.trim()) } },
+            modifier = Modifier.fillMaxWidth(),
+            contentPadding = PaddingValues(vertical = 14.dp)
+        ) {
+            Text(stringResource(R.string.onboarding_paste))
         }
     }
 }

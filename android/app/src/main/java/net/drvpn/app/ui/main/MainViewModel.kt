@@ -19,6 +19,7 @@ import net.drvpn.app.extension.isComplexType
 import net.drvpn.app.extension.matchesPattern
 import net.drvpn.app.extension.moveItem
 import net.drvpn.app.core.LauncherManager
+import net.drvpn.app.handler.AnnouncementManager
 import net.drvpn.app.handler.AppLog
 import net.drvpn.app.handler.MmkvManager
 import net.drvpn.app.handler.ServerCountryManager
@@ -130,6 +131,15 @@ class MainViewModel(
         collectSelectedServerName()
         watchAutoPing()
         setupGroupTab()
+        loadAnnouncement()
+    }
+
+    private fun loadAnnouncement() {
+        viewModelScope.launch(ioDispatcher) {
+            val lang = runCatching { localizedContext.resources.configuration.locales[0].language }.getOrDefault("fa")
+            val notice = runCatching { AnnouncementManager.fetch(lang) }.getOrNull() ?: return@launch
+            _uiState.update { it.copy(announcement = notice) }
+        }
     }
 
     // ---------- Auto ping (Dr VPN) ----------
@@ -206,6 +216,11 @@ class MainViewModel(
                 toastSuccess(R.string.toast_services_success)
                 updateRunningState(true)
                 markConnected(resume = false)
+            }
+            MainServiceEvent.AutoSwitched -> {
+                refreshSelectedGuid()
+                toast(R.string.home_auto_switched)
+                AppLog.add(dataSource.getString(R.string.home_auto_switched))
             }
             is MainServiceEvent.SpeedUpdate -> {
                 if (uiState.value.isRunning) {
@@ -383,6 +398,10 @@ class MainViewModel(
             is MainAction.Search -> filterConfig(action.query)
             is MainAction.SetShowServersWithoutPing -> setShowServersWithoutPing(action.show)
             MainAction.SelectFastest -> selectFastest()
+            is MainAction.DismissAnnouncement -> {
+                AnnouncementManager.dismiss(action.id)
+                _uiState.update { it.copy(announcement = null) }
+            }
             is MainAction.ImportBatchConfig -> importBatchConfig(action.configText)
             MainAction.LocateHandled -> consumeLocateTarget()
             is MainAction.ShareQRCode -> {
@@ -1072,37 +1091,14 @@ class MainViewModel(
 
     private fun autoReconnectEnabled() = MmkvManager.decodeSettingsBool(AppConfig.PREF_DRVPN_AUTO_RECONNECT, true)
 
-    /** While connected, check the link every minute; two failures in a row switch to another server. */
+    /** The periodic link check now runs in the VPN service (CoreServiceManager watchdog). */
     private fun startHealthChecks() {
         healthJob?.cancel()
         healthFailures = 0
-        if (!autoReconnectEnabled()) return
-        healthJob = viewModelScope.launch {
-            while (true) {
-                delay(HEALTH_CHECK_INTERVAL_MS)
-                val ui = uiState.value
-                if (!ui.isRunning) break
-                if (!ui.isTesting) testCurrentServerRealPing()
-            }
-        }
     }
 
-    private fun onHealthResult(ok: Boolean) {
-        if (ok) {
-            healthFailures = 0
-            return
-        }
-        healthFailures++
-        if (healthFailures >= 2 && autoReconnectEnabled()) {
-            healthFailures = 0
-            val next = nextBestServerGuid()
-            if (next != null) {
-                AppLog.add(dataSource.getString(R.string.home_auto_switched))
-                toast(R.string.home_auto_switched)
-                selectAndApply(next, announce = false)
-            }
-        }
-    }
+    @Suppress("UNUSED_PARAMETER")
+    private fun onHealthResult(ok: Boolean) = Unit
 
     /** A failed start tries the next best pinged server, at most twice in a row. */
     private fun retryOnAnotherServer() {

@@ -6,6 +6,8 @@ import net.drvpn.app.AppConfig
 import net.drvpn.app.enums.Language
 import net.drvpn.app.enums.Region
 import net.drvpn.app.handler.MmkvManager
+import net.drvpn.app.R
+import net.drvpn.app.handler.AngConfigManager
 import net.drvpn.app.handler.SettingsChangeManager
 import net.drvpn.app.handler.SettingsManager
 import net.drvpn.app.ui.base.BaseViewModel
@@ -19,7 +21,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Locale
 
-enum class OnboardingStep { Country, Language }
+enum class OnboardingStep { Country, Language, Subscription }
 
 data class OnboardingUiState(
     val step: OnboardingStep = OnboardingStep.Country,
@@ -27,6 +29,8 @@ data class OnboardingUiState(
     /** Language code from [Language]; null until the user reaches or picks on the language step. */
     val languageCode: String? = null,
     val isSaving: Boolean = false,
+    /** Subscription link typed or pasted on the last step; imported on finish if not blank. */
+    val subLink: String = "",
     /** Set once settings are saved; the activity then applies [languageCode] and closes. */
     val finishedLanguageCode: String? = null,
 )
@@ -34,6 +38,7 @@ data class OnboardingUiState(
 sealed interface OnboardingAction {
     data class SelectRegion(val region: Region) : OnboardingAction
     data class SelectLanguage(val code: String) : OnboardingAction
+    data class SetSubLink(val text: String) : OnboardingAction
     data object Next : OnboardingAction
     data object Back : OnboardingAction
     data object Finish : OnboardingAction
@@ -60,15 +65,24 @@ class OnboardingViewModel(application: Application) : BaseViewModel(application)
         when (action) {
             is OnboardingAction.SelectRegion -> _uiState.update { it.copy(region = action.region) }
             is OnboardingAction.SelectLanguage -> _uiState.update { it.copy(languageCode = action.code) }
+            is OnboardingAction.SetSubLink -> _uiState.update { it.copy(subLink = action.text) }
             OnboardingAction.Next -> _uiState.update { state ->
-                val region = state.region ?: return@update state
-                state.copy(
-                    step = OnboardingStep.Language,
-                    languageCode = state.languageCode ?: region.suggestedLanguage.code,
-                )
+                when (state.step) {
+                    OnboardingStep.Country -> {
+                        val region = state.region ?: return@update state
+                        state.copy(
+                            step = OnboardingStep.Language,
+                            languageCode = state.languageCode ?: region.suggestedLanguage.code,
+                        )
+                    }
+                    OnboardingStep.Language -> state.copy(step = OnboardingStep.Subscription)
+                    OnboardingStep.Subscription -> state
+                }
             }
 
-            OnboardingAction.Back -> _uiState.update { it.copy(step = OnboardingStep.Country) }
+            OnboardingAction.Back -> _uiState.update {
+                it.copy(step = if (it.step == OnboardingStep.Subscription) OnboardingStep.Language else OnboardingStep.Country)
+            }
             OnboardingAction.Finish -> finish()
         }
     }
@@ -91,6 +105,16 @@ class OnboardingViewModel(application: Application) : BaseViewModel(application)
                     }
                 } catch (e: Exception) {
                     LogUtil.e(AppConfig.TAG, "Onboarding: failed to apply routing for region ${region.code}", e)
+                }
+                val link = state.subLink.trim()
+                if (link.isNotEmpty()) {
+                    try {
+                        val (count, countSub) = AngConfigManager.importBatchConfig(link, "", true)
+                        if (count + countSub == 0) toastError(R.string.toast_failure)
+                        else if (countSub > 0) AngConfigManager.updateConfigViaSubAll()
+                    } catch (e: Exception) {
+                        LogUtil.e(AppConfig.TAG, "Onboarding: failed to import subscription", e)
+                    }
                 }
                 MmkvManager.encodeSettings(AppConfig.PREF_DRVPN_ONBOARDING_DONE, true)
             }

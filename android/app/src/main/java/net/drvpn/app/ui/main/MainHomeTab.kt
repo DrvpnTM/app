@@ -67,6 +67,8 @@ import net.drvpn.app.dto.entities.SubscriptionItem
 import net.drvpn.app.ui.compose.IosRed
 import net.drvpn.app.ui.compose.IosOrange
 import androidx.compose.material3.LinearProgressIndicator
+import net.drvpn.app.handler.AnnouncementManager
+import androidx.compose.ui.platform.LocalUriHandler
 import net.drvpn.app.R
 
 private val ConnectedColor = Color(0xFF34C759)
@@ -80,6 +82,7 @@ private val DisconnectedColor = Color(0xFF8E8E93)
 fun MainHomeTab(
     profileName: String,
     subscription: SubscriptionItem?,
+    announcement: AnnouncementManager.Announcement?,
     selectedServerName: String,
     isRunning: Boolean,
     statusText: String,
@@ -144,6 +147,10 @@ fun MainHomeTab(
                         .weight(1f)
                         .verticalScroll(rememberScrollState())
                 ) {
+                    if (announcement != null) {
+                        AnnouncementCard(announcement, onDismiss = { onAction(MainAction.DismissAnnouncement(announcement.id)) })
+                        Spacer(Modifier.height(12.dp))
+                    }
                     ProfileCard(
                         profileName = profileName,
                         subscription = subscription,
@@ -163,6 +170,10 @@ fun MainHomeTab(
                     .padding(horizontal = 16.dp, vertical = 12.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
+                if (announcement != null) {
+                    AnnouncementCard(announcement, onDismiss = { onAction(MainAction.DismissAnnouncement(announcement.id)) })
+                    Spacer(Modifier.height(12.dp))
+                }
                 ProfileCard(
                     profileName = profileName,
                     subscription = subscription,
@@ -432,6 +443,34 @@ private fun ServerCard(serverName: String, onClick: () -> Unit) {
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+        }
+    }
+}
+
+@Composable
+private fun AnnouncementCard(notice: AnnouncementManager.Announcement, onDismiss: () -> Unit) {
+    val uriHandler = LocalUriHandler.current
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
+            .clickable(enabled = notice.link != null) { notice.link?.let { runCatching { uriHandler.openUri(it) } } }
+            .padding(start = 16.dp, top = 12.dp, bottom = 12.dp, end = 4.dp),
+        verticalAlignment = Alignment.Top,
+    ) {
+        Text("📢", style = MaterialTheme.typography.titleMedium)
+        Spacer(Modifier.width(10.dp))
+        Column(Modifier.weight(1f)) {
+            if (notice.title.isNotBlank()) {
+                Text(notice.title, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
+            }
+            if (notice.message.isNotBlank()) {
+                Text(notice.message, style = MaterialTheme.typography.bodyMedium)
+            }
+        }
+        IconButton(onClick = onDismiss, modifier = Modifier.size(32.dp)) {
+            Text("✕", color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }

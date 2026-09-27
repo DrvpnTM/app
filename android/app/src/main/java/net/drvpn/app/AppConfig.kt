@@ -206,6 +206,7 @@ object AppConfig {
     const val MSG_MEASURE_CONFIG_NOTIFY = 73
     const val MSG_MEASURE_CONFIG_FINISH = 74
     const val MSG_SPEED_UPDATE = 81
+    const val MSG_AUTO_SWITCHED = 82
 
     const val MSG_SUB_UPDATE_START = 8
     const val MSG_SUB_UPDATE_CANCEL = 81

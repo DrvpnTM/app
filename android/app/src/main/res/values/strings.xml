@@ -640,4 +640,11 @@
     <string name="usage_month">This month</string>
     <string name="usage_last7">Last 7 days</string>
     <string name="usage_note">Traffic that went through Dr VPN on this phone.</string>
+    <string name="onboarding_add_sub_title">Add your subscription</string>
+    <string name="onboarding_add_sub_hint">Paste the subscription link you got from drvpn.net. You can also add it later with the + button.</string>
+    <string name="onboarding_paste">Paste from clipboard</string>
+    <string name="onboarding_skip">Later</string>
+    <string name="per_app_iran_direct">Iranian apps without VPN</string>
+    <string name="per_app_iran_done">%1$d Iranian apps now bypass the VPN</string>
+    <string name="per_app_iran_none">No Iranian apps found on this phone</string>
 </resources>
