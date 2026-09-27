@@ -18,6 +18,7 @@ import net.drvpn.app.extension.delay
 import net.drvpn.app.extension.isComplexType
 import net.drvpn.app.extension.matchesPattern
 import net.drvpn.app.extension.moveItem
+import net.drvpn.app.core.LauncherManager
 import net.drvpn.app.handler.AppLog
 import net.drvpn.app.handler.MmkvManager
 import net.drvpn.app.handler.ServerCountryManager
@@ -219,6 +220,7 @@ class MainViewModel(
                         (event.message?.takeIf { it.isNotBlank() }?.let { " ($it)" } ?: ""))
                 updateRunningState(false)
                 markDisconnected()
+                retryOnAnotherServer()
             }
 
             MainServiceEvent.StateStopSuccess -> {
@@ -228,6 +230,7 @@ class MainViewModel(
             is MainServiceEvent.MeasureDelayResult -> {
                 if (!uiState.value.isRunning || !testRequests.completeCurrent(event.requestId)) return
                 _uiState.update { it.copy(isTesting = testRequests.isTesting, status = MainStatus.ConnectionTest(event.result)) }
+                onHealthResult(event.result.delayMillis >= 0)
             }
 
             is MainServiceEvent.MeasureConfigSuccess -> {
@@ -371,7 +374,10 @@ class MainViewModel(
             MainAction.SortByTestResults -> sortByTestResultsAsync()
             MainAction.UpdateSubscriptions -> importConfigViaSub()
             MainAction.ExportAll -> exportAllAsync()
-            is MainAction.SelectGroup -> subscriptionIdChanged(action.groupId)
+            is MainAction.SelectGroup -> {
+                subscriptionIdChanged(action.groupId)
+                loadSubscriptionInfo(action.groupId)
+            }
             is MainAction.SelectServer -> updateSelectedGuid(action.guid)
             is MainAction.RemoveServer -> removeServerAndRefresh(action.guid)
             is MainAction.Search -> filterConfig(action.query)
@@ -586,6 +592,7 @@ class MainViewModel(
                     it.copy(
                         groups = groups,
                         selectedGroupId = selectedGroup,
+                        subscription = runCatching { dataSource.getSubscriptionItem(selectedGroup) }.getOrNull(),
                         selectedGuid = dataSource.getSelectServer(),
                     )
                 }
@@ -1048,10 +1055,81 @@ class MainViewModel(
     }
 
     // ---------- Running state ----------
+    private fun loadSubscriptionInfo(groupId: String) {
+        viewModelScope.launch(ioDispatcher) {
+            val sub = runCatching { dataSource.getSubscriptionItem(groupId) }.getOrNull()
+            _uiState.update { if (it.selectedGroupId == groupId) it.copy(subscription = sub) else it }
+        }
+    }
+
     // ---------- Connection timer & fastest server (Dr VPN) ----------
     private var pendingSelectFastest = false
 
+    // ---------- Auto-reconnect (Dr VPN) ----------
+    private var healthJob: Job? = null
+    private var healthFailures = 0
+    private var startRetries = 0
+
+    private fun autoReconnectEnabled() = MmkvManager.decodeSettingsBool(AppConfig.PREF_DRVPN_AUTO_RECONNECT, true)
+
+    /** While connected, check the link every minute; two failures in a row switch to another server. */
+    private fun startHealthChecks() {
+        healthJob?.cancel()
+        healthFailures = 0
+        if (!autoReconnectEnabled()) return
+        healthJob = viewModelScope.launch {
+            while (true) {
+                delay(HEALTH_CHECK_INTERVAL_MS)
+                val ui = uiState.value
+                if (!ui.isRunning) break
+                if (!ui.isTesting) testCurrentServerRealPing()
+            }
+        }
+    }
+
+    private fun onHealthResult(ok: Boolean) {
+        if (ok) {
+            healthFailures = 0
+            return
+        }
+        healthFailures++
+        if (healthFailures >= 2 && autoReconnectEnabled()) {
+            healthFailures = 0
+            val next = nextBestServerGuid()
+            if (next != null) {
+                AppLog.add(dataSource.getString(R.string.home_auto_switched))
+                toast(R.string.home_auto_switched)
+                selectAndApply(next, announce = false)
+            }
+        }
+    }
+
+    /** A failed start tries the next best pinged server, at most twice in a row. */
+    private fun retryOnAnotherServer() {
+        if (!autoReconnectEnabled() || startRetries >= 2) return
+        val next = nextBestServerGuid() ?: return
+        startRetries++
+        updateSelectedGuid(next)
+        toast(R.string.home_auto_switched)
+        viewModelScope.launch {
+            delay(800)
+            runCatching { LauncherManager.startService(app) }
+                .onFailure { LogUtil.e(AppConfig.TAG, "Auto-reconnect start failed", it) }
+        }
+    }
+
+    /** Fastest pinged server other than the current one. */
+    private fun nextBestServerGuid(): String? {
+        val current = uiState.value.selectedGuid
+        return mutableServerGroupState(uiState.value.selectedGroupId).value.allRows
+            .filter { it.testDelayMillis > 0L && it.guid != current }
+            .minByOrNull { it.testDelayMillis }
+            ?.guid
+    }
+
     private fun markConnected(resume: Boolean) {
+        startRetries = 0
+        startHealthChecks()
         val stored = MmkvManager.decodeSettingsString(AppConfig.PREF_DRVPN_CONNECTED_AT)?.toLongOrNull()
         val since = if (resume && stored != null && stored > 0L) stored else System.currentTimeMillis()
         if (since != stored) MmkvManager.encodeSettings(AppConfig.PREF_DRVPN_CONNECTED_AT, since.toString())
@@ -1059,6 +1137,8 @@ class MainViewModel(
     }
 
     private fun markDisconnected() {
+        healthJob?.cancel()
+        healthJob = null
         MmkvManager.encodeSettings(AppConfig.PREF_DRVPN_CONNECTED_AT, "")
         _uiState.update { it.copy(connectedSince = null, speedUp = 0L, speedDown = 0L, totalUp = 0L, totalDown = 0L) }
     }
@@ -1082,12 +1162,12 @@ class MainViewModel(
         }
     }
 
-    private fun selectAndApply(guid: String) {
+    private fun selectAndApply(guid: String, announce: Boolean = true) {
         if (guid != uiState.value.selectedGuid) {
             updateSelectedGuid(guid)
             if (uiState.value.isRunning) dataSource.sendMsg2Service(AppConfig.MSG_STATE_RESTART, "")
         }
-        toastSuccess(R.string.home_fastest_selected)
+        if (announce) toastSuccess(R.string.home_fastest_selected)
     }
 
     private fun updateRunningState(running: Boolean, clearTestingText: Boolean = true) {
@@ -1125,6 +1205,7 @@ class MainViewModel(
     }
 
     private companion object {
+        const val HEALTH_CHECK_INTERVAL_MS = 60_000L
         const val TEST_RESULT_FLUSH_INTERVAL_MS = 500L
     }
 }

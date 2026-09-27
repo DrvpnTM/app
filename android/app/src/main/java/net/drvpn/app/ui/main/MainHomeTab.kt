@@ -63,6 +63,10 @@ import net.drvpn.app.ui.compose.IosGreen
 import net.drvpn.app.ui.compose.cell
 import kotlinx.coroutines.delay
 import java.util.Locale
+import net.drvpn.app.dto.entities.SubscriptionItem
+import net.drvpn.app.ui.compose.IosRed
+import net.drvpn.app.ui.compose.IosOrange
+import androidx.compose.material3.LinearProgressIndicator
 import net.drvpn.app.R
 
 private val ConnectedColor = Color(0xFF34C759)
@@ -75,6 +79,7 @@ private val DisconnectedColor = Color(0xFF8E8E93)
 @Composable
 fun MainHomeTab(
     profileName: String,
+    subscription: SubscriptionItem?,
     selectedServerName: String,
     isRunning: Boolean,
     statusText: String,
@@ -141,6 +146,7 @@ fun MainHomeTab(
                 ) {
                     ProfileCard(
                         profileName = profileName,
+                        subscription = subscription,
                         onUpdate = { onAction(MainAction.UpdateSubscriptions) },
                     )
                     Spacer(Modifier.height(12.dp))
@@ -159,6 +165,7 @@ fun MainHomeTab(
             ) {
                 ProfileCard(
                     profileName = profileName,
+                    subscription = subscription,
                     onUpdate = { onAction(MainAction.UpdateSubscriptions) },
                 )
                 Spacer(Modifier.height(36.dp))
@@ -239,12 +246,13 @@ private fun FastestButton(busy: Boolean, onClick: () -> Unit) {
 }
 
 @Composable
-private fun ProfileCard(profileName: String, onUpdate: () -> Unit) {
+private fun ProfileCard(profileName: String, subscription: SubscriptionItem?, onUpdate: () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
     ) {
+        Column {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -269,6 +277,61 @@ private fun ProfileCard(profileName: String, onUpdate: () -> Unit) {
                     painter = painterResource(R.drawable.ic_refresh_24dp),
                     contentDescription = stringResource(R.string.title_sub_update),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+        if (subscription != null && (subscription.usedBytes > 0 || subscription.totalBytes > 0 || subscription.expireAt > 0)) {
+            SubscriptionUsage(subscription)
+        }
+        }
+    }
+}
+
+/** Used/total bar and days left, from the panel's subscription-userinfo header. */
+@Composable
+private fun SubscriptionUsage(sub: SubscriptionItem) {
+    val total = sub.totalBytes
+    val used = sub.usedBytes.coerceAtLeast(0)
+    val fraction = if (total > 0) (used.toFloat() / total).coerceIn(0f, 1f) else 0f
+    val barColor = when {
+        fraction >= 0.9f -> IosRed
+        fraction >= 0.7f -> IosOrange
+        else -> IosGreen
+    }
+    val usageText = if (total > 0) {
+        stringResource(R.string.home_sub_usage, used.toTrafficString(), total.toTrafficString())
+    } else {
+        stringResource(R.string.home_sub_usage_unlimited, used.toTrafficString())
+    }
+    val expiryText = when {
+        sub.expireAt <= 0 -> null
+        sub.expireAt < System.currentTimeMillis() -> stringResource(R.string.home_sub_expired)
+        else -> {
+            val days = ((sub.expireAt - System.currentTimeMillis()) / 86_400_000L).toInt()
+            stringResource(R.string.home_sub_days_left, days)
+        }
+    }
+    Column(Modifier.padding(start = 20.dp, end = 20.dp, bottom = 14.dp)) {
+        if (total > 0) {
+            LinearProgressIndicator(
+                progress = { fraction },
+                color = barColor,
+                trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(6.dp)
+                    .clip(RoundedCornerShape(3.dp)),
+            )
+            Spacer(Modifier.height(6.dp))
+        }
+        Row(Modifier.fillMaxWidth()) {
+            Text(usageText, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.weight(1f))
+            if (expiryText != null) {
+                Text(
+                    expiryText,
+                    style = MaterialTheme.typography.bodySmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = if (sub.expireAt < System.currentTimeMillis()) IosRed else MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         }

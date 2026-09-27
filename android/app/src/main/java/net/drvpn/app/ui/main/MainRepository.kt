@@ -238,6 +238,19 @@ class MainRepository(
     }
 
     override fun syncSubscriptions() {
+        // Dr VPN: one-time switch of existing subscriptions to auto-update every 6 hours.
+        if (!MmkvManager.decodeSettingsBool(AppConfig.PREF_DRVPN_SUB_AUTO_MIGRATED, false)) {
+            MmkvManager.decodeSubscriptions().forEach { cache ->
+                val sub = cache.subscription
+                if (sub.url.isNotEmpty() && !sub.autoUpdate) {
+                    sub.autoUpdate = true
+                    if (sub.updateInterval <= 0L || sub.updateInterval == 1440L) sub.updateInterval = 360L
+                    MmkvManager.encodeSubscription(cache.guid, sub)
+                }
+            }
+            MmkvManager.encodeSettings(AppConfig.PREF_DRVPN_SUB_AUTO_MIGRATED, true)
+            SubscriptionUpdater.sync(app, forceReschedule = true)
+        }
         SubscriptionUpdater.sync(app)
     }
 

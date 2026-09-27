@@ -628,4 +628,11 @@
     <string name="kill_switch_title">কিল সুইচ (IP ফাঁস রোধ)</string>
     <string name="kill_switch_message">কিল সুইচ চালু থাকলে VPN বা সাবস্ক্রিপশন বিচ্ছিন্ন হলে ফোনের ইন্টারনেটও বন্ধ হবে, তাই আসল IP প্রকাশ পাবে না।\n\nপরের স্ক্রিনে:\n১. Dr VPN-এর পাশের গিয়ারে ট্যাপ করুন।\n২. Always-on VPN চালু করুন।\n৩. VPN ছাড়া সংযোগ ব্লক করুন চালু করুন।</string>
     <string name="kill_switch_open">VPN সেটিংস খুলুন</string>
+    <string name="home_sub_usage">%2$s এর মধ্যে %1$s</string>
+    <string name="home_sub_usage_unlimited">%1$s ব্যবহৃত (সীমাহীন)</string>
+    <string name="home_sub_days_left">%1$d দিন বাকি</string>
+    <string name="home_sub_expired">মেয়াদ শেষ</string>
+    <string name="home_auto_switched">সার্ভার বন্ধ ছিল; পরের সচল সার্ভারে যুক্ত হয়েছে</string>
+    <string name="title_auto_reconnect">স্বয়ংক্রিয় পুনঃসংযোগ</string>
+    <string name="summary_auto_reconnect">সার্ভার কাজ না করলে স্বয়ংক্রিয়ভাবে পরের দ্রুততম সচল সার্ভারে যুক্ত হবে</string>
 </resources>

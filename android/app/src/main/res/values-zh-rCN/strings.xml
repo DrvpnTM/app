@@ -626,4 +626,11 @@
     <string name="kill_switch_title">断网保护（防止 IP 泄露）</string>
     <string name="kill_switch_message">开启后，如果 VPN 或订阅断开，手机也会断网，真实 IP 不会泄露。\n\n在接下来的页面：\n1. 点击 Dr VPN 旁边的齿轮。\n2. 打开「始终开启的 VPN」。\n3. 打开「屏蔽未使用 VPN 的连接」。</string>
     <string name="kill_switch_open">打开 VPN 设置</string>
+    <string name="home_sub_usage">%1$s / %2$s</string>
+    <string name="home_sub_usage_unlimited">已用 %1$s（不限量）</string>
+    <string name="home_sub_days_left">剩余 %1$d 天</string>
+    <string name="home_sub_expired">已过期</string>
+    <string name="home_auto_switched">节点不可用，已切换到下一个可用节点</string>
+    <string name="title_auto_reconnect">自动重连</string>
+    <string name="summary_auto_reconnect">节点失效时，自动切换到下一个最快的可用节点</string>
 </resources>

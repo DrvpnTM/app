@@ -636,4 +636,11 @@
     <string name="kill_switch_title">مفتاح الإيقاف (منع تسريب IP)</string>
     <string name="kill_switch_message">عند تفعيل مفتاح الإيقاف، إذا انقطع الـVPN أو الاشتراك ينقطع الإنترنت أيضًا حتى لا يظهر عنوان IP الحقيقي.\n\nفي الشاشة التالية:\n١. اضغط على الترس بجانب Dr VPN.\n٢. فعّل «VPN دائم التشغيل».\n٣. فعّل «حظر الاتصالات بدون VPN».</string>
     <string name="kill_switch_open">فتح إعدادات VPN</string>
+    <string name="home_sub_usage">%1$s من %2$s</string>
+    <string name="home_sub_usage_unlimited">تم استخدام %1$s (غير محدود)</string>
+    <string name="home_sub_days_left">متبقٍ %1$d يوم</string>
+    <string name="home_sub_expired">منتهي</string>
+    <string name="home_auto_switched">كان الخادم معطلًا؛ تم التبديل إلى الخادم التالي</string>
+    <string name="title_auto_reconnect">إعادة الاتصال التلقائي</string>
+    <string name="summary_auto_reconnect">إذا توقف الخادم، يتم التبديل تلقائيًا إلى أسرع خادم يعمل</string>
 </resources>
