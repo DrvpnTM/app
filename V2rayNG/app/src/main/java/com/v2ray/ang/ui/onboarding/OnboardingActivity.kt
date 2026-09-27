@@ -87,7 +87,7 @@ private fun OnboardingScreen(state: OnboardingUiState, onAction: (OnboardingActi
     ) {
         Spacer(Modifier.height(32.dp))
         Image(
-            painter = painterResource(R.mipmap.ic_launcher_round),
+            painter = painterResource(R.drawable.drvpn_logo),
             contentDescription = null,
             modifier = Modifier.size(88.dp),
         )
