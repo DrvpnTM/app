@@ -49,13 +49,27 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.unit.Dp
+import com.v2ray.ang.extension.toSpeedString
+import com.v2ray.ang.ui.compose.IosBlue
+import com.v2ray.ang.ui.compose.IosGreen
+import com.v2ray.ang.ui.compose.cell
+import kotlinx.coroutines.delay
+import java.util.Locale
 import com.v2ray.ang.R
 
 private val ConnectedColor = Color(0xFF34C759)
 private val DisconnectedColor = Color(0xFF8E8E93)
 
 /**
- * Hiddify-style home: active profile card, a large connect button and the selected server card.
+ * Hiddify-style home: active profile card, a large connect button, live status (timer + speed)
+ * and the selected server card. Switches to two columns in landscape.
  */
 @Composable
 fun MainHomeTab(
@@ -63,57 +77,159 @@ fun MainHomeTab(
     selectedServerName: String,
     isRunning: Boolean,
     statusText: String,
+    connectedSince: Long?,
+    speedUp: Long,
+    speedDown: Long,
+    isTesting: Boolean,
     onAction: (MainAction) -> Unit,
     onOpenProxies: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        ProfileCard(
-            profileName = profileName,
-            onUpdate = { onAction(MainAction.UpdateSubscriptions) },
-        )
-
-        Spacer(Modifier.height(48.dp))
-
-        ConnectButton(
-            isRunning = isRunning,
-            onToggle = { onAction(MainAction.ToggleService) },
-        )
-
-        Spacer(Modifier.height(20.dp))
-
-        Text(
-            text = stringResource(if (isRunning) R.string.home_connected else R.string.home_tap_to_connect),
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold,
-            color = if (isRunning) ConnectedColor else MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-
-        if (isRunning && statusText.isNotBlank()) {
-            Spacer(Modifier.height(8.dp))
-            Text(
-                text = statusText,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .clip(RoundedCornerShape(12.dp))
-                    .clickable(onClick = { onAction(MainAction.TestCurrentServer) })
-                    .padding(horizontal = 12.dp, vertical = 6.dp),
-            )
+    BoxWithConstraints(modifier = modifier.fillMaxSize()) {
+        val landscape = maxWidth > maxHeight
+        val connectBlock: @Composable () -> Unit = {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                ConnectButton(
+                    isRunning = isRunning,
+                    onToggle = { onAction(MainAction.ToggleService) },
+                    size = if (landscape) 170.dp else 220.dp,
+                )
+                Spacer(Modifier.height(16.dp))
+                Text(
+                    text = stringResource(if (isRunning) R.string.home_connected else R.string.home_tap_to_connect),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = if (isRunning) ConnectedColor else MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                if (isRunning) {
+                    Spacer(Modifier.height(6.dp))
+                    ConnectionTimer(connectedSince)
+                    Spacer(Modifier.height(12.dp))
+                    SpeedRow(up = speedUp, down = speedDown)
+                    if (statusText.isNotBlank()) {
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            text = statusText,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(12.dp))
+                                .clickable(onClick = { onAction(MainAction.TestCurrentServer) })
+                                .padding(horizontal = 12.dp, vertical = 6.dp),
+                        )
+                    }
+                }
+            }
         }
+        if (landscape) {
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 24.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(24.dp),
+            ) {
+                Box(Modifier.weight(1f), contentAlignment = Alignment.Center) { connectBlock() }
+                Column(
+                    Modifier
+                        .weight(1f)
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    ProfileCard(
+                        profileName = profileName,
+                        onUpdate = { onAction(MainAction.UpdateSubscriptions) },
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    ServerCard(serverName = selectedServerName, onClick = onOpenProxies)
+                    Spacer(Modifier.height(10.dp))
+                    FastestButton(busy = isTesting, onClick = { onAction(MainAction.SelectFastest) })
+                }
+            }
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                ProfileCard(
+                    profileName = profileName,
+                    onUpdate = { onAction(MainAction.UpdateSubscriptions) },
+                )
+                Spacer(Modifier.height(36.dp))
+                connectBlock()
+                Spacer(Modifier.height(32.dp))
+                ServerCard(serverName = selectedServerName, onClick = onOpenProxies)
+                Spacer(Modifier.height(10.dp))
+                FastestButton(busy = isTesting, onClick = { onAction(MainAction.SelectFastest) })
+            }
+        }
+    }
+}
 
-        Spacer(Modifier.height(40.dp))
+/** Elapsed connection time, ticking every second (HH:MM:SS). */
+@Composable
+private fun ConnectionTimer(since: Long?) {
+    if (since == null) return
+    var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
+    LaunchedEffect(since) {
+        while (true) {
+            now = System.currentTimeMillis()
+            delay(1000)
+        }
+    }
+    val total = ((now - since) / 1000).coerceAtLeast(0)
+    val text = String.format(Locale.US, "%02d:%02d:%02d", total / 3600, (total % 3600) / 60, total % 60)
+    Text(
+        text = text,
+        style = MaterialTheme.typography.headlineSmall,
+        fontFamily = FontFamily.Monospace,
+        color = MaterialTheme.colorScheme.onSurface,
+    )
+}
 
-        ServerCard(
-            serverName = selectedServerName,
-            onClick = onOpenProxies,
+@Composable
+private fun SpeedRow(up: Long, down: Long) {
+    Row(
+        modifier = Modifier
+            .clip(RoundedCornerShape(14.dp))
+            .background(MaterialTheme.colorScheme.cell)
+            .padding(horizontal = 18.dp, vertical = 10.dp),
+        horizontalArrangement = Arrangement.spacedBy(22.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        SpeedItem(arrow = "↓", label = stringResource(R.string.home_download), value = down.toSpeedString(), color = IosBlue)
+        SpeedItem(arrow = "↑", label = stringResource(R.string.home_upload), value = up.toSpeedString(), color = IosGreen)
+    }
+}
+
+@Composable
+private fun SpeedItem(arrow: String, label: String, value: String, color: Color) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text("$arrow $label", style = MaterialTheme.typography.labelMedium, color = color, fontWeight = FontWeight.SemiBold)
+        Text(value, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
+    }
+}
+
+@Composable
+private fun FastestButton(busy: Boolean, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(20.dp))
+            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
+            .clickable(enabled = !busy, onClick = onClick)
+            .padding(vertical = 14.dp),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = "⚡ " + stringResource(if (busy) R.string.home_fastest_testing else R.string.home_fastest),
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.primary,
         )
     }
 }
@@ -156,7 +272,7 @@ private fun ProfileCard(profileName: String, onUpdate: () -> Unit) {
 }
 
 @Composable
-private fun ConnectButton(isRunning: Boolean, onToggle: () -> Unit) {
+private fun ConnectButton(isRunning: Boolean, onToggle: () -> Unit, size: Dp = 220.dp) {
     val color by animateColorAsState(
         targetValue = if (isRunning) ConnectedColor else DisconnectedColor,
         label = "connectColor",
@@ -174,7 +290,7 @@ private fun ConnectButton(isRunning: Boolean, onToggle: () -> Unit) {
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
-            .size(220.dp)
+            .size(size)
             .clearAndSetSemantics {
                 role = Role.Button
                 contentDescription = actionLabel
@@ -184,7 +300,7 @@ private fun ConnectButton(isRunning: Boolean, onToggle: () -> Unit) {
     ) {
         Box(
             modifier = Modifier
-                .size(200.dp)
+                .size(size * 0.91f)
                 .scale(haloScale)
                 .clip(CircleShape)
                 .background(color.copy(alpha = 0.15f)),
@@ -192,7 +308,7 @@ private fun ConnectButton(isRunning: Boolean, onToggle: () -> Unit) {
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
-                .size(160.dp)
+                .size(size * 0.73f)
                 .clip(CircleShape)
                 .background(color)
                 .clickable(onClick = onToggle),
@@ -201,7 +317,7 @@ private fun ConnectButton(isRunning: Boolean, onToggle: () -> Unit) {
                 painter = painterResource(R.drawable.ic_power_24dp),
                 contentDescription = null,
                 tint = Color.White,
-                modifier = Modifier.size(72.dp),
+                modifier = Modifier.size(size * 0.33f),
             )
         }
     }

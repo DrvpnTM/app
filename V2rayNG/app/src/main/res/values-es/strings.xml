@@ -58,4 +58,11 @@
     <string name="import_quick_file">Archivo</string>
     <string name="import_section_manual">Añadir manualmente</string>
     <string name="import_section_advanced">Avanzado</string>
+    <string name="home_connect_failed">No se pudo conectar. Prueba otro servidor o revisa tu internet.</string>
+    <string name="home_fastest">Elegir el servidor más rápido</string>
+    <string name="home_fastest_testing">Probando servidores…</string>
+    <string name="home_fastest_selected">Servidor más rápido seleccionado</string>
+    <string name="home_fastest_none">No se encontró ningún servidor que funcione</string>
+    <string name="home_download">Descarga</string>
+    <string name="home_upload">Subida</string>
 </resources>

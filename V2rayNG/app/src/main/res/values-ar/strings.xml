@@ -626,4 +626,11 @@
     <string name="import_quick_file">ملف</string>
     <string name="import_section_manual">إضافة يدوية</string>
     <string name="import_section_advanced">متقدم</string>
+    <string name="home_connect_failed">تعذّر الاتصال. جرّب خادمًا آخر أو تحقّق من الإنترنت.</string>
+    <string name="home_fastest">اختيار أسرع خادم</string>
+    <string name="home_fastest_testing">جارٍ اختبار الخوادم…</string>
+    <string name="home_fastest_selected">تم اختيار أسرع خادم</string>
+    <string name="home_fastest_none">لم يُعثر على خادم يعمل</string>
+    <string name="home_download">تنزيل</string>
+    <string name="home_upload">رفع</string>
 </resources>

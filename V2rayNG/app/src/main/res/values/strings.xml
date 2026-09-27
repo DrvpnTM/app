@@ -618,4 +618,11 @@
     <string name="import_quick_file">File</string>
     <string name="import_section_manual">Add manually</string>
     <string name="import_section_advanced">Advanced</string>
+    <string name="home_connect_failed">Could not connect. Try another server or check your internet.</string>
+    <string name="home_fastest">Pick the fastest server</string>
+    <string name="home_fastest_testing">Testing servers…</string>
+    <string name="home_fastest_selected">Fastest server selected</string>
+    <string name="home_fastest_none">No working server found</string>
+    <string name="home_download">Download</string>
+    <string name="home_upload">Upload</string>
 </resources>

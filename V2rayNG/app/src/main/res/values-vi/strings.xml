@@ -616,4 +616,11 @@
     <string name="import_quick_file">Tệp</string>
     <string name="import_section_manual">Thêm thủ công</string>
     <string name="import_section_advanced">Nâng cao</string>
+    <string name="home_connect_failed">Không thể kết nối. Hãy thử máy chủ khác hoặc kiểm tra internet.</string>
+    <string name="home_fastest">Chọn máy chủ nhanh nhất</string>
+    <string name="home_fastest_testing">Đang kiểm tra máy chủ…</string>
+    <string name="home_fastest_selected">Đã chọn máy chủ nhanh nhất</string>
+    <string name="home_fastest_none">Không tìm thấy máy chủ hoạt động</string>
+    <string name="home_download">Tải xuống</string>
+    <string name="home_upload">Tải lên</string>
 </resources>

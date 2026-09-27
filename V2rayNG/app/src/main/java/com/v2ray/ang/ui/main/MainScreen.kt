@@ -244,6 +244,10 @@ fun MainScreen(
                     selectedServerName = uiState.selectedServerName,
                     isRunning = isRunning,
                     statusText = displayText,
+                    connectedSince = uiState.connectedSince,
+                    speedUp = uiState.speedUp,
+                    speedDown = uiState.speedDown,
+                    isTesting = uiState.isTesting,
                     onAction = onAction,
                     onOpenProxies = { selectedTab = MainTab.Proxies },
                     modifier = Modifier.padding(innerPadding)
