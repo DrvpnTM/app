@@ -625,4 +625,7 @@
     <string name="home_fastest_none">No working server found</string>
     <string name="home_download">Download</string>
     <string name="home_upload">Upload</string>
+    <string name="kill_switch_title">Kill switch (prevent IP leaks)</string>
+    <string name="kill_switch_message">With the kill switch on, if the VPN or your subscription drops, the phone loses internet too, so your real IP is never exposed.\n\nOn the next screen:\n1. Tap the gear next to Dr VPN.\n2. Turn on Always-on VPN.\n3. Turn on Block connections without VPN.</string>
+    <string name="kill_switch_open">Open VPN settings</string>
 </resources>

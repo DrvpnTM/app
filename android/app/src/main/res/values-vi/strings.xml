@@ -623,4 +623,7 @@
     <string name="home_fastest_none">Không tìm thấy máy chủ hoạt động</string>
     <string name="home_download">Tải xuống</string>
     <string name="home_upload">Tải lên</string>
+    <string name="kill_switch_title">Kill switch (chống lộ IP)</string>
+    <string name="kill_switch_message">Khi bật kill switch, nếu VPN hoặc gói đăng ký bị ngắt, điện thoại cũng mất internet để IP thật không bị lộ.\n\nỞ màn hình tiếp theo:\n1. Nhấn bánh răng cạnh Dr VPN.\n2. Bật VPN luôn bật.\n3. Bật Chặn kết nối không có VPN.</string>
+    <string name="kill_switch_open">Mở cài đặt VPN</string>
 </resources>

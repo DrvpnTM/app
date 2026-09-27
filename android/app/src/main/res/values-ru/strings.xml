@@ -629,4 +629,7 @@
     <string name="home_fastest_none">Рабочий сервер не найден</string>
     <string name="home_download">Загрузка</string>
     <string name="home_upload">Отдача</string>
+    <string name="kill_switch_title">Kill switch (защита от утечки IP)</string>
+    <string name="kill_switch_message">Если VPN или подписка отключится, интернет на телефоне тоже пропадёт, и ваш настоящий IP не утечёт.\n\nНа следующем экране:\n1. Нажмите на шестерёнку рядом с Dr VPN.\n2. Включите «Постоянная VPN».\n3. Включите «Блокировать подключения без VPN».</string>
+    <string name="kill_switch_open">Открыть настройки VPN</string>
 </resources>

@@ -57,6 +57,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.Dp
 import net.drvpn.app.extension.toSpeedString
+import net.drvpn.app.extension.toTrafficString
 import net.drvpn.app.ui.compose.IosBlue
 import net.drvpn.app.ui.compose.IosGreen
 import net.drvpn.app.ui.compose.cell
@@ -80,6 +81,8 @@ fun MainHomeTab(
     connectedSince: Long?,
     speedUp: Long,
     speedDown: Long,
+    totalUp: Long,
+    totalDown: Long,
     isTesting: Boolean,
     onAction: (MainAction) -> Unit,
     onOpenProxies: () -> Unit,
@@ -105,7 +108,7 @@ fun MainHomeTab(
                     Spacer(Modifier.height(6.dp))
                     ConnectionTimer(connectedSince)
                     Spacer(Modifier.height(12.dp))
-                    SpeedRow(up = speedUp, down = speedDown)
+                    SpeedRow(up = speedUp, down = speedDown, totalUp = totalUp, totalDown = totalDown)
                     if (statusText.isNotBlank()) {
                         Spacer(Modifier.height(8.dp))
                         Text(
@@ -191,7 +194,7 @@ private fun ConnectionTimer(since: Long?) {
 }
 
 @Composable
-private fun SpeedRow(up: Long, down: Long) {
+private fun SpeedRow(up: Long, down: Long, totalUp: Long, totalDown: Long) {
     Row(
         modifier = Modifier
             .clip(RoundedCornerShape(14.dp))
@@ -200,16 +203,17 @@ private fun SpeedRow(up: Long, down: Long) {
         horizontalArrangement = Arrangement.spacedBy(22.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        SpeedItem(arrow = "↓", label = stringResource(R.string.home_download), value = down.toSpeedString(), color = IosBlue)
-        SpeedItem(arrow = "↑", label = stringResource(R.string.home_upload), value = up.toSpeedString(), color = IosGreen)
+        SpeedItem(arrow = "↓", label = stringResource(R.string.home_download), value = down.toSpeedString(), total = totalDown.toTrafficString(), color = IosBlue)
+        SpeedItem(arrow = "↑", label = stringResource(R.string.home_upload), value = up.toSpeedString(), total = totalUp.toTrafficString(), color = IosGreen)
     }
 }
 
 @Composable
-private fun SpeedItem(arrow: String, label: String, value: String, color: Color) {
+private fun SpeedItem(arrow: String, label: String, value: String, total: String, color: Color) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text("$arrow $label", style = MaterialTheme.typography.labelMedium, color = color, fontWeight = FontWeight.SemiBold)
         Text(value, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
+        Text(total, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 

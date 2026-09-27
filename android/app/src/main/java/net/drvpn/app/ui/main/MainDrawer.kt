@@ -40,6 +40,7 @@ import net.drvpn.app.ui.compose.IosOrange
 import net.drvpn.app.ui.compose.IosTeal
 import net.drvpn.app.ui.compose.IosGreen
 import net.drvpn.app.ui.compose.IosRed
+import net.drvpn.app.ui.compose.IosPink
 import net.drvpn.app.ui.compose.IosGray
 import net.drvpn.app.R
 import net.drvpn.app.ui.compose.AppDivider
@@ -53,6 +54,7 @@ enum class MainDestination(@DrawableRes val iconRes: Int, @StringRes val labelRe
     Settings(R.drawable.ic_settings_24dp, R.string.title_settings),
     RegionLanguage(R.drawable.ic_translate_24dp, R.string.onboarding_drawer_title),
     Advanced(R.drawable.ic_routing_24dp, R.string.advanced_scan_title),
+    KillSwitch(R.drawable.ic_lock_24dp, R.string.kill_switch_title),
     AppLogView(R.drawable.ic_logcat_24dp, R.string.title_app_log),
     Promotion(R.drawable.ic_promotion_24dp, R.string.title_pref_promotion),
     Logcat(R.drawable.ic_logcat_24dp, R.string.title_logcat),
@@ -68,6 +70,7 @@ private val primaryDrawerItems = listOf(
     MainDestination.UserAssets,
     MainDestination.RegionLanguage,
     MainDestination.Advanced,
+    MainDestination.KillSwitch,
     MainDestination.AppLogView,
     MainDestination.Settings
 )
@@ -86,6 +89,7 @@ private fun MainDestination.badgeColor(): Color = when (this) {
     MainDestination.UserAssets -> IosTeal
     MainDestination.RegionLanguage -> IosGreen
     MainDestination.Advanced -> IosRed
+    MainDestination.KillSwitch -> IosPink
     MainDestination.AppLogView -> IosGray
     MainDestination.Settings -> IosGray
     MainDestination.CheckUpdate -> IosBlue

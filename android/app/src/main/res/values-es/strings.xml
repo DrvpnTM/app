@@ -65,4 +65,7 @@
     <string name="home_fastest_none">No se encontró ningún servidor que funcione</string>
     <string name="home_download">Descarga</string>
     <string name="home_upload">Subida</string>
+    <string name="kill_switch_title">Kill switch (evita filtrar tu IP)</string>
+    <string name="kill_switch_message">Con el kill switch activado, si la VPN o tu suscripción se corta, el teléfono también se queda sin internet, así tu IP real nunca queda expuesta.\n\nEn la siguiente pantalla:\n1. Toca el engranaje junto a Dr VPN.\n2. Activa VPN siempre activa.\n3. Activa Bloquear conexiones sin VPN.</string>
+    <string name="kill_switch_open">Abrir ajustes de VPN</string>
 </resources>
