@@ -618,4 +618,11 @@
     <string name="import_quick_file">فایل</string>
     <string name="import_section_manual">افزودن دستی</string>
     <string name="import_section_advanced">پیشرفته</string>
+    <string name="home_connect_failed">اتصال برقرار نشد. سرور دیگری را امتحان کنید یا اینترنت خود را بررسی کنید.</string>
+    <string name="home_fastest">انتخاب سریع‌ترین سرور</string>
+    <string name="home_fastest_testing">در حال تست سرورها…</string>
+    <string name="home_fastest_selected">سریع‌ترین سرور انتخاب شد</string>
+    <string name="home_fastest_none">سرور سالمی پیدا نشد</string>
+    <string name="home_download">دانلود</string>
+    <string name="home_upload">آپلود</string>
 </resources>

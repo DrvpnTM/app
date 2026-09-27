@@ -616,4 +616,11 @@
     <string name="import_quick_file">文件</string>
     <string name="import_section_manual">手动添加</string>
     <string name="import_section_advanced">高级</string>
+    <string name="home_connect_failed">连接失败。请换一个节点或检查网络。</string>
+    <string name="home_fastest">选择最快节点</string>
+    <string name="home_fastest_testing">正在测试节点…</string>
+    <string name="home_fastest_selected">已选择最快节点</string>
+    <string name="home_fastest_none">没有找到可用节点</string>
+    <string name="home_download">下载</string>
+    <string name="home_upload">上传</string>
 </resources>

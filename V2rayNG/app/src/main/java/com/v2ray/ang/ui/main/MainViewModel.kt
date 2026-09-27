@@ -18,6 +18,8 @@ import com.v2ray.ang.extension.delay
 import com.v2ray.ang.extension.isComplexType
 import com.v2ray.ang.extension.matchesPattern
 import com.v2ray.ang.extension.moveItem
+import com.v2ray.ang.handler.AppLog
+import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.handler.ServerCountryManager
 import com.v2ray.ang.handler.SettingsManager
 import com.v2ray.ang.ui.base.BaseViewModel
@@ -191,23 +193,38 @@ class MainViewModel(
 
     private fun handleServiceEvent(event: MainServiceEvent) {
         when (event) {
-            MainServiceEvent.StateRunning -> updateRunningState(true, clearTestingText = false)
-            MainServiceEvent.StateNotRunning -> updateRunningState(false, clearTestingText = false)
+            MainServiceEvent.StateRunning -> {
+                updateRunningState(true, clearTestingText = false)
+                markConnected(resume = true)
+            }
+            MainServiceEvent.StateNotRunning -> {
+                updateRunningState(false, clearTestingText = false)
+                markDisconnected()
+            }
             MainServiceEvent.StateStartSuccess -> {
                 toastSuccess(R.string.toast_services_success)
                 updateRunningState(true)
+                markConnected(resume = false)
+            }
+            is MainServiceEvent.SpeedUpdate -> {
+                if (uiState.value.isRunning) {
+                    _uiState.update { it.copy(speedUp = event.up, speedDown = event.down) }
+                }
             }
 
             is MainServiceEvent.StateStartFailure -> {
-                if (!event.message.isNullOrBlank()) {
-                    toastError(event.message)
-                } else {
-                    toastError(R.string.toast_services_failure)
-                }
+                // Plain-language message for users; the technical reason goes to the in-app log.
+                toastError(R.string.home_connect_failed)
+                AppLog.add(dataSource.getString(R.string.home_connect_failed) +
+                        (event.message?.takeIf { it.isNotBlank() }?.let { " ($it)" } ?: ""))
                 updateRunningState(false)
+                markDisconnected()
             }
 
-            MainServiceEvent.StateStopSuccess -> updateRunningState(false)
+            MainServiceEvent.StateStopSuccess -> {
+                updateRunningState(false)
+                markDisconnected()
+            }
             is MainServiceEvent.MeasureDelayResult -> {
                 if (!uiState.value.isRunning || !testRequests.completeCurrent(event.requestId)) return
                 _uiState.update { it.copy(isTesting = testRequests.isTesting, status = MainStatus.ConnectionTest(event.result)) }
@@ -359,6 +376,7 @@ class MainViewModel(
             is MainAction.RemoveServer -> removeServerAndRefresh(action.guid)
             is MainAction.Search -> filterConfig(action.query)
             is MainAction.SetShowServersWithoutPing -> setShowServersWithoutPing(action.show)
+            MainAction.SelectFastest -> selectFastest()
             is MainAction.ImportBatchConfig -> importBatchConfig(action.configText)
             MainAction.LocateHandled -> consumeLocateTarget()
             is MainAction.ShareQRCode -> {
@@ -998,6 +1016,10 @@ class MainViewModel(
     private fun onTestsFinished(requestId: String) {
         if (testRequests.completeBulk(requestId) == null) return
         resetTestStatus()
+        if (pendingSelectFastest) {
+            pendingSelectFastest = false
+            fastestServerGuid()?.let { selectAndApply(it) } ?: toastError(R.string.home_fastest_none)
+        }
         viewModelScope.launch(ioDispatcher) {
             cacheMutex.withLock { groupDataCache.clear() }
             reloadAllGroups(_uiState.value.groups.map { it.id })
@@ -1026,6 +1048,48 @@ class MainViewModel(
     }
 
     // ---------- Running state ----------
+    // ---------- Connection timer & fastest server (Dr VPN) ----------
+    private var pendingSelectFastest = false
+
+    private fun markConnected(resume: Boolean) {
+        val stored = MmkvManager.decodeSettingsString(AppConfig.PREF_DRVPN_CONNECTED_AT)?.toLongOrNull()
+        val since = if (resume && stored != null && stored > 0L) stored else System.currentTimeMillis()
+        if (since != stored) MmkvManager.encodeSettings(AppConfig.PREF_DRVPN_CONNECTED_AT, since.toString())
+        _uiState.update { it.copy(connectedSince = since) }
+    }
+
+    private fun markDisconnected() {
+        MmkvManager.encodeSettings(AppConfig.PREF_DRVPN_CONNECTED_AT, "")
+        _uiState.update { it.copy(connectedSince = null, speedUp = 0L, speedDown = 0L) }
+    }
+
+    /** Lowest-latency server with a successful ping in the selected group, if any. */
+    private fun fastestServerGuid(): String? =
+        mutableServerGroupState(uiState.value.selectedGroupId).value.allRows
+            .filter { it.testDelayMillis > 0L }
+            .minByOrNull { it.testDelayMillis }
+            ?.guid
+
+    private fun selectFastest() {
+        if (uiState.value.isTesting) return
+        val best = fastestServerGuid()
+        if (best != null) {
+            selectAndApply(best)
+        } else {
+            pendingSelectFastest = true
+            toast(R.string.home_fastest_testing)
+            testAllRealPing()
+        }
+    }
+
+    private fun selectAndApply(guid: String) {
+        if (guid != uiState.value.selectedGuid) {
+            updateSelectedGuid(guid)
+            if (uiState.value.isRunning) dataSource.sendMsg2Service(AppConfig.MSG_STATE_RESTART, "")
+        }
+        toastSuccess(R.string.home_fastest_selected)
+    }
+
     private fun updateRunningState(running: Boolean, clearTestingText: Boolean = true) {
         if (!running || clearTestingText) testRequests.invalidateCurrent()
         _uiState.update { state ->

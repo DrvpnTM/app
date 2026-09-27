@@ -622,4 +622,11 @@
     <string name="import_quick_file">Файл</string>
     <string name="import_section_manual">Добавить вручную</string>
     <string name="import_section_advanced">Дополнительно</string>
+    <string name="home_connect_failed">Не удалось подключиться. Попробуйте другой сервер или проверьте интернет.</string>
+    <string name="home_fastest">Выбрать самый быстрый сервер</string>
+    <string name="home_fastest_testing">Проверка серверов…</string>
+    <string name="home_fastest_selected">Выбран самый быстрый сервер</string>
+    <string name="home_fastest_none">Рабочий сервер не найден</string>
+    <string name="home_download">Загрузка</string>
+    <string name="home_upload">Отдача</string>
 </resources>

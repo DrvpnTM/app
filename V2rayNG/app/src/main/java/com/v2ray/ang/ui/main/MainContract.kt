@@ -28,6 +28,11 @@ data class MainUiState(
     val confirmRemove: Boolean = false,
     val doubleColumnDisplay: Boolean = false,
     val showServersWithoutPing: Boolean = false,
+    /** Live traffic speed in bytes/s while connected. */
+    val speedUp: Long = 0L,
+    val speedDown: Long = 0L,
+    /** Wall-clock time the current connection started, or null when disconnected. */
+    val connectedSince: Long? = null,
     val shareQRCodeBitmap: android.graphics.Bitmap? = null
 )
 
@@ -62,6 +67,7 @@ sealed interface MainAction {
     data class EditServer(val guid: String, val profile: com.v2ray.ang.dto.entities.ProfileItem) : MainAction
     data class Search(val query: String) : MainAction
     data class SetShowServersWithoutPing(val show: Boolean) : MainAction
+    data object SelectFastest : MainAction
     data class ShareQRCode(val guid: String) : MainAction
     data class ShareClipboard(val guid: String) : MainAction
     data class ShareFullContent(val guid: String) : MainAction

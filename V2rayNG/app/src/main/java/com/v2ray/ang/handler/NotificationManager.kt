@@ -12,6 +12,7 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
+import com.v2ray.ang.helper.MessageHelper
 import com.v2ray.ang.core.CoreServiceManager
 import com.v2ray.ang.dto.entities.ProfileItem
 import com.v2ray.ang.extension.delay
@@ -44,7 +45,7 @@ object NotificationManager {
      * @param currentConfig The current profile configuration.
      */
     fun startSpeedNotification() {
-        if (MmkvManager.decodeSettingsBool(AppConfig.PREF_SPEED_ENABLED) != true) return
+        if (MmkvManager.decodeSettingsBool(AppConfig.PREF_SPEED_ENABLED, true) != true) return
         if (speedNotificationJob != null || CoreServiceManager.isRunning() == false) return
 
         var lastZeroSpeed = false
@@ -265,6 +266,12 @@ object NotificationManager {
 
         val proxyTotal = proxyUplink + proxyDownlink
         val directTotal = directUplink + directDownlink
+        // Dr VPN: publish live speed (bytes/s, proxy + direct) to the home screen.
+        getService()?.let { service ->
+            val up = ((proxyUplink + directUplink) / sinceLastQueryInSeconds).toLong()
+            val down = ((proxyDownlink + directDownlink) / sinceLastQueryInSeconds).toLong()
+            MessageHelper.sendMsg2UI(service, AppConfig.MSG_SPEED_UPDATE, "$up,$down")
+        }
         val zeroSpeed = proxyTotal + directTotal == 0L
         if (!zeroSpeed || !lastZeroSpeed) {
             val text = StringBuilder()

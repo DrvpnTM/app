@@ -618,4 +618,11 @@
     <string name="import_quick_file">ফাইল</string>
     <string name="import_section_manual">নিজে যোগ করুন</string>
     <string name="import_section_advanced">উন্নত</string>
+    <string name="home_connect_failed">সংযোগ করা যায়নি। অন্য সার্ভার চেষ্টা করুন বা ইন্টারনেট দেখুন।</string>
+    <string name="home_fastest">দ্রুততম সার্ভার বেছে নিন</string>
+    <string name="home_fastest_testing">সার্ভার পরীক্ষা হচ্ছে…</string>
+    <string name="home_fastest_selected">দ্রুততম সার্ভার বেছে নেওয়া হয়েছে</string>
+    <string name="home_fastest_none">কোনো সচল সার্ভার পাওয়া যায়নি</string>
+    <string name="home_download">ডাউনলোড</string>
+    <string name="home_upload">আপলোড</string>
 </resources>

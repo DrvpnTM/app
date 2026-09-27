@@ -73,6 +73,10 @@ class MainRepository(
                     requestId
                 )
                 AppConfig.MSG_MEASURE_CONFIG_CANCEL -> MainServiceEvent.MeasureConfigCancelled(requestId)
+                AppConfig.MSG_SPEED_UPDATE -> safeIntent.getStringExtra("content")
+                    ?.split(',')
+                    ?.takeIf { it.size == 2 }
+                    ?.let { MainServiceEvent.SpeedUpdate(it[0].toLongOrNull() ?: 0L, it[1].toLongOrNull() ?: 0L) }
 
                 else -> null
             }
