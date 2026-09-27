@@ -13,7 +13,6 @@ import android.system.OsConstants
 import androidx.core.content.ContextCompat
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.isActive
-import kotlinx.coroutines.delay
 import net.drvpn.app.AppConfig
 import net.drvpn.app.contracts.IDialerService
 import net.drvpn.app.contracts.ServiceControl

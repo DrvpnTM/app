@@ -13,7 +13,9 @@ enum class Language(val code: String, val languageTag: String) {
     PERSIAN("fa", "fa"),
     ARABIC("ar", "ar"),
     BANGLA("bn", "bn"),
-    BAKHTIARI("bqi-rIR", "bqi-IR");
+    BAKHTIARI("bqi-rIR", "bqi-IR"),
+    SPANISH("es", "es"),
+    MYANMAR("my", "my");
 
     val locale: Locale?
         get() = languageTag.takeIf { it.isNotEmpty() }?.let(Locale::forLanguageTag)
