@@ -611,4 +611,11 @@
     <string name="advanced_scan_log_started">স্ক্যান শুরু</string>
     <string name="advanced_scan_log_finished">স্ক্যান সম্পন্ন</string>
     <string name="advanced_scan_log_stopped">স্ক্যান বন্ধ</string>
+    <string name="import_sheet_title">সার্ভার যোগ করুন</string>
+    <string name="import_sheet_hint">সাবস্ক্রিপশন লিংক বা কনফিগ কপি করে «ক্লিপবোর্ড» চাপুন।</string>
+    <string name="import_quick_clipboard">ক্লিপবোর্ড</string>
+    <string name="import_quick_qr">QR স্ক্যান</string>
+    <string name="import_quick_file">ফাইল</string>
+    <string name="import_section_manual">নিজে যোগ করুন</string>
+    <string name="import_section_advanced">উন্নত</string>
 </resources>

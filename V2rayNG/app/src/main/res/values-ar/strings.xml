@@ -619,4 +619,11 @@
     <string name="advanced_scan_log_started">بدأ الفحص</string>
     <string name="advanced_scan_log_finished">انتهى الفحص</string>
     <string name="advanced_scan_log_stopped">تم إيقاف الفحص</string>
+    <string name="import_sheet_title">إضافة خادم</string>
+    <string name="import_sheet_hint">انسخ رابط الاشتراك أو الإعداد ثم اضغط «الحافظة».</string>
+    <string name="import_quick_clipboard">الحافظة</string>
+    <string name="import_quick_qr">مسح QR</string>
+    <string name="import_quick_file">ملف</string>
+    <string name="import_section_manual">إضافة يدوية</string>
+    <string name="import_section_advanced">متقدم</string>
 </resources>

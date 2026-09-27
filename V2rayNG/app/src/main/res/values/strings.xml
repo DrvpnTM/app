@@ -611,4 +611,11 @@
     <string name="advanced_scan_log_started">Scan started</string>
     <string name="advanced_scan_log_finished">Scan finished</string>
     <string name="advanced_scan_log_stopped">Scan stopped</string>
+    <string name="import_sheet_title">Add server</string>
+    <string name="import_sheet_hint">Copy a subscription link or config, then tap Clipboard.</string>
+    <string name="import_quick_clipboard">Clipboard</string>
+    <string name="import_quick_qr">Scan QR</string>
+    <string name="import_quick_file">File</string>
+    <string name="import_section_manual">Add manually</string>
+    <string name="import_section_advanced">Advanced</string>
 </resources>
