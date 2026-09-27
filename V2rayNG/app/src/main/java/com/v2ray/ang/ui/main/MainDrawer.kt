@@ -91,7 +91,7 @@ fun MainDrawerContent(drawerState: DrawerState, onNavigate: (MainDestination) ->
                     verticalArrangement = Arrangement.Center
                 ) {
                     Image(
-                        painter = painterResource(R.mipmap.ic_launcher_round),
+                        painter = painterResource(R.drawable.drvpn_logo),
                         contentDescription = null,
                         modifier = Modifier.size(96.dp)
                     )
