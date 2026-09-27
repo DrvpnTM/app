@@ -609,4 +609,11 @@
     <string name="advanced_scan_log_started">扫描开始</string>
     <string name="advanced_scan_log_finished">扫描完成</string>
     <string name="advanced_scan_log_stopped">扫描已停止</string>
+    <string name="import_sheet_title">添加节点</string>
+    <string name="import_sheet_hint">复制订阅链接或配置，然后点击「剪贴板」。</string>
+    <string name="import_quick_clipboard">剪贴板</string>
+    <string name="import_quick_qr">扫描二维码</string>
+    <string name="import_quick_file">文件</string>
+    <string name="import_section_manual">手动添加</string>
+    <string name="import_section_advanced">高级</string>
 </resources>

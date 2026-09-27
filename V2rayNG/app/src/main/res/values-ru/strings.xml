@@ -615,4 +615,11 @@
     <string name="advanced_scan_log_started">Сканирование начато</string>
     <string name="advanced_scan_log_finished">Сканирование завершено</string>
     <string name="advanced_scan_log_stopped">Сканирование остановлено</string>
+    <string name="import_sheet_title">Добавить сервер</string>
+    <string name="import_sheet_hint">Скопируйте ссылку подписки или конфиг и нажмите «Буфер обмена».</string>
+    <string name="import_quick_clipboard">Буфер обмена</string>
+    <string name="import_quick_qr">Сканировать QR</string>
+    <string name="import_quick_file">Файл</string>
+    <string name="import_section_manual">Добавить вручную</string>
+    <string name="import_section_advanced">Дополнительно</string>
 </resources>

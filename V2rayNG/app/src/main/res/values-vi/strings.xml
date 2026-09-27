@@ -609,4 +609,11 @@
     <string name="advanced_scan_log_started">Bắt đầu quét</string>
     <string name="advanced_scan_log_finished">Quét xong</string>
     <string name="advanced_scan_log_stopped">Đã dừng quét</string>
+    <string name="import_sheet_title">Thêm máy chủ</string>
+    <string name="import_sheet_hint">Sao chép liên kết đăng ký hoặc cấu hình rồi nhấn Bộ nhớ tạm.</string>
+    <string name="import_quick_clipboard">Bộ nhớ tạm</string>
+    <string name="import_quick_qr">Quét QR</string>
+    <string name="import_quick_file">Tệp</string>
+    <string name="import_section_manual">Thêm thủ công</string>
+    <string name="import_section_advanced">Nâng cao</string>
 </resources>

@@ -611,4 +611,11 @@
     <string name="advanced_scan_log_started">اسکن شروع شد</string>
     <string name="advanced_scan_log_finished">اسکن کامل شد</string>
     <string name="advanced_scan_log_stopped">اسکن متوقف شد</string>
+    <string name="import_sheet_title">افزودن سرور</string>
+    <string name="import_sheet_hint">لینک اشتراک یا کانفیگ را کپی کنید و «کلیپ‌بورد» را بزنید.</string>
+    <string name="import_quick_clipboard">کلیپ‌بورد</string>
+    <string name="import_quick_qr">اسکن QR</string>
+    <string name="import_quick_file">فایل</string>
+    <string name="import_section_manual">افزودن دستی</string>
+    <string name="import_section_advanced">پیشرفته</string>
 </resources>

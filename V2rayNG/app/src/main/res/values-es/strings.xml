@@ -51,4 +51,11 @@
     <string name="advanced_scan_log_started">Escaneo iniciado</string>
     <string name="advanced_scan_log_finished">Escaneo finalizado</string>
     <string name="advanced_scan_log_stopped">Escaneo detenido</string>
+    <string name="import_sheet_title">Añadir servidor</string>
+    <string name="import_sheet_hint">Copia un enlace de suscripción o una configuración y toca Portapapeles.</string>
+    <string name="import_quick_clipboard">Portapapeles</string>
+    <string name="import_quick_qr">Escanear QR</string>
+    <string name="import_quick_file">Archivo</string>
+    <string name="import_section_manual">Añadir manualmente</string>
+    <string name="import_section_advanced">Avanzado</string>
 </resources>
