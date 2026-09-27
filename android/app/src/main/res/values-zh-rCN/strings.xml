@@ -638,4 +638,11 @@
     <string name="usage_month">本月</string>
     <string name="usage_last7">最近 7 天</string>
     <string name="usage_note">在本机通过 Dr VPN 的流量。</string>
+    <string name="onboarding_add_sub_title">添加你的订阅</string>
+    <string name="onboarding_add_sub_hint">粘贴你从 drvpn.net 获得的订阅链接。也可以稍后用 + 按钮添加。</string>
+    <string name="onboarding_paste">从剪贴板粘贴</string>
+    <string name="onboarding_skip">稍后</string>
+    <string name="per_app_iran_direct">伊朗应用不走 VPN</string>
+    <string name="per_app_iran_done">已有 %1$d 个伊朗应用绕过 VPN</string>
+    <string name="per_app_iran_none">未找到伊朗应用</string>
 </resources>

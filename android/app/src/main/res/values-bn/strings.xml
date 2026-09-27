@@ -640,4 +640,11 @@
     <string name="usage_month">এই মাস</string>
     <string name="usage_last7">গত ৭ দিন</string>
     <string name="usage_note">এই ফোনে Dr VPN দিয়ে যাওয়া ট্রাফিক।</string>
+    <string name="onboarding_add_sub_title">আপনার সাবস্ক্রিপশন যোগ করুন</string>
+    <string name="onboarding_add_sub_hint">drvpn.net থেকে পাওয়া সাবস্ক্রিপশন লিংক এখানে পেস্ট করুন। পরে + বোতাম দিয়েও যোগ করতে পারবেন।</string>
+    <string name="onboarding_paste">ক্লিপবোর্ড থেকে পেস্ট</string>
+    <string name="onboarding_skip">পরে</string>
+    <string name="per_app_iran_direct">ইরানি অ্যাপ VPN ছাড়া</string>
+    <string name="per_app_iran_done">%1$dটি ইরানি অ্যাপ এখন VPN ছাড়া চলবে</string>
+    <string name="per_app_iran_none">কোনো ইরানি অ্যাপ পাওয়া যায়নি</string>
 </resources>

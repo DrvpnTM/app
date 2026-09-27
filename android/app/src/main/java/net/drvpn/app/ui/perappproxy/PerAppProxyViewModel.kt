@@ -3,6 +3,7 @@ package net.drvpn.app.ui.perappproxy
 import android.app.Application
 import android.content.Context
 import net.drvpn.app.AppConfig
+import net.drvpn.app.R
 import net.drvpn.app.dto.AppInfo
 import net.drvpn.app.dto.UrlContentRequest
 import net.drvpn.app.handler.MmkvManager
@@ -257,6 +258,51 @@ class PerAppProxyViewModel(application: Application) : BaseViewModel(application
             return false
         }
         return true
+    }
+
+    /**
+     * Dr VPN preset: installed Iranian apps (banks, Snapp, Divar, Bazaar, messengers...) go direct,
+     * everything else through the VPN. Switches per-app proxy to bypass mode.
+     */
+    fun bypassIranianApps(context: Context) {
+        val applicationContext = context.applicationContext
+        launchLoading {
+            val installed = withContext(Dispatchers.IO) {
+                appsAll ?: AppManagerUtil.loadNetworkAppList(applicationContext)
+            }
+            val iranian = installed.map { it.packageName }.filter(::isIranianApp).toSet()
+            if (iranian.isEmpty()) {
+                toast(R.string.per_app_iran_none)
+                return@launchLoading
+            }
+            val base = if (_bypassApps.value) _blacklist.value else emptySet()
+            replaceBlacklist(base + iranian)
+            setBypassAppsEnabled(true)
+            enablePerAppProxyAndRestart()
+            toastSuccess(localizedContext.getString(R.string.per_app_iran_done, iranian.size))
+        }
+    }
+
+    private fun isIranianApp(pkg: String): Boolean =
+        IRANIAN_PREFIXES.any { pkg.startsWith(it) } || pkg in IRANIAN_PACKAGES
+
+    private companion object {
+        /** Package prefixes used by Iranian publishers (most local apps use the ir.* namespace). */
+        val IRANIAN_PREFIXES = listOf(
+            "ir.", "com.farsitel.", "cab.snapp.", "com.bpm.", "com.sadad.", "com.samanpr.",
+            "com.parsian.", "com.pasargad.", "com.tosan.", "com.isc.", "com.mydigipay.",
+            "com.zoodfood.", "com.divar.", "com.digikala.", "com.alibaba.ir", "com.tapsi.",
+        )
+        val IRANIAN_PACKAGES = setOf(
+            "app.rbmain.a",            // Rubika
+            "com.bale.messenger",
+            "com.sibche.aspardproject.app",
+            "com.torob.app",
+            "com.filimo.android",
+            "net.telewebion",
+            "com.aparat",
+            "com.snapp.food",
+        )
     }
 
     private fun enablePerAppProxyAndRestart() {

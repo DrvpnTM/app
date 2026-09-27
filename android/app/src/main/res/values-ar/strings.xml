@@ -648,4 +648,11 @@
     <string name="usage_month">هذا الشهر</string>
     <string name="usage_last7">آخر ٧ أيام</string>
     <string name="usage_note">حركة البيانات التي مرت عبر Dr VPN على هذا الهاتف.</string>
+    <string name="onboarding_add_sub_title">أضف اشتراكك</string>
+    <string name="onboarding_add_sub_hint">الصق رابط الاشتراك الذي حصلت عليه من drvpn.net. يمكنك أيضًا إضافته لاحقًا بزر +.</string>
+    <string name="onboarding_paste">لصق من الحافظة</string>
+    <string name="onboarding_skip">لاحقًا</string>
+    <string name="per_app_iran_direct">التطبيقات الإيرانية بدون VPN</string>
+    <string name="per_app_iran_done">%1$d تطبيقًا إيرانيًا يعمل الآن بدون VPN</string>
+    <string name="per_app_iran_none">لم يُعثر على تطبيقات إيرانية</string>
 </resources>

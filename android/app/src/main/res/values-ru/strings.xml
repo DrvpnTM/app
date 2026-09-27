@@ -644,4 +644,11 @@
     <string name="usage_month">Этот месяц</string>
     <string name="usage_last7">Последние 7 дней</string>
     <string name="usage_note">Трафик, прошедший через Dr VPN на этом телефоне.</string>
+    <string name="onboarding_add_sub_title">Добавьте подписку</string>
+    <string name="onboarding_add_sub_hint">Вставьте ссылку на подписку с drvpn.net. Это можно сделать и позже кнопкой +.</string>
+    <string name="onboarding_paste">Вставить из буфера</string>
+    <string name="onboarding_skip">Позже</string>
+    <string name="per_app_iran_direct">Иранские приложения без VPN</string>
+    <string name="per_app_iran_done">Иранских приложений в обход VPN: %1$d</string>
+    <string name="per_app_iran_none">Иранские приложения не найдены</string>
 </resources>

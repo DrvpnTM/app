@@ -242,6 +242,7 @@ fun MainScreen(
                 MainHomeTab(
                     profileName = profileName,
                     subscription = uiState.subscription,
+                    announcement = uiState.announcement,
                     selectedServerName = uiState.selectedServerName,
                     isRunning = isRunning,
                     statusText = displayText,

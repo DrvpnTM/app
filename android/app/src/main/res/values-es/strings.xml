@@ -80,4 +80,11 @@
     <string name="usage_month">Este mes</string>
     <string name="usage_last7">Últimos 7 días</string>
     <string name="usage_note">Tráfico que pasó por Dr VPN en este teléfono.</string>
+    <string name="onboarding_add_sub_title">Añade tu suscripción</string>
+    <string name="onboarding_add_sub_hint">Pega el enlace de suscripción que obtuviste en drvpn.net. También puedes añadirlo después con el botón +.</string>
+    <string name="onboarding_paste">Pegar del portapapeles</string>
+    <string name="onboarding_skip">Más tarde</string>
+    <string name="per_app_iran_direct">Apps iraníes sin VPN</string>
+    <string name="per_app_iran_done">%1$d apps iraníes ahora no usan la VPN</string>
+    <string name="per_app_iran_none">No se encontraron apps iraníes</string>
 </resources>

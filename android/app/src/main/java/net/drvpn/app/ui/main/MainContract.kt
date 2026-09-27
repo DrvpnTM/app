@@ -38,6 +38,8 @@ data class MainUiState(
     val connectedSince: Long? = null,
     /** Subscription of the selected group (usage/expiry from the panel), if it is a subscription. */
     val subscription: net.drvpn.app.dto.entities.SubscriptionItem? = null,
+    /** Owner announcement from notice.json, shown as a card on the home tab until dismissed. */
+    val announcement: net.drvpn.app.handler.AnnouncementManager.Announcement? = null,
     val shareQRCodeBitmap: android.graphics.Bitmap? = null
 )
 
@@ -73,6 +75,7 @@ sealed interface MainAction {
     data class Search(val query: String) : MainAction
     data class SetShowServersWithoutPing(val show: Boolean) : MainAction
     data object SelectFastest : MainAction
+    data class DismissAnnouncement(val id: String) : MainAction
     data class ShareQRCode(val guid: String) : MainAction
     data class ShareClipboard(val guid: String) : MainAction
     data class ShareFullContent(val guid: String) : MainAction

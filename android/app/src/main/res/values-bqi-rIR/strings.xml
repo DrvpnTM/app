@@ -640,4 +640,11 @@
     <string name="usage_month">این ماه</string>
     <string name="usage_last7">۷ روز اخیر</string>
     <string name="usage_note">حجم ترافیکی که از طریق Dr VPN روی همین گوشی رد شده است.</string>
+    <string name="onboarding_add_sub_title">اشتراک خود را اضافه کنید</string>
+    <string name="onboarding_add_sub_hint">لینک اشتراکی که از drvpn.net گرفته‌اید را اینجا بچسبانید. بعداً هم با دکمه + می‌توانید اضافه کنید.</string>
+    <string name="onboarding_paste">چسباندن از کلیپ‌بورد</string>
+    <string name="onboarding_skip">بعداً</string>
+    <string name="per_app_iran_direct">برنامه‌های ایرانی بدون VPN</string>
+    <string name="per_app_iran_done">%1$d برنامه ایرانی بدون VPN کار می‌کنند</string>
+    <string name="per_app_iran_none">برنامه ایرانی‌ای روی گوشی پیدا نشد</string>
 </resources>

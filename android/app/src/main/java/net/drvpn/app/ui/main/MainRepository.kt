@@ -73,6 +73,7 @@ class MainRepository(
                     requestId
                 )
                 AppConfig.MSG_MEASURE_CONFIG_CANCEL -> MainServiceEvent.MeasureConfigCancelled(requestId)
+                AppConfig.MSG_AUTO_SWITCHED -> MainServiceEvent.AutoSwitched
                 AppConfig.MSG_SPEED_UPDATE -> safeIntent.getStringExtra("content")
                     ?.split(',')
                     ?.map { it.toLongOrNull() ?: 0L }
