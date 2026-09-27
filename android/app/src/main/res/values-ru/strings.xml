@@ -632,4 +632,11 @@
     <string name="kill_switch_title">Kill switch (защита от утечки IP)</string>
     <string name="kill_switch_message">Если VPN или подписка отключится, интернет на телефоне тоже пропадёт, и ваш настоящий IP не утечёт.\n\nНа следующем экране:\n1. Нажмите на шестерёнку рядом с Dr VPN.\n2. Включите «Постоянная VPN».\n3. Включите «Блокировать подключения без VPN».</string>
     <string name="kill_switch_open">Открыть настройки VPN</string>
+    <string name="home_sub_usage">%1$s из %2$s</string>
+    <string name="home_sub_usage_unlimited">Использовано %1$s (без лимита)</string>
+    <string name="home_sub_days_left">Осталось дней: %1$d</string>
+    <string name="home_sub_expired">Истекла</string>
+    <string name="home_auto_switched">Сервер недоступен; подключено к следующему рабочему серверу</string>
+    <string name="title_auto_reconnect">Автопереподключение</string>
+    <string name="summary_auto_reconnect">Если сервер перестал работать, автоматически переключаться на самый быстрый рабочий сервер</string>
 </resources>

@@ -489,9 +489,10 @@ object AngConfigManager {
             val proxyUsername = SettingsManager.getSocksUsername()
             val proxyPassword = SettingsManager.getSocksPassword()
 
+            var userInfo: String? = null
             var configText = try {
                 val httpPort = SettingsManager.getHttpPort()
-                HttpUtil.getUrlContentWithUserAgent(
+                HttpUtil.getUrlContentWithUserInfo(
                     UrlContentRequest(
                         url = url,
                         userAgent = userAgent,
@@ -501,20 +502,20 @@ object AngConfigManager {
                         proxyUsername = proxyUsername,
                         proxyPassword = proxyPassword
                     )
-                )
+                ).let { (body, info) -> userInfo = info; body }
             } catch (e: Exception) {
                 LogUtil.e(AppConfig.ANG_PACKAGE, "Update subscription: proxy not ready or other error", e)
                 ""
             }
             if (configText.isEmpty()) {
                 configText = try {
-                    HttpUtil.getUrlContentWithUserAgent(
+                    HttpUtil.getUrlContentWithUserInfo(
                         UrlContentRequest(
                             url = url,
                             userAgent = userAgent,
                             requestHeaders = requestHeaders
                         )
-                    )
+                    ).let { (body, info) -> userInfo = info; body }
                 } catch (e: Exception) {
                     LogUtil.e(AppConfig.TAG, "Update subscription: Failed to get URL content with user agent", e)
                     ""
@@ -527,6 +528,7 @@ object AngConfigManager {
             val count = parseConfigViaSub(configText, it.guid, false)
             if (count > 0) {
                 it.subscription.lastUpdated = System.currentTimeMillis()
+                applySubscriptionUserInfo(it.subscription, userInfo)
                 MmkvManager.encodeSubscription(it.guid, it.subscription)
                 LogUtil.i(AppConfig.TAG, "Subscription updated: ${it.subscription.remarks}, $count configs")
                 return SubscriptionUpdateResult(
@@ -541,6 +543,23 @@ object AngConfigManager {
             LogUtil.e(AppConfig.TAG, "Failed to update config via subscription", e)
             return SubscriptionUpdateResult(failureCount = 1)
         }
+    }
+
+    /**
+     * Parses a "subscription-userinfo" header such as
+     * `upload=123; download=456; total=10737418240; expire=1767225600` into the subscription.
+     */
+    private fun applySubscriptionUserInfo(sub: SubscriptionItem, header: String?) {
+        if (header.isNullOrBlank()) return
+        val values = header.split(';').mapNotNull { part ->
+            val kv = part.split('=', limit = 2)
+            if (kv.size != 2) null else kv[0].trim().lowercase() to kv[1].trim().toDoubleOrNull()?.toLong()
+        }.toMap()
+        val up = values["upload"] ?: 0L
+        val down = values["download"] ?: 0L
+        sub.usedBytes = up + down
+        sub.totalBytes = values["total"]?.takeIf { it > 0 } ?: -1
+        sub.expireAt = values["expire"]?.takeIf { it > 0 }?.let { it * 1000 } ?: -1
     }
 
     /**

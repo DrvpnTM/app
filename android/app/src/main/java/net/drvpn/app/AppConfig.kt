@@ -65,6 +65,8 @@ object AppConfig {
     const val PREF_DRVPN_SCAN_OFFSET = "pref_drvpn_scan_offset"
     const val PREF_DRVPN_THEME = "pref_drvpn_theme_v2"
     const val PREF_DRVPN_CONNECTED_AT = "pref_drvpn_connected_at"
+    const val PREF_DRVPN_SUB_AUTO_MIGRATED = "pref_drvpn_sub_auto_migrated"
+    const val PREF_DRVPN_AUTO_RECONNECT = "pref_drvpn_auto_reconnect"
     const val PREF_UI_MODE_NIGHT = "pref_ui_mode_night"
     const val PREF_DYNAMIC_COLOR = "pref_dynamic_color"
     const val PREF_IPV6_ENABLED = "pref_ipv6_enabled"

@@ -143,7 +143,12 @@ object HttpUtil {
      * @throws IOException If an I/O error occurs.
      */
     @Throws(IOException::class)
-    fun getUrlContentWithUserAgent(request: UrlContentRequest): String {
+    fun getUrlContentWithUserAgent(request: UrlContentRequest): String =
+        getUrlContentWithUserInfo(request).first
+
+    /** Like [getUrlContentWithUserAgent], also returning the "subscription-userinfo" response header if present. */
+    @Throws(IOException::class)
+    fun getUrlContentWithUserInfo(request: UrlContentRequest): Pair<String, String?> {
         var currentUrl = request.url
         var redirects = 0
         val maxRedirects = 3
@@ -193,7 +198,7 @@ object HttpUtil {
                     }
 
                     response.isSuccessful -> {
-                        return response.body?.string() ?: ""
+                        return (response.body?.string() ?: "") to response.header("subscription-userinfo")
                     }
 
                     else -> {

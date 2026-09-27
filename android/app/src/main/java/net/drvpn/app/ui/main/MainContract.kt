@@ -36,6 +36,8 @@ data class MainUiState(
     val totalDown: Long = 0L,
     /** Wall-clock time the current connection started, or null when disconnected. */
     val connectedSince: Long? = null,
+    /** Subscription of the selected group (usage/expiry from the panel), if it is a subscription. */
+    val subscription: net.drvpn.app.dto.entities.SubscriptionItem? = null,
     val shareQRCodeBitmap: android.graphics.Bitmap? = null
 )
 

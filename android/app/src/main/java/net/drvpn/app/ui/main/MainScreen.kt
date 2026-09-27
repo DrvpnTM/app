@@ -241,6 +241,7 @@ fun MainScreen(
             if (selectedTab == MainTab.Home) {
                 MainHomeTab(
                     profileName = profileName,
+                    subscription = uiState.subscription,
                     selectedServerName = uiState.selectedServerName,
                     isRunning = isRunning,
                     statusText = displayText,

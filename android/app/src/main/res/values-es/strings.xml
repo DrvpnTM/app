@@ -68,4 +68,11 @@
     <string name="kill_switch_title">Kill switch (evita filtrar tu IP)</string>
     <string name="kill_switch_message">Con el kill switch activado, si la VPN o tu suscripción se corta, el teléfono también se queda sin internet, así tu IP real nunca queda expuesta.\n\nEn la siguiente pantalla:\n1. Toca el engranaje junto a Dr VPN.\n2. Activa VPN siempre activa.\n3. Activa Bloquear conexiones sin VPN.</string>
     <string name="kill_switch_open">Abrir ajustes de VPN</string>
+    <string name="home_sub_usage">%1$s de %2$s</string>
+    <string name="home_sub_usage_unlimited">%1$s usados (ilimitado)</string>
+    <string name="home_sub_days_left">Quedan %1$d días</string>
+    <string name="home_sub_expired">Caducada</string>
+    <string name="home_auto_switched">El servidor falló; se cambió al siguiente servidor que funciona</string>
+    <string name="title_auto_reconnect">Reconexión automática</string>
+    <string name="summary_auto_reconnect">Si el servidor deja de funcionar, cambia automáticamente al siguiente servidor más rápido</string>
 </resources>

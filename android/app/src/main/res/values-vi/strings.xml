@@ -626,4 +626,11 @@
     <string name="kill_switch_title">Kill switch (chống lộ IP)</string>
     <string name="kill_switch_message">Khi bật kill switch, nếu VPN hoặc gói đăng ký bị ngắt, điện thoại cũng mất internet để IP thật không bị lộ.\n\nỞ màn hình tiếp theo:\n1. Nhấn bánh răng cạnh Dr VPN.\n2. Bật VPN luôn bật.\n3. Bật Chặn kết nối không có VPN.</string>
     <string name="kill_switch_open">Mở cài đặt VPN</string>
+    <string name="home_sub_usage">%1$s / %2$s</string>
+    <string name="home_sub_usage_unlimited">Đã dùng %1$s (không giới hạn)</string>
+    <string name="home_sub_days_left">Còn %1$d ngày</string>
+    <string name="home_sub_expired">Đã hết hạn</string>
+    <string name="home_auto_switched">Máy chủ bị lỗi; đã chuyển sang máy chủ hoạt động tiếp theo</string>
+    <string name="title_auto_reconnect">Tự động kết nối lại</string>
+    <string name="summary_auto_reconnect">Nếu máy chủ ngừng hoạt động, tự động chuyển sang máy chủ nhanh nhất còn hoạt động</string>
 </resources>

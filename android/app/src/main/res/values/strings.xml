@@ -628,4 +628,11 @@
     <string name="kill_switch_title">Kill switch (prevent IP leaks)</string>
     <string name="kill_switch_message">With the kill switch on, if the VPN or your subscription drops, the phone loses internet too, so your real IP is never exposed.\n\nOn the next screen:\n1. Tap the gear next to Dr VPN.\n2. Turn on Always-on VPN.\n3. Turn on Block connections without VPN.</string>
     <string name="kill_switch_open">Open VPN settings</string>
+    <string name="home_sub_usage">%1$s of %2$s</string>
+    <string name="home_sub_usage_unlimited">%1$s used (unlimited)</string>
+    <string name="home_sub_days_left">%1$d days left</string>
+    <string name="home_sub_expired">Expired</string>
+    <string name="home_auto_switched">Server was down; switched to the next working server</string>
+    <string name="title_auto_reconnect">Auto-reconnect</string>
+    <string name="summary_auto_reconnect">If the server stops working, switch to the next fastest working server automatically</string>
 </resources>

@@ -166,6 +166,7 @@ fun SettingsScreen(
     }
     var uiModeNight by rememberMmkvString(AppConfig.PREF_UI_MODE_NIGHT, "0")
     var themeStyle by rememberMmkvString(AppConfig.PREF_DRVPN_THEME, "default")
+    var autoReconnect by rememberMmkvBool(AppConfig.PREF_DRVPN_AUTO_RECONNECT, true)
     var dynamicColor by rememberMmkvBool(AppConfig.PREF_DYNAMIC_COLOR, false)
 
     var ipv6Enabled by rememberMmkvBool(AppConfig.PREF_IPV6_ENABLED, false)
@@ -245,6 +246,12 @@ fun SettingsScreen(
                 onExpandedChange = { uiSettingsExpanded = it }
             )
             if (uiSettingsExpanded) SettingsGroup {
+                SettingsSwitchItem(
+                    title = stringResource(R.string.title_auto_reconnect),
+                    summary = stringResource(R.string.summary_auto_reconnect),
+                    checked = autoReconnect,
+                    onCheckedChange = { autoReconnect = it }
+                )
                 SettingsSwitchItem(
                     title = stringResource(R.string.title_pref_speed_enabled),
                     summary = stringResource(R.string.summary_pref_speed_enabled),

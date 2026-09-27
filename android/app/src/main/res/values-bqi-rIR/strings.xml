@@ -628,4 +628,11 @@
     <string name="kill_switch_title">کیل‌سوییچ (جلوگیری از لو رفتن IP)</string>
     <string name="kill_switch_message">با کیل‌سوییچ، اگر VPN یا اشتراک شما قطع شود، اینترنت گوشی هم قطع می‌شود تا IP واقعی شما لو نرود.\n\nدر صفحه‌ای که باز می‌شود:\n۱. روی چرخ‌دنده کنار «Dr VPN» بزنید.\n۲. «VPN همیشه روشن» را روشن کنید.\n۳. «مسدود کردن اتصال‌های بدون VPN» را روشن کنید.</string>
     <string name="kill_switch_open">باز کردن تنظیمات VPN</string>
+    <string name="home_sub_usage">%1$s از %2$s</string>
+    <string name="home_sub_usage_unlimited">%1$s مصرف‌شده (نامحدود)</string>
+    <string name="home_sub_days_left">%1$d روز مانده</string>
+    <string name="home_sub_expired">منقضی شده</string>
+    <string name="home_auto_switched">سرور قطع بود؛ به سرور سالم بعدی وصل شد</string>
+    <string name="title_auto_reconnect">اتصال مجدد خودکار</string>
+    <string name="summary_auto_reconnect">اگر سرور قطع شود، برنامه خودش به سریع‌ترین سرور سالم بعدی وصل می‌شود</string>
 </resources>
