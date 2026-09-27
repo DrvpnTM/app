@@ -36,6 +36,10 @@ object NotificationManager {
     private const val QUERY_INTERVAL_MS = 3000L
 
     private var lastQueryTime = 0L
+
+    // Dr VPN: bytes transferred since this connection started (proxy + direct).
+    private var sessionUp = 0L
+    private var sessionDown = 0L
     private var mBuilder: NotificationCompat.Builder? = null
     private var speedNotificationJob: Job? = null
     private var mNotificationManager: NotificationManager? = null
@@ -47,6 +51,8 @@ object NotificationManager {
     fun startSpeedNotification() {
         if (MmkvManager.decodeSettingsBool(AppConfig.PREF_SPEED_ENABLED, true) != true) return
         if (speedNotificationJob != null || CoreServiceManager.isRunning() == false) return
+        sessionUp = 0L
+        sessionDown = 0L
 
         var lastZeroSpeed = false
 
@@ -268,9 +274,11 @@ object NotificationManager {
         val directTotal = directUplink + directDownlink
         // Dr VPN: publish live speed (bytes/s, proxy + direct) to the home screen.
         getService()?.let { service ->
+            sessionUp += proxyUplink + directUplink
+            sessionDown += proxyDownlink + directDownlink
             val up = ((proxyUplink + directUplink) / sinceLastQueryInSeconds).toLong()
             val down = ((proxyDownlink + directDownlink) / sinceLastQueryInSeconds).toLong()
-            MessageHelper.sendMsg2UI(service, AppConfig.MSG_SPEED_UPDATE, "$up,$down")
+            MessageHelper.sendMsg2UI(service, AppConfig.MSG_SPEED_UPDATE, "$up,$down,$sessionUp,$sessionDown")
         }
         val zeroSpeed = proxyTotal + directTotal == 0L
         if (!zeroSpeed || !lastZeroSpeed) {

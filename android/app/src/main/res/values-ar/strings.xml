@@ -633,4 +633,7 @@
     <string name="home_fastest_none">لم يُعثر على خادم يعمل</string>
     <string name="home_download">تنزيل</string>
     <string name="home_upload">رفع</string>
+    <string name="kill_switch_title">مفتاح الإيقاف (منع تسريب IP)</string>
+    <string name="kill_switch_message">عند تفعيل مفتاح الإيقاف، إذا انقطع الـVPN أو الاشتراك ينقطع الإنترنت أيضًا حتى لا يظهر عنوان IP الحقيقي.\n\nفي الشاشة التالية:\n١. اضغط على الترس بجانب Dr VPN.\n٢. فعّل «VPN دائم التشغيل».\n٣. فعّل «حظر الاتصالات بدون VPN».</string>
+    <string name="kill_switch_open">فتح إعدادات VPN</string>
 </resources>

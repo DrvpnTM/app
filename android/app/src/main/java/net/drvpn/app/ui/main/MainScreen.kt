@@ -247,6 +247,8 @@ fun MainScreen(
                     connectedSince = uiState.connectedSince,
                     speedUp = uiState.speedUp,
                     speedDown = uiState.speedDown,
+                    totalUp = uiState.totalUp,
+                    totalDown = uiState.totalDown,
                     isTesting = uiState.isTesting,
                     onAction = onAction,
                     onOpenProxies = { selectedTab = MainTab.Proxies },

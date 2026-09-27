@@ -158,6 +158,10 @@ class MainActivity : HelperBaseComponentActivity() {
             MainDestination.RegionLanguage -> Intent(this, OnboardingActivity::class.java)
             MainDestination.Advanced -> Intent(this, AdvancedScanActivity::class.java)
             MainDestination.AppLogView -> Intent(this, AppLogActivity::class.java)
+            MainDestination.KillSwitch -> {
+                showKillSwitchDialog()
+                return
+            }
             MainDestination.Promotion -> {
                 Utils.openUri(
                     this,
@@ -167,6 +171,26 @@ class MainActivity : HelperBaseComponentActivity() {
             }
         }
         settingsActivityLauncher.launch(intent)
+    }
+
+    /**
+     * Android's own kill switch is the reliable one: Always-on VPN + "Block connections without VPN"
+     * stops all traffic whenever the tunnel is down, so the real IP never leaks.
+     */
+    private fun showKillSwitchDialog() {
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle(R.string.kill_switch_title)
+            .setMessage(R.string.kill_switch_message)
+            .setPositiveButton(R.string.kill_switch_open) { _, _ ->
+                try {
+                    startActivity(Intent(android.provider.Settings.ACTION_VPN_SETTINGS))
+                } catch (e: Exception) {
+                    LogUtil.e(AppConfig.TAG, "Cannot open VPN settings", e)
+                    toastError(R.string.toast_failure)
+                }
+            }
+            .setNegativeButton(R.string.action_cancel, null)
+            .show()
     }
 
     private fun handleFabAction() {

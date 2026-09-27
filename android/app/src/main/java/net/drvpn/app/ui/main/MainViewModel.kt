@@ -208,7 +208,7 @@ class MainViewModel(
             }
             is MainServiceEvent.SpeedUpdate -> {
                 if (uiState.value.isRunning) {
-                    _uiState.update { it.copy(speedUp = event.up, speedDown = event.down) }
+                    _uiState.update { it.copy(speedUp = event.up, speedDown = event.down, totalUp = event.totalUp, totalDown = event.totalDown) }
                 }
             }
 
@@ -1060,7 +1060,7 @@ class MainViewModel(
 
     private fun markDisconnected() {
         MmkvManager.encodeSettings(AppConfig.PREF_DRVPN_CONNECTED_AT, "")
-        _uiState.update { it.copy(connectedSince = null, speedUp = 0L, speedDown = 0L) }
+        _uiState.update { it.copy(connectedSince = null, speedUp = 0L, speedDown = 0L, totalUp = 0L, totalDown = 0L) }
     }
 
     /** Lowest-latency server with a successful ping in the selected group, if any. */

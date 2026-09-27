@@ -623,4 +623,7 @@
     <string name="home_fastest_none">沒有找到可用節點</string>
     <string name="home_download">下載</string>
     <string name="home_upload">上傳</string>
+    <string name="kill_switch_title">斷網保護（防止 IP 洩漏）</string>
+    <string name="kill_switch_message">開啟後，如果 VPN 或訂閱中斷，手機也會斷網，真實 IP 不會洩漏。\n\n在接下來的頁面：\n1. 點擊 Dr VPN 旁邊的齒輪。\n2. 開啟「永久連線的 VPN」。\n3. 開啟「封鎖未使用 VPN 的連線」。</string>
+    <string name="kill_switch_open">開啟 VPN 設定</string>
 </resources>

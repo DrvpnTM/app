@@ -31,6 +31,9 @@ data class MainUiState(
     /** Live traffic speed in bytes/s while connected. */
     val speedUp: Long = 0L,
     val speedDown: Long = 0L,
+    /** Bytes transferred in the current connection. */
+    val totalUp: Long = 0L,
+    val totalDown: Long = 0L,
     /** Wall-clock time the current connection started, or null when disconnected. */
     val connectedSince: Long? = null,
     val shareQRCodeBitmap: android.graphics.Bitmap? = null

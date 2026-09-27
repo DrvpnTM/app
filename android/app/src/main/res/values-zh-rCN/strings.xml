@@ -623,4 +623,7 @@
     <string name="home_fastest_none">没有找到可用节点</string>
     <string name="home_download">下载</string>
     <string name="home_upload">上传</string>
+    <string name="kill_switch_title">断网保护（防止 IP 泄露）</string>
+    <string name="kill_switch_message">开启后，如果 VPN 或订阅断开，手机也会断网，真实 IP 不会泄露。\n\n在接下来的页面：\n1. 点击 Dr VPN 旁边的齿轮。\n2. 打开「始终开启的 VPN」。\n3. 打开「屏蔽未使用 VPN 的连接」。</string>
+    <string name="kill_switch_open">打开 VPN 设置</string>
 </resources>
