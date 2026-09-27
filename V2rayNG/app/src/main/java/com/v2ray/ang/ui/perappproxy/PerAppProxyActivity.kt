@@ -40,6 +40,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.v2ray.ang.R
+import com.v2ray.ang.ui.compose.iosSwitchColors
 import com.v2ray.ang.dto.AppInfo
 import com.v2ray.ang.extension.toastSuccess
 import com.v2ray.ang.ui.base.BaseComponentActivity
@@ -220,10 +221,7 @@ fun PerAppProxyScreen(
                             checked = perAppProxyEnabled,
                             modifier = Modifier.scale(0.65f),
                             onCheckedChange = onPerAppProxyChanged,
-                            colors = SwitchDefaults.colors(
-                                checkedThumbColor = MaterialTheme.colorScheme.onSecondary,
-                                checkedTrackColor = MaterialTheme.colorScheme.secondary
-                            )
+                            colors = iosSwitchColors()
                         )
                     }
                     Spacer(modifier = Modifier.width(16.dp))
@@ -241,10 +239,7 @@ fun PerAppProxyScreen(
                             checked = bypassApps,
                             modifier = Modifier.scale(0.65f),
                             onCheckedChange = onBypassAppsChanged,
-                            colors = SwitchDefaults.colors(
-                                checkedThumbColor = MaterialTheme.colorScheme.onSecondary,
-                                checkedTrackColor = MaterialTheme.colorScheme.secondary
-                            )
+                            colors = iosSwitchColors()
                         )
                     }
                     IconButton(onClick = onInfoClick) {

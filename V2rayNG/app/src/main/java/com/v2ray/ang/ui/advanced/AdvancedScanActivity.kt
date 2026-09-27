@@ -43,6 +43,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.material3.TextField
+import com.v2ray.ang.ui.compose.iosFieldColors
+import com.v2ray.ang.ui.compose.IosGroupShape
 import com.v2ray.ang.R
 import com.v2ray.ang.core.LauncherManager
 import com.v2ray.ang.extension.toastSuccess
@@ -112,22 +115,26 @@ class AdvancedScanActivity : BaseComponentActivity() {
                 }
                 AnimatedVisibility(visible = showOptions) {
                     Column {
-                        OutlinedTextField(
+                        TextField(
                             value = range,
                             onValueChange = viewModel::setRange,
                             label = { Text(getString(R.string.advanced_scan_range)) },
                             singleLine = true,
                             enabled = !progress.running,
+                            colors = iosFieldColors(),
+                            shape = IosGroupShape,
                             modifier = Modifier.fillMaxWidth(),
                         )
                         Spacer(Modifier.height(8.dp))
-                        OutlinedTextField(
+                        TextField(
                             value = ports,
                             onValueChange = viewModel::setPorts,
                             label = { Text(getString(R.string.advanced_scan_ports)) },
                             singleLine = true,
                             enabled = !progress.running,
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            colors = iosFieldColors(),
+                            shape = IosGroupShape,
                             modifier = Modifier.fillMaxWidth(),
                         )
                         Spacer(Modifier.height(8.dp))

@@ -59,6 +59,11 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.material3.Switch
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.background
 import com.v2ray.ang.R
 import com.v2ray.ang.util.AppIconFetcher
 import sh.calvin.reorderable.ReorderableCollectionItemScope
@@ -182,8 +187,11 @@ fun AppListItem(
     Row(
         modifier = modifier
             .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 3.dp)
+            .clip(IosGroupShape)
+            .background(MaterialTheme.colorScheme.cell)
             .clickable { onCheckedChange(!checked) }
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .padding(horizontal = 14.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         val model = remember(icon, packageName) {
@@ -223,17 +231,18 @@ fun AppListItem(
                 overflow = TextOverflow.Ellipsis
             )
         }
-        Checkbox(
+        Switch(
             checked = checked,
             onCheckedChange = onCheckedChange,
-            colors = CheckboxDefaults.colors(checkedColor = MaterialTheme.colorScheme.secondary)
+            modifier = Modifier.scale(0.85f),
+            colors = iosSwitchColors()
         )
     }
 }
 
 @Composable
 fun ItemDivider() {
-    AppDivider(modifier = Modifier.padding(horizontal = 12.dp))
+    // iOS style: list rows are separate rounded cards, so no divider line is drawn.
 }
 
 @Composable
@@ -294,17 +303,23 @@ fun ReorderableCollectionItemScope.reorderableDragHandle(): Modifier {
 fun ReorderableListItem(
     scope: ReorderableCollectionItemScope,
     isDragging: Boolean,
+    card: Boolean = true,
     content: @Composable RowScope.() -> Unit
 ) {
     val elevation by reorderableElevation(isDragging)
     Surface(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .then(if (card) Modifier.padding(horizontal = 16.dp, vertical = 4.dp) else Modifier),
+        shape = if (card) IosGroupShape else RectangleShape,
+        color = if (card) MaterialTheme.colorScheme.cell else Color.Transparent,
         shadowElevation = elevation
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .then(with(scope) { reorderableDragHandle() }),
+                .then(with(scope) { reorderableDragHandle() })
+                .then(if (card) Modifier.padding(vertical = 6.dp) else Modifier),
             verticalAlignment = Alignment.CenterVertically,
             content = content
         )
@@ -322,6 +337,7 @@ fun ReorderableGridItem(
         modifier = Modifier
             .fillMaxWidth()
             .then(with(scope) { reorderableDragHandle() }),
+        color = Color.Transparent,
         shadowElevation = elevation
     ) {
         content()

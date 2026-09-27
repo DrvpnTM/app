@@ -39,6 +39,15 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.ui.text.font.FontWeight
 import com.v2ray.ang.R
 
 @Composable
@@ -91,7 +100,7 @@ fun ConfirmDialog(
                 }
             }
         },
-        containerColor = MaterialTheme.colorScheme.surface
+        containerColor = MaterialTheme.colorScheme.cell
     )
 }
 
@@ -171,7 +180,7 @@ fun InputDialog(
         dismissButton = {
             TextButton(onClick = onDismiss) { Text(dismissText) }
         },
-        containerColor = MaterialTheme.colorScheme.surface
+        containerColor = MaterialTheme.colorScheme.cell
     )
 }
 
@@ -195,7 +204,7 @@ fun QRCodeDialog(
         confirmButton = {
             TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_close)) }
         },
-        containerColor = MaterialTheme.colorScheme.surface
+        containerColor = MaterialTheme.colorScheme.cell
     )
 }
 
@@ -204,6 +213,7 @@ fun QRCodeDialog(
  * otherwise, plain clickable list mode.
  * The selectedOption parameter is used to highlight the selected item only when showRadio is true.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun <T> SelectListDialog(
     options: List<T>,
@@ -214,13 +224,33 @@ fun <T> SelectListDialog(
     selectedOption: T? = null,
     showRadio: Boolean = false
 ) {
-    AlertDialog(
+    // iOS action sheet: options in a rounded card, a separate Cancel button underneath.
+    ModalBottomSheet(
         onDismissRequest = onDismiss,
-        title = title?.let { { Text(it) } },
-        text = {
-            LazyColumn {
-                items(options) { option ->
-                    val isSelected = option == selectedOption
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        containerColor = MaterialTheme.colorScheme.background,
+        shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+    ) {
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .navigationBarsPadding()
+                .padding(bottom = 16.dp)
+        ) {
+            if (title != null) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp, vertical = 8.dp)
+                )
+            }
+            SettingsGroup {
+                options.forEach { option ->
+                    val isSelected = showRadio && option == selectedOption
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -231,31 +261,41 @@ fun <T> SelectListDialog(
                                     role = Role.RadioButton
                                 ) else Modifier.clickable { onSelected(option) }
                             )
-                            .padding(vertical = 12.dp, horizontal = 4.dp),
+                            .padding(horizontal = 16.dp, vertical = 14.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        if (showRadio) {
-                            RadioButton(
-                                selected = isSelected,
-                                onClick = null
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                        }
                         Text(
                             text = optionText(option),
-                            style = MaterialTheme.typography.bodyMedium,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = if (showRadio) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.primary,
+                            textAlign = if (showRadio) TextAlign.Start else TextAlign.Center,
                             modifier = Modifier.weight(1f)
                         )
+                        if (isSelected) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_action_done),
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
                     }
                 }
             }
-        },
-        confirmButton = {},
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.action_cancel))
+            Spacer(Modifier.height(8.dp))
+            SettingsGroup {
+                Text(
+                    text = stringResource(R.string.action_cancel),
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.primary,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable(onClick = onDismiss)
+                        .padding(vertical = 14.dp)
+                )
             }
-        },
-        containerColor = MaterialTheme.colorScheme.surface
-    )
+        }
+    }
 }

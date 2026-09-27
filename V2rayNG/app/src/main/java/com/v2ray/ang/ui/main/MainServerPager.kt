@@ -217,7 +217,8 @@ private fun ServerListPage(
                     ) { isDragging ->
                         ReorderableListItem(
                             scope = this,
-                            isDragging = isDragging
+                            isDragging = isDragging,
+                            card = false
                         ) {
                             ServerItemRow(
                                 row = row,
