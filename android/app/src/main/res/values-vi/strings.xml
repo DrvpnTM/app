@@ -633,4 +633,9 @@
     <string name="home_auto_switched">Máy chủ bị lỗi; đã chuyển sang máy chủ hoạt động tiếp theo</string>
     <string name="title_auto_reconnect">Tự động kết nối lại</string>
     <string name="summary_auto_reconnect">Nếu máy chủ ngừng hoạt động, tự động chuyển sang máy chủ nhanh nhất còn hoạt động</string>
+    <string name="usage_title">Mức sử dụng</string>
+    <string name="usage_today">Hôm nay</string>
+    <string name="usage_month">Tháng này</string>
+    <string name="usage_last7">7 ngày qua</string>
+    <string name="usage_note">Lưu lượng đi qua Dr VPN trên điện thoại này.</string>
 </resources>

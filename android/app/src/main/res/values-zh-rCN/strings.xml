@@ -633,4 +633,9 @@
     <string name="home_auto_switched">节点不可用，已切换到下一个可用节点</string>
     <string name="title_auto_reconnect">自动重连</string>
     <string name="summary_auto_reconnect">节点失效时，自动切换到下一个最快的可用节点</string>
+    <string name="usage_title">流量统计</string>
+    <string name="usage_today">今天</string>
+    <string name="usage_month">本月</string>
+    <string name="usage_last7">最近 7 天</string>
+    <string name="usage_note">在本机通过 Dr VPN 的流量。</string>
 </resources>

@@ -31,6 +31,7 @@ import net.drvpn.app.ui.checkupdate.CheckUpdateActivity
 import net.drvpn.app.ui.logcat.LogcatActivity
 import net.drvpn.app.ui.advanced.AdvancedScanActivity
 import net.drvpn.app.ui.log.AppLogActivity
+import net.drvpn.app.ui.usage.UsageActivity
 import net.drvpn.app.ui.onboarding.OnboardingActivity
 import net.drvpn.app.ui.perappproxy.PerAppProxyActivity
 import net.drvpn.app.ui.routing.RoutingSettingActivity
@@ -158,6 +159,7 @@ class MainActivity : HelperBaseComponentActivity() {
             MainDestination.RegionLanguage -> Intent(this, OnboardingActivity::class.java)
             MainDestination.Advanced -> Intent(this, AdvancedScanActivity::class.java)
             MainDestination.AppLogView -> Intent(this, AppLogActivity::class.java)
+            MainDestination.Usage -> Intent(this, UsageActivity::class.java)
             MainDestination.KillSwitch -> {
                 showKillSwitchDialog()
                 return

@@ -89,6 +89,9 @@
             android:name=".ui.log.AppLogActivity"
             android:exported="false" />
         <activity
+            android:name=".ui.usage.UsageActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.server.ServerVmessActivity"
             android:exported="false"
             android:windowSoftInputMode="stateUnchanged|adjustResize" />

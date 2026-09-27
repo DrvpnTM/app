@@ -189,9 +189,9 @@ object NotificationManager {
             if (proxyTraffic < NOTIFICATION_ICON_THRESHOLD && directTraffic < NOTIFICATION_ICON_THRESHOLD) {
                 mBuilder?.setSmallIcon(R.drawable.ic_stat_name)
             } else if (proxyTraffic > directTraffic) {
-                mBuilder?.setSmallIcon(R.drawable.ic_stat_proxy)
+                mBuilder?.setSmallIcon(R.drawable.ic_stat_name)
             } else {
-                mBuilder?.setSmallIcon(R.drawable.ic_stat_direct)
+                mBuilder?.setSmallIcon(R.drawable.ic_stat_name)
             }
             mBuilder?.setStyle(NotificationCompat.BigTextStyle().bigText(contentText))
             mBuilder?.setContentText(contentText)
@@ -276,6 +276,7 @@ object NotificationManager {
         getService()?.let { service ->
             sessionUp += proxyUplink + directUplink
             sessionDown += proxyDownlink + directDownlink
+            UsageStats.add(proxyUplink + directUplink, proxyDownlink + directDownlink)
             val up = ((proxyUplink + directUplink) / sinceLastQueryInSeconds).toLong()
             val down = ((proxyDownlink + directDownlink) / sinceLastQueryInSeconds).toLong()
             MessageHelper.sendMsg2UI(service, AppConfig.MSG_SPEED_UPDATE, "$up,$down,$sessionUp,$sessionDown")

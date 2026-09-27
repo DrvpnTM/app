@@ -1,31 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Dr VPN widget: round iOS-style power button (green = connected, gray = off) with the app name. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/layout_switch"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
     android:gravity="center"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:padding="4dp">
 
     <LinearLayout
         android:id="@+id/layout_background"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center">
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_gravity="center"
+        android:background="@drawable/ic_rounded_corner_inactive"
+        android:gravity="center">
 
         <ImageView
             android:id="@+id/image_switch"
-            android:layout_width="45dp"
-            android:layout_height="45dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             android:importantForAccessibility="no"
-            android:padding="@dimen/padding_spacing_dp16"
-            android:src="@drawable/ic_stat_name" />
+            android:src="@drawable/ic_power_24dp" />
     </LinearLayout>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:shadowColor="#80000000"
+        android:shadowDy="1"
+        android:shadowRadius="3"
         android:text="@string/app_name"
         android:textAppearance="@android:style/TextAppearance.Small"
-        android:textColor="@android:color/white" />
+        android:textColor="@android:color/white"
+        android:textStyle="bold" />
 </LinearLayout>
