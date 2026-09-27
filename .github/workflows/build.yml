@@ -55,12 +55,12 @@ jobs:
         run: bash compile-hevtun.sh
 
       - name: Copy libhevtun
-        run: cp -r libs V2rayNG/app/
+        run: cp -r libs android/app/
 
       - name: Download libv2ray.aar
         run: |
-          mkdir -p V2rayNG/app/libs
-          curl -fsSL -o V2rayNG/app/libs/libv2ray.aar \
+          mkdir -p android/app/libs
+          curl -fsSL -o android/app/libs/libv2ray.aar \
             "https://github.com/2dust/AndroidLibXrayLite/releases/download/${LIBV2RAY_TAG}/libv2ray.aar"
 
       - name: Decrypt release keystore
@@ -68,9 +68,9 @@ jobs:
         env:
           DRVPN_KEYSTORE_ENC_PASSWORD: ${{ secrets.DRVPN_KEYSTORE_ENC_PASSWORD }}
         run: |
-          if [ -n "$DRVPN_KEYSTORE_ENC_PASSWORD" ] && [ -f V2rayNG/app/drvpn-release.jks.enc ]; then
+          if [ -n "$DRVPN_KEYSTORE_ENC_PASSWORD" ] && [ -f android/app/drvpn-release.jks.enc ]; then
             if openssl enc -d -aes-256-cbc -pbkdf2 \
-                 -in V2rayNG/app/drvpn-release.jks.enc \
+                 -in android/app/drvpn-release.jks.enc \
                  -out "$RUNNER_TEMP/drvpn-release.jks" \
                  -pass pass:"$DRVPN_KEYSTORE_ENC_PASSWORD"; then
               echo "DRVPN_KEYSTORE_FILE=$RUNNER_TEMP/drvpn-release.jks" >> "$GITHUB_ENV"
@@ -84,7 +84,7 @@ jobs:
           fi
 
       - name: Build APK
-        working-directory: V2rayNG
+        working-directory: android
         env:
           DRVPN_KEYSTORE_PASSWORD: ${{ secrets.DRVPN_KEYSTORE_PASSWORD }}
           DRVPN_KEY_ALIAS: ${{ secrets.DRVPN_KEY_ALIAS }}
@@ -98,25 +98,25 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: DrVPN-universal
-          path: V2rayNG/app/build/outputs/apk/playstore/release/*universal*.apk
+          path: android/app/build/outputs/apk/playstore/release/*universal*.apk
 
       - name: Upload arm64-v8a APK
         uses: actions/upload-artifact@v4
         with:
           name: DrVPN-arm64-v8a
-          path: V2rayNG/app/build/outputs/apk/playstore/release/*arm64-v8a*.apk
+          path: android/app/build/outputs/apk/playstore/release/*arm64-v8a*.apk
 
       - name: Read app version
         id: appver
         run: |
-          ver=$(grep -oE 'versionName = "[^"]+"' V2rayNG/app/build.gradle.kts | sed -E 's/.*"([^"]+)".*/\1/')
+          ver=$(grep -oE 'versionName = "[^"]+"' android/app/build.gradle.kts | sed -E 's/.*"([^"]+)".*/\1/')
           echo "version=$ver" >> "$GITHUB_OUTPUT"
 
       - name: Publish release
         if: ${{ steps.keystore.outputs.signed == 'true' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')) }}
         uses: softprops/action-gh-release@v2
         with:
-          files: V2rayNG/app/build/outputs/apk/playstore/release/*.apk
+          files: android/app/build/outputs/apk/playstore/release/*.apk
           tag_name: v${{ steps.appver.outputs.version }}
           name: Dr VPN v${{ steps.appver.outputs.version }}
           generate_release_notes: true
