@@ -44,6 +44,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
+import com.v2ray.ang.ui.compose.iosSwitchColors
 import com.v2ray.ang.dto.entities.RulesetItem
 import com.v2ray.ang.enums.RoutingType
 import com.v2ray.ang.extension.toastError
@@ -385,10 +386,7 @@ private fun RoutingRulesetItem(
                 checked = ruleset.enabled ?: false,
                 onCheckedChange = onEnabledChange,
                 modifier = Modifier.scale(0.7f),
-                colors = SwitchDefaults.colors(
-                    checkedThumbColor = MaterialTheme.colorScheme.onSecondary,
-                    checkedTrackColor = MaterialTheme.colorScheme.secondary
-                )
+                colors = iosSwitchColors()
             )
         }
     }
