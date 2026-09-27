@@ -635,4 +635,9 @@
     <string name="home_auto_switched">سرور قطع بود؛ به سرور سالم بعدی وصل شد</string>
     <string name="title_auto_reconnect">اتصال مجدد خودکار</string>
     <string name="summary_auto_reconnect">اگر سرور قطع شود، برنامه خودش به سریع‌ترین سرور سالم بعدی وصل می‌شود</string>
+    <string name="usage_title">آمار مصرف</string>
+    <string name="usage_today">امروز</string>
+    <string name="usage_month">این ماه</string>
+    <string name="usage_last7">۷ روز اخیر</string>
+    <string name="usage_note">حجم ترافیکی که از طریق Dr VPN روی همین گوشی رد شده است.</string>
 </resources>

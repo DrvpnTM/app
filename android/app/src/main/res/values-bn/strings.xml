@@ -635,4 +635,9 @@
     <string name="home_auto_switched">সার্ভার বন্ধ ছিল; পরের সচল সার্ভারে যুক্ত হয়েছে</string>
     <string name="title_auto_reconnect">স্বয়ংক্রিয় পুনঃসংযোগ</string>
     <string name="summary_auto_reconnect">সার্ভার কাজ না করলে স্বয়ংক্রিয়ভাবে পরের দ্রুততম সচল সার্ভারে যুক্ত হবে</string>
+    <string name="usage_title">ব্যবহার</string>
+    <string name="usage_today">আজ</string>
+    <string name="usage_month">এই মাস</string>
+    <string name="usage_last7">গত ৭ দিন</string>
+    <string name="usage_note">এই ফোনে Dr VPN দিয়ে যাওয়া ট্রাফিক।</string>
 </resources>

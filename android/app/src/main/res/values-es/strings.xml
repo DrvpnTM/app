@@ -75,4 +75,9 @@
     <string name="home_auto_switched">El servidor falló; se cambió al siguiente servidor que funciona</string>
     <string name="title_auto_reconnect">Reconexión automática</string>
     <string name="summary_auto_reconnect">Si el servidor deja de funcionar, cambia automáticamente al siguiente servidor más rápido</string>
+    <string name="usage_title">Consumo</string>
+    <string name="usage_today">Hoy</string>
+    <string name="usage_month">Este mes</string>
+    <string name="usage_last7">Últimos 7 días</string>
+    <string name="usage_note">Tráfico que pasó por Dr VPN en este teléfono.</string>
 </resources>

@@ -635,4 +635,9 @@
     <string name="home_auto_switched">Server was down; switched to the next working server</string>
     <string name="title_auto_reconnect">Auto-reconnect</string>
     <string name="summary_auto_reconnect">If the server stops working, switch to the next fastest working server automatically</string>
+    <string name="usage_title">Usage</string>
+    <string name="usage_today">Today</string>
+    <string name="usage_month">This month</string>
+    <string name="usage_last7">Last 7 days</string>
+    <string name="usage_note">Traffic that went through Dr VPN on this phone.</string>
 </resources>

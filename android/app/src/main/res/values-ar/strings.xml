@@ -643,4 +643,9 @@
     <string name="home_auto_switched">كان الخادم معطلًا؛ تم التبديل إلى الخادم التالي</string>
     <string name="title_auto_reconnect">إعادة الاتصال التلقائي</string>
     <string name="summary_auto_reconnect">إذا توقف الخادم، يتم التبديل تلقائيًا إلى أسرع خادم يعمل</string>
+    <string name="usage_title">الاستهلاك</string>
+    <string name="usage_today">اليوم</string>
+    <string name="usage_month">هذا الشهر</string>
+    <string name="usage_last7">آخر ٧ أيام</string>
+    <string name="usage_note">حركة البيانات التي مرت عبر Dr VPN على هذا الهاتف.</string>
 </resources>
