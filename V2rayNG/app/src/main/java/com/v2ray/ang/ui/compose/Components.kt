@@ -57,6 +57,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.ui.draw.rotate
 import com.v2ray.ang.R
 import com.v2ray.ang.util.AppIconFetcher
 import sh.calvin.reorderable.ReorderableCollectionItemScope
@@ -76,7 +78,7 @@ fun AppTopBar(
     actions: @Composable RowScope.() -> Unit = {}
 ) {
     Column {
-        TopAppBar(
+        CenterAlignedTopAppBar(
             title = {
                 if (isSearchActive) {
                     SearchInputField(
@@ -85,7 +87,12 @@ fun AppTopBar(
                         placeholder = searchPlaceholder
                     )
                 } else {
-                    Text(text = title)
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.titleMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
                 }
             },
             navigationIcon = {
@@ -94,26 +101,31 @@ fun AppTopBar(
                 } else {
                     IconButton(onClick = if (isSearchActive) onSearchClose else onBackClick) {
                         Icon(
-                            painter = painterResource(R.drawable.ic_arrow_back_24dp),
-                            contentDescription = stringResource(R.string.acc_back)
+                            painter = painterResource(R.drawable.ic_chevron_right_24dp),
+                            contentDescription = stringResource(R.string.acc_back),
+                            modifier = Modifier
+                                .size(30.dp)
+                                .rotate(180f)
                         )
                     }
                 }
             },
             actions = actions,
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = MaterialTheme.colorScheme.surface,
+            colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                containerColor = MaterialTheme.colorScheme.background,
+                scrolledContainerColor = MaterialTheme.colorScheme.background,
                 titleContentColor = MaterialTheme.colorScheme.onSurface,
-                navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
-                actionIconContentColor = MaterialTheme.colorScheme.onSurface
+                navigationIconContentColor = MaterialTheme.colorScheme.primary,
+                actionIconContentColor = MaterialTheme.colorScheme.primary
             )
         )
+        HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant)
         AnimatedVisibility(
             visible = isLoading,
             enter = expandVertically(),
             exit = shrinkVertically()
         ) {
-            LinearProgressIndicator(modifier = Modifier.fillMaxWidth(), color = MaterialTheme.colorScheme.secondary)
+            LinearProgressIndicator(modifier = Modifier.fillMaxWidth(), color = MaterialTheme.colorScheme.primary, trackColor = Color.Transparent)
         }
     }
 }

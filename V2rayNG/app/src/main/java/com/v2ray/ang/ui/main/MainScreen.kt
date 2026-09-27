@@ -34,6 +34,15 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.asPaddingValues
 import com.v2ray.ang.R
 import com.v2ray.ang.dto.entities.ProfileItem
 import com.v2ray.ang.ui.compose.QRCodeDialog
@@ -194,7 +203,12 @@ fun MainScreen(
                 )
             },
             bottomBar = {
-                NavigationBar {
+                Column {
+                HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant)
+                NavigationBar(
+                    containerColor = MaterialTheme.colorScheme.background.copy(alpha = 0.96f),
+                    tonalElevation = 0.dp
+                ) {
                     MainTab.entries.forEach { tab ->
                         NavigationBarItem(
                             selected = selectedTab == tab,
@@ -206,10 +220,18 @@ fun MainScreen(
                                 }
                                 selectedTab = tab
                             },
-                            icon = { Icon(painterResource(tab.iconRes), contentDescription = null) },
-                            label = { Text(stringResource(tab.labelRes)) }
+                            icon = { Icon(painterResource(tab.iconRes), contentDescription = null, modifier = Modifier.size(26.dp)) },
+                            label = { Text(stringResource(tab.labelRes), style = MaterialTheme.typography.labelSmall) },
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = MaterialTheme.colorScheme.primary,
+                                selectedTextColor = MaterialTheme.colorScheme.primary,
+                                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                indicatorColor = Color.Transparent
+                            )
                         )
                     }
+                }
                 }
             },
             floatingActionButton = {},

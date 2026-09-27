@@ -23,6 +23,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.v2ray.ang.BuildConfig
 import com.v2ray.ang.R
+import com.v2ray.ang.ui.compose.IosOrange
+import com.v2ray.ang.ui.compose.IosBlue
+import com.v2ray.ang.ui.compose.SettingsGroup
 import com.v2ray.ang.core.CoreNativeManager
 import com.v2ray.ang.ui.base.BaseComponentActivity
 import com.v2ray.ang.ui.compose.AppTopBar
@@ -81,17 +84,21 @@ fun CheckUpdateScreen(
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
         ) {
-            SettingsSwitchItem(
-                icon = painterResource(R.drawable.ic_source_code_24dp),
-                title = stringResource(R.string.update_check_pre_release),
-                checked = checkPreRelease,
-                onCheckedChange = { viewModel.toggleCheckPreRelease(it) }
-            )
-            SettingsMenuItem(
-                icon = painterResource(R.drawable.ic_check_update_24dp),
-                title = stringResource(R.string.update_check_for_update),
-                onClick = { viewModel.checkForUpdates() }
-            )
+            SettingsGroup {
+                SettingsSwitchItem(
+                    icon = painterResource(R.drawable.ic_source_code_24dp),
+                    title = stringResource(R.string.update_check_pre_release),
+                    iconTint = IosOrange,
+                    checked = checkPreRelease,
+                    onCheckedChange = { viewModel.toggleCheckPreRelease(it) }
+                )
+                SettingsMenuItem(
+                    icon = painterResource(R.drawable.ic_check_update_24dp),
+                    title = stringResource(R.string.update_check_for_update),
+                    iconTint = IosBlue,
+                    onClick = { viewModel.checkForUpdates() }
+                )
+            }
             VersionInfoBlock(versionText = versionText)
             NavigationBarsSpacer()
         }

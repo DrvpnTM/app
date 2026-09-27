@@ -102,10 +102,10 @@ private val DarkColor = darkColorScheme(
 )
 
 // Semantic Colors
-val colorPing = Color(0xFF009966) // Green
-val colorPingRed = Color(0xFFFF0099) // Pink Red
-val colorConfigType = Color(0xFFf97910) // Orange
-val colorFabActive = Color(0xFFf97910) // Orange
+val colorPing = IosGreen
+val colorPingRed = IosRed
+val colorConfigType = IosOrange
+val colorFabActive = IosGreen
 val colorFabInactiveLight = Color(0xFF9C9C9C) // Gray
 val colorFabInactiveDark = Color(0xFF646464) // Dark Gray
 val dividerColorLight = Color(0xFFE0E0E0) // Light Gray
@@ -240,7 +240,8 @@ private val GlassDark = DarkColor.copy(
 fun themeColorScheme(style: String, dark: Boolean) = when (style) {
     "neomorph" -> if (dark) NeoDark else NeoLight
     "glass" -> if (dark) GlassDark else GlassLight
-    else -> if (dark) DarkColor else LightColor
+    "material" -> if (dark) DarkColor else LightColor
+    else -> if (dark) IosDark else IosLight
 }
 
 val LocalDarkTheme = compositionLocalOf { false }
@@ -279,7 +280,9 @@ fun AppTheme(
         LocalAppSnackbar provides snackbarController
     ) {
         MaterialTheme(
-            colorScheme = colorScheme
+            colorScheme = colorScheme,
+            typography = IosTypography,
+            shapes = IosShapes
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
                 AppSnackbarBridge(controller = snackbarController)
