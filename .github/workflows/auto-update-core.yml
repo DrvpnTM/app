@@ -54,7 +54,7 @@ jobs:
 
           # 2) bump the app's OWN version: patch +1 (e.g. 0.0.1 -> 0.0.2), versionCode +1.
           #    The app version is independent of the Xray core version.
-          gradle=V2rayNG/app/build.gradle.kts
+          gradle=android/app/build.gradle.kts
           code=$(grep -oE 'versionCode = [0-9]+' "$gradle" | grep -oE '[0-9]+')
           newcode=$((code + 1))
           cur=$(grep -oE 'versionName = "[^"]+"' "$gradle" | sed -E 's/.*"([^"]+)".*/\1/')
