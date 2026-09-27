@@ -51,8 +51,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.v2ray.ang.R
 
-private val ConnectedColor = Color(0xFF2EB67D)
-private val DisconnectedColor = Color(0xFF8A94A6)
+private val ConnectedColor = Color(0xFF34C759)
+private val DisconnectedColor = Color(0xFF8E8E93)
 
 /**
  * Hiddify-style home: active profile card, a large connect button and the selected server card.

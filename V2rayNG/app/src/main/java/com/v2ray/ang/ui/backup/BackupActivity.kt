@@ -32,6 +32,12 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.BuildConfig
 import com.v2ray.ang.R
+import com.v2ray.ang.ui.compose.IosGray
+import com.v2ray.ang.ui.compose.IosRed
+import com.v2ray.ang.ui.compose.IosOrange
+import com.v2ray.ang.ui.compose.IosGreen
+import com.v2ray.ang.ui.compose.IosBlue
+import com.v2ray.ang.ui.compose.SettingsGroup
 import com.v2ray.ang.dto.entities.WebDavConfig
 import com.v2ray.ang.extension.toastError
 import com.v2ray.ang.extension.toastSuccess
@@ -218,34 +224,43 @@ fun BackupScreen(
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
         ) {
-            SettingsMenuItem(
-                icon = painterResource(R.drawable.ic_backup_24dp),
-                title = stringResource(R.string.title_configuration_backup),
-                onClick = { showBackupDialog = true }
-            )
-            SettingsMenuItem(
-                icon = painterResource(R.drawable.ic_share_24dp),
-                title = stringResource(R.string.title_configuration_share),
-                onClick = onShareClick
-            )
-            SettingsMenuItem(
-                icon = painterResource(R.drawable.ic_restore_24dp),
-                title = stringResource(R.string.title_configuration_restore),
-                onClick = { showRestoreDialog = true }
-            )
-            SettingsMenuItem(
-                icon = painterResource(R.drawable.ic_delete_24dp),
-                title = stringResource(R.string.title_profile_storage_cleanup),
-                subtitle = stringResource(R.string.summary_profile_storage_cleanup),
-                onClick = { showCleanupDialog = true }
-            )
+            SettingsGroup {
+                SettingsMenuItem(
+                    icon = painterResource(R.drawable.ic_backup_24dp),
+                    title = stringResource(R.string.title_configuration_backup),
+                    iconTint = IosBlue,
+                    onClick = { showBackupDialog = true }
+                )
+                SettingsMenuItem(
+                    icon = painterResource(R.drawable.ic_share_24dp),
+                    title = stringResource(R.string.title_configuration_share),
+                    iconTint = IosGreen,
+                    onClick = onShareClick
+                )
+                SettingsMenuItem(
+                    icon = painterResource(R.drawable.ic_restore_24dp),
+                    title = stringResource(R.string.title_configuration_restore),
+                    iconTint = IosOrange,
+                    onClick = { showRestoreDialog = true }
+                )
+                SettingsMenuItem(
+                    icon = painterResource(R.drawable.ic_delete_24dp),
+                    title = stringResource(R.string.title_profile_storage_cleanup),
+                    iconTint = IosRed,
+                    subtitle = stringResource(R.string.summary_profile_storage_cleanup),
+                    onClick = { showCleanupDialog = true }
+                )
+            }
             Spacer(modifier = Modifier.height(16.dp))
-            SettingsMenuItem(
-                icon = painterResource(R.drawable.ic_settings_24dp),
-                title = stringResource(R.string.title_webdav_config_setting),
-                subtitle = webDavSummary,
-                onClick = { showWebDavDialog = true }
-            )
+            SettingsGroup {
+                SettingsMenuItem(
+                    icon = painterResource(R.drawable.ic_settings_24dp),
+                    title = stringResource(R.string.title_webdav_config_setting),
+                    iconTint = IosGray,
+                    subtitle = webDavSummary,
+                    onClick = { showWebDavDialog = true }
+                )
+            }
             NavigationBarsSpacer()
         }
     }

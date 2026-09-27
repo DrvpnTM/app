@@ -6,13 +6,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -23,22 +24,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.v2ray.ang.R
 
 @Composable
 fun PreferenceGroupHeader(title: String, modifier: Modifier = Modifier) {
     Text(
-        text = title,
-        style = MaterialTheme.typography.titleSmall,
-        color = MaterialTheme.colorScheme.secondary,
+        text = title.uppercase(),
+        style = iosCaption,
         modifier = modifier
             .fillMaxWidth()
-            .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 8.dp)
+            .padding(start = 32.dp, end = 32.dp, top = 22.dp, bottom = 6.dp)
     )
 }
 
@@ -52,23 +54,23 @@ fun CollapsiblePreferenceGroupHeader(
     Row(
         modifier = modifier
             .fillMaxWidth()
+            .padding(top = 14.dp)
             .clickable { onExpandedChange(!expanded) }
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .padding(start = 32.dp, end = 24.dp, top = 8.dp, bottom = 6.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = title,
-            style = MaterialTheme.typography.titleSmall,
-            color = MaterialTheme.colorScheme.secondary,
+            text = title.uppercase(),
+            style = iosCaption,
             modifier = Modifier.weight(1f)
         )
         Icon(
-            painter = painterResource(R.drawable.ic_expand_more_24dp),
+            painter = painterResource(R.drawable.ic_chevron_right_24dp),
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.secondary,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier
-                .size(24.dp)
-                .rotate(if (expanded) 180f else 0f)
+                .size(18.dp)
+                .rotate(if (expanded) 90f else 0f)
         )
     }
 }
@@ -81,28 +83,29 @@ private fun SettingsItemRow(
     enabled: Boolean,
     onClick: (() -> Unit)?,
     modifier: Modifier = Modifier,
+    value: String? = null,
+    showChevron: Boolean = false,
+    iconTint: Color? = null,
     trailing: @Composable (() -> Unit)? = null
 ) {
+    val inGroup = LocalInSettingsGroup.current
     val titleColor = if (enabled) MaterialTheme.colorScheme.onSurface
     else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-    val descriptionColor = if (enabled) MaterialTheme.colorScheme.onSurfaceVariant
+    val secondaryColor = if (enabled) MaterialTheme.colorScheme.onSurfaceVariant
     else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f)
 
     Row(
         modifier = modifier
             .fillMaxWidth()
+            .iosStandaloneCell(inGroup, MaterialTheme.colorScheme.cell)
             .then(if (onClick != null) Modifier.clickable(enabled = enabled, onClick = onClick) else Modifier)
-            .padding(16.dp),
+            .heightIn(min = 48.dp)
+            .padding(horizontal = 16.dp, vertical = 11.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (icon != null) {
-            Icon(
-                painter = icon,
-                contentDescription = null,
-                modifier = Modifier.size(24.dp),
-                tint = titleColor
-            )
-            Spacer(modifier = Modifier.width(16.dp))
+            IosIconBadge(icon = icon, tint = iconTint ?: MaterialTheme.colorScheme.primary, enabled = enabled)
+            Spacer(modifier = Modifier.width(14.dp))
         }
         Column(modifier = Modifier.weight(1f)) {
             Text(
@@ -111,15 +114,35 @@ private fun SettingsItemRow(
                 color = titleColor
             )
             if (!description.isNullOrEmpty()) {
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(2.dp))
                 Text(
                     text = description,
                     style = MaterialTheme.typography.bodySmall,
-                    color = descriptionColor
+                    color = secondaryColor
                 )
             }
         }
+        if (!value.isNullOrEmpty()) {
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = value,
+                style = MaterialTheme.typography.bodyLarge,
+                color = secondaryColor,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.widthIn(max = 160.dp)
+            )
+        }
         trailing?.invoke()
+        if (showChevron) {
+            Spacer(modifier = Modifier.width(4.dp))
+            Icon(
+                painter = painterResource(R.drawable.ic_chevron_right_24dp),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.outline,
+                modifier = Modifier.size(20.dp)
+            )
+        }
     }
 }
 
@@ -135,8 +158,8 @@ fun SettingsEditItem(
     keyboardNumber: Boolean = false
 ) {
     var showDialog by remember { mutableStateOf(false) }
-    val description = if (isPassword) {
-        if (value.isEmpty()) null else "******"
+    val shown = if (isPassword) {
+        if (value.isEmpty()) null else "••••••"
     } else {
         value.ifEmpty { null }
     }
@@ -144,12 +167,14 @@ fun SettingsEditItem(
     SettingsItemRow(
         icon = icon,
         title = title,
-        description = description,
+        description = null,
         enabled = enabled,
         onClick = if (enabled) {
             { showDialog = true }
         } else null,
-        modifier = modifier
+        modifier = modifier,
+        value = shown,
+        showChevron = true
     )
 
     if (showDialog) {
@@ -191,12 +216,14 @@ fun SettingsListItem(
     SettingsItemRow(
         icon = icon,
         title = title,
-        description = summary.ifEmpty { null },
+        description = null,
         enabled = enabled,
         onClick = if (enabled) {
             { showDialog = true }
         } else null,
-        modifier = modifier
+        modifier = modifier,
+        value = summary.ifEmpty { null },
+        showChevron = true
     )
 
     if (showDialog) {
@@ -221,7 +248,8 @@ fun SettingsMenuItem(
     title: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    subtitle: String? = null
+    subtitle: String? = null,
+    iconTint: Color? = null
 ) {
     SettingsItemRow(
         icon = icon,
@@ -229,7 +257,9 @@ fun SettingsMenuItem(
         description = subtitle,
         enabled = true,
         onClick = onClick,
-        modifier = modifier
+        modifier = modifier,
+        showChevron = true,
+        iconTint = iconTint
     )
 }
 
@@ -241,12 +271,14 @@ fun SettingsSwitchItem(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    iconTint: Color? = null
 ) {
     SettingsItemRow(
         icon = icon,
         title = title,
         description = summary,
+        iconTint = iconTint,
         enabled = enabled,
         onClick = if (enabled) {
             { onCheckedChange(!checked) }
@@ -256,11 +288,8 @@ fun SettingsSwitchItem(
             Switch(
                 checked = checked,
                 onCheckedChange = if (enabled) onCheckedChange else null,
-                modifier = Modifier.scale(0.8f),
-                colors = SwitchDefaults.colors(
-                    checkedThumbColor = MaterialTheme.colorScheme.onSecondary,
-                    checkedTrackColor = MaterialTheme.colorScheme.secondary
-                ),
+                modifier = Modifier.scale(0.85f),
+                colors = iosSwitchColors(),
                 enabled = enabled
             )
         }

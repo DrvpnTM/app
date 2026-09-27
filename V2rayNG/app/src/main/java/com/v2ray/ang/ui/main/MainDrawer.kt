@@ -26,6 +26,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.Color
+import com.v2ray.ang.BuildConfig
+import com.v2ray.ang.ui.compose.SettingsGroup
+import com.v2ray.ang.ui.compose.SettingsMenuItem
+import com.v2ray.ang.ui.compose.IosBlue
+import com.v2ray.ang.ui.compose.IosIndigo
+import com.v2ray.ang.ui.compose.IosOrange
+import com.v2ray.ang.ui.compose.IosTeal
+import com.v2ray.ang.ui.compose.IosGreen
+import com.v2ray.ang.ui.compose.IosRed
+import com.v2ray.ang.ui.compose.IosGray
 import com.v2ray.ang.R
 import com.v2ray.ang.ui.compose.AppDivider
 import com.v2ray.ang.ui.compose.verticalScrollbar
@@ -64,53 +79,74 @@ private val drawerItems = primaryDrawerItems + listOf(
     MainDestination.About
 )
 
+private fun MainDestination.badgeColor(): Color = when (this) {
+    MainDestination.Subscriptions -> IosBlue
+    MainDestination.PerAppProxy -> IosIndigo
+    MainDestination.Routing -> IosOrange
+    MainDestination.UserAssets -> IosTeal
+    MainDestination.RegionLanguage -> IosGreen
+    MainDestination.Advanced -> IosRed
+    MainDestination.AppLogView -> IosGray
+    MainDestination.Settings -> IosGray
+    MainDestination.CheckUpdate -> IosBlue
+    MainDestination.BackupRestore -> IosOrange
+    MainDestination.About -> IosIndigo
+    else -> IosBlue
+}
+
 @Composable
 fun MainDrawerContent(drawerState: DrawerState, onNavigate: (MainDestination) -> Unit) {
     val drawerScrollState = rememberScrollState()
 
     ModalDrawerSheet(
         drawerState = drawerState,
-        modifier = Modifier.fillMaxWidth(0.75f),
-        drawerContainerColor = MaterialTheme.colorScheme.surface
+        modifier = Modifier.fillMaxWidth(0.82f),
+        drawerContainerColor = MaterialTheme.colorScheme.background,
+        drawerShape = RoundedCornerShape(topEnd = 22.dp, bottomEnd = 22.dp)
     ) {
         Column(
             modifier = Modifier
                 .verticalScroll(drawerScrollState)
                 .verticalScrollbar(drawerScrollState)
+                .padding(bottom = 24.dp)
         ) {
-            Surface(
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(180.dp)
+                    .padding(start = 20.dp, end = 20.dp, top = 28.dp, bottom = 12.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Image(
-                        painter = painterResource(R.drawable.drvpn_logo),
-                        contentDescription = null,
-                        modifier = Modifier.size(96.dp)
-                    )
+                Image(
+                    painter = painterResource(R.drawable.drvpn_logo),
+                    contentDescription = null,
+                    modifier = Modifier.size(56.dp)
+                )
+                Spacer(Modifier.width(14.dp))
+                Column {
                     Text(
                         text = stringResource(R.string.app_name),
-                        style = MaterialTheme.typography.titleLarge,
+                        style = MaterialTheme.typography.headlineSmall,
                         color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = "v${BuildConfig.VERSION_NAME}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
-            drawerItems.forEachIndexed { index, item ->
-                if (index == primaryDrawerItems.size) AppDivider()
-                NavigationDrawerItem(
-                    label = { Text(stringResource(item.labelRes)) },
-                    selected = false,
-                    onClick = { onNavigate(item) },
-                    icon = { Icon(painterResource(item.iconRes), contentDescription = null) },
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-                )
+            listOf(primaryDrawerItems, drawerItems.drop(primaryDrawerItems.size)).forEach { section ->
+                Spacer(Modifier.height(14.dp))
+                SettingsGroup(dividerInset = 60.dp) {
+                    section.forEach { item ->
+                        SettingsMenuItem(
+                            icon = painterResource(item.iconRes),
+                            title = stringResource(item.labelRes),
+                            iconTint = item.badgeColor(),
+                            onClick = { onNavigate(item) }
+                        )
+                    }
+                }
             }
         }
     }

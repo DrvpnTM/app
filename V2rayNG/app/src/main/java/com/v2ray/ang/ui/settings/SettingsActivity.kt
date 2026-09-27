@@ -46,6 +46,7 @@ import com.v2ray.ang.ui.compose.AppTopBar
 import com.v2ray.ang.ui.compose.CollapsiblePreferenceGroupHeader
 import com.v2ray.ang.ui.compose.NavigationBarsSpacer
 import com.v2ray.ang.ui.compose.SettingsEditItem
+import com.v2ray.ang.ui.compose.SettingsGroup
 import com.v2ray.ang.ui.compose.SettingsListItem
 import com.v2ray.ang.ui.compose.SettingsMenuItem
 import com.v2ray.ang.ui.compose.SettingsSwitchItem
@@ -243,7 +244,7 @@ fun SettingsScreen(
                 expanded = uiSettingsExpanded,
                 onExpandedChange = { uiSettingsExpanded = it }
             )
-            if (uiSettingsExpanded) {
+            if (uiSettingsExpanded) SettingsGroup {
                 SettingsSwitchItem(
                     title = stringResource(R.string.title_pref_speed_enabled),
                     summary = stringResource(R.string.summary_pref_speed_enabled),
@@ -321,7 +322,7 @@ fun SettingsScreen(
                 expanded = vpnSettingsExpanded,
                 onExpandedChange = { vpnSettingsExpanded = it }
             )
-            if (vpnSettingsExpanded) {
+            if (vpnSettingsExpanded) SettingsGroup {
                 SettingsSwitchItem(
                     title = stringResource(R.string.title_pref_ipv6_enabled),
                     summary = stringResource(R.string.summary_pref_ipv6_enabled),
@@ -418,7 +419,7 @@ fun SettingsScreen(
                 expanded = coreSettingsExpanded,
                 onExpandedChange = { coreSettingsExpanded = it }
             )
-            if (coreSettingsExpanded) {
+            if (coreSettingsExpanded) SettingsGroup {
                 SettingsSwitchItem(
                     title = stringResource(R.string.title_pref_sniffing_enabled),
                     summary = stringResource(R.string.summary_pref_sniffing_enabled),
@@ -522,7 +523,7 @@ fun SettingsScreen(
                 expanded = muxSettingsExpanded,
                 onExpandedChange = { muxSettingsExpanded = it }
             )
-            if (muxSettingsExpanded) {
+            if (muxSettingsExpanded) SettingsGroup {
                 SettingsSwitchItem(
                     title = stringResource(R.string.title_pref_mux_enabled),
                     summary = stringResource(R.string.summary_pref_mux_enabled),
@@ -558,7 +559,7 @@ fun SettingsScreen(
                 expanded = fragmentSettingsExpanded,
                 onExpandedChange = { fragmentSettingsExpanded = it }
             )
-            if (fragmentSettingsExpanded) {
+            if (fragmentSettingsExpanded) SettingsGroup {
                 SettingsSwitchItem(
                     title = stringResource(R.string.title_pref_fragment_enabled),
                     checked = fragment,
@@ -598,7 +599,7 @@ fun SettingsScreen(
                 expanded = observatorySettingsExpanded,
                 onExpandedChange = { observatorySettingsExpanded = it }
             )
-            if (observatorySettingsExpanded) {
+            if (observatorySettingsExpanded) SettingsGroup {
                 SettingsEditItem(
                     title = stringResource(R.string.title_pref_observatory_least_ping_interval),
                     value = observatoryLeastPingInterval,
@@ -650,7 +651,7 @@ fun SettingsScreen(
                 expanded = advancedSettingsExpanded,
                 onExpandedChange = { advancedSettingsExpanded = it }
             )
-            if (advancedSettingsExpanded) {
+            if (advancedSettingsExpanded) SettingsGroup {
                 SettingsSwitchItem(
                     title = stringResource(R.string.title_pref_is_booted),
                     summary = stringResource(R.string.summary_pref_is_booted),
@@ -687,7 +688,7 @@ fun SettingsScreen(
                 expanded = modeSettingsExpanded,
                 onExpandedChange = { modeSettingsExpanded = it }
             )
-            if (modeSettingsExpanded) {
+            if (modeSettingsExpanded) SettingsGroup {
                 SettingsListItem(
                     title = stringResource(R.string.title_mode),
                     entries = modeEntries,
