@@ -660,4 +660,5 @@
     <string name="qr_transfer_hint">Отсканируйте код в Dr VPN на телефоне (или другом совместимом приложении), чтобы добавить этот сервер.</string>
     <string name="qr_transfer_unavailable">Этот сервер нельзя передать QR-кодом.</string>
     <string name="server_category_all">Все</string>
+    <string name="server_category_empty">В этой категории нет рабочих серверов. Включите «показывать серверы без пинга», чтобы увидеть все.</string>
 </resources>

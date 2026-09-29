@@ -654,4 +654,5 @@
     <string name="qr_transfer_hint">用手機上的 Dr VPN（或其他相容應用）掃描此碼即可新增該伺服器。</string>
     <string name="qr_transfer_unavailable">此伺服器無法以 QR 碼分享。</string>
     <string name="server_category_all">全部</string>
+    <string name="server_category_empty">此分類中沒有可用的伺服器。勾選「顯示無延遲的伺服器」即可查看全部。</string>
 </resources>
