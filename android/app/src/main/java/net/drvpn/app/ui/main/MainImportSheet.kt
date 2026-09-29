@@ -33,6 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import net.drvpn.app.R
+import net.drvpn.app.ui.compose.sheetDragHandle
 import net.drvpn.app.ui.compose.focusHighlight
 import net.drvpn.app.ui.compose.IosBlue
 import net.drvpn.app.ui.compose.IosGray
@@ -80,6 +81,7 @@ fun ImportSheet(onDismiss: () -> Unit, onAction: (MainAction) -> Unit, onFromPho
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         containerColor = MaterialTheme.colorScheme.background,
         shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+        dragHandle = sheetDragHandle(),
     ) {
         Column(
             Modifier

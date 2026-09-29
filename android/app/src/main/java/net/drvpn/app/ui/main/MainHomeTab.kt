@@ -70,6 +70,12 @@ import androidx.compose.material3.LinearProgressIndicator
 import net.drvpn.app.handler.AnnouncementManager
 import androidx.compose.ui.platform.LocalUriHandler
 import net.drvpn.app.R
+import net.drvpn.app.util.DeviceUtil
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.unit.coerceIn
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -104,6 +110,16 @@ fun MainHomeTab(
     onOpenProxies: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // On a TV the remote starts on the connect button instead of the first control on screen.
+    val isTv = DeviceUtil.isTv(LocalContext.current)
+    val connectFocus = remember { FocusRequester() }
+    var initialFocusDone by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(isTv) {
+        if (isTv && !initialFocusDone) {
+            runCatching { connectFocus.requestFocus() }
+            initialFocusDone = true
+        }
+    }
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
         val landscape = maxWidth > maxHeight
         val availableHeight = maxHeight
@@ -114,6 +130,7 @@ fun MainHomeTab(
                 ConnectButton(
                     isRunning = isRunning,
                     onToggle = { onAction(MainAction.ToggleService) },
+                    focusRequester = connectFocus,
                     // In landscape (phones on their side, TVs) the button shrinks with the height so the
                     // status, timer and speed below it stay visible.
                     size = if (landscape) (availableHeight * 0.42f).coerceIn(110.dp, 200.dp) else 220.dp,
@@ -433,7 +450,7 @@ private fun StatusPill(isRunning: Boolean) {
 }
 
 @Composable
-private fun ConnectButton(isRunning: Boolean, onToggle: () -> Unit, size: Dp = 220.dp) {
+private fun ConnectButton(isRunning: Boolean, onToggle: () -> Unit, size: Dp = 220.dp, focusRequester: FocusRequester? = null) {
     // Off: brand blue (an invitation to tap, not a "disabled" grey). On: green.
     val top by animateColorAsState(
         targetValue = if (isRunning) Color(0xFF4CD964) else Color(0xFF3D9BFF),
@@ -483,6 +500,7 @@ private fun ConnectButton(isRunning: Boolean, onToggle: () -> Unit, size: Dp = 2
             modifier = Modifier
                 .size(size * 0.68f)
                 .shadow(elevation = 16.dp, shape = CircleShape, ambientColor = color, spotColor = color)
+                .then(if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier)
                 .focusHighlight(CircleShape)
                 .clip(CircleShape)
                 .background(Brush.verticalGradient(listOf(top, bottom)))
