@@ -238,6 +238,16 @@ fun QRCodeDialog(
 }
 
 /**
+ * The sheet's drag handle is a focus target of its own; on a TV remote it would take the first
+ * focus instead of the first option, and there is nothing to drag. Hidden on TVs.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun sheetDragHandle(): (@Composable () -> Unit)? =
+    if (net.drvpn.app.util.DeviceUtil.isTv(androidx.compose.ui.platform.LocalContext.current)) null
+    else ({ androidx.compose.material3.BottomSheetDefaults.DragHandle() })
+
+/**
  * When showRadio is true, displays RadioButton (single selection mode);
  * otherwise, plain clickable list mode.
  * The selectedOption parameter is used to highlight the selected item only when showRadio is true.
@@ -259,6 +269,7 @@ fun <T> SelectListDialog(
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         containerColor = MaterialTheme.colorScheme.background,
         shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+        dragHandle = sheetDragHandle(),
     ) {
         Column(
             Modifier

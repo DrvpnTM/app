@@ -144,17 +144,41 @@ jobs:
           name: DrVPN-arm64-v8a
           path: android/app/build/outputs/apk/playstore/release/*arm64-v8a*.apk
 
+      - name: Upload all release APKs
+        if: ${{ steps.keystore.outputs.signed == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-apks
+          path: android/app/build/outputs/apk/playstore/release/*.apk
+
       - name: Read app version
         id: appver
         run: |
           ver=$(grep -oE 'versionName = "[^"]+"' android/app/build.gradle.kts | sed -E 's/.*"([^"]+)".*/\1/')
           echo "version=$ver" >> "$GITHUB_OUTPUT"
 
+    outputs:
+      signed: ${{ steps.keystore.outputs.signed }}
+      version: ${{ steps.appver.outputs.version }}
+
+  # Publishes only when the signed build AND the unit tests succeeded, and only from main or a tag
+  # (the dev branch builds test APKs without releasing them).
+  release:
+    needs: [build, unit-tests]
+    if: ${{ needs.build.outputs.signed == 'true' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')) }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download release APKs
+        uses: actions/download-artifact@v4
+        with:
+          name: release-apks
+          path: apks
+
       - name: Publish release
-        if: ${{ steps.keystore.outputs.signed == 'true' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')) }}
         uses: softprops/action-gh-release@v2
         with:
-          files: android/app/build/outputs/apk/playstore/release/*.apk
-          tag_name: v${{ steps.appver.outputs.version }}
-          name: Dr VPN v${{ steps.appver.outputs.version }}
+          files: apks/*.apk
+          tag_name: v${{ needs.build.outputs.version }}
+          target_commitish: ${{ github.sha }}
+          name: Dr VPN v${{ needs.build.outputs.version }}
           generate_release_notes: true

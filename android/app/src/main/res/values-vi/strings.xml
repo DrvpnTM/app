@@ -655,4 +655,7 @@
     <string name="qr_transfer_unavailable">Không thể chia sẻ máy chủ này bằng mã QR.</string>
     <string name="server_category_all">Tất cả</string>
     <string name="server_category_empty">Không có máy chủ hoạt động trong mục này. Bật “hiện máy chủ không có ping” để xem tất cả.</string>
+    <string name="kill_switch_unavailable">Thiết bị này không có màn hình cài đặt VPN (thường gặp trên TV), nên không bật được kill switch ở đây.
+
+Dr VPN vẫn tự kết nối lại khi mất kết nối. Để bảo vệ mọi thiết bị, hãy dùng Dr VPN trên router.</string>
 </resources>
