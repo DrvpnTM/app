@@ -32,7 +32,7 @@ jobs:
           cache: 'gradle'
 
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@v4
         with:
           log-accepted-android-sdk-licenses: false
           packages: 'platforms;android-37.0 build-tools;37.0.0 platform-tools'
@@ -71,7 +71,7 @@ jobs:
           cache: 'gradle'
 
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@v4
         with:
           log-accepted-android-sdk-licenses: false
           packages: 'platforms;android-37.0 build-tools;37.0.0 platform-tools'
