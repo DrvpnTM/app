@@ -177,6 +177,7 @@ class BackupViewModel(application: Application) : BaseViewModel(application) {
         if (count <= 0) {
             return Pair(false, "")
         }
+        MmkvManager.decryptBackupCopies(backupDir)
 
         return if (ZipUtil.zipFromFolder(backupDir, outputZipFilePath)) {
             Pair(true, outputZipFilePath)
@@ -193,6 +194,7 @@ class BackupViewModel(application: Application) : BaseViewModel(application) {
                     return@withContext false
                 }
 
+                MmkvManager.encryptRestoreCopies(backupDir.absolutePath)
                 val count = MMKV.restoreAllFromDirectory(backupDir.absolutePath)
                 SettingsChangeManager.makeSetupGroupTab()
                 SettingsChangeManager.makeRestartService()

@@ -650,4 +650,7 @@
     <string name="phone_link_hint">Quét mã bằng điện thoại (cùng Wi-Fi), dán liên kết đăng ký vào trang vừa mở rồi nhấn Gửi.</string>
     <string name="phone_link_waiting">Đang chờ điện thoại…</string>
     <string name="phone_link_no_network">TV chưa kết nối Wi-Fi hoặc mạng dây.</string>
+    <string name="qr_transfer_title">Hiện mã QR</string>
+    <string name="qr_transfer_hint">Quét mã này bằng Dr VPN trên điện thoại (hoặc ứng dụng tương thích khác) để thêm máy chủ này.</string>
+    <string name="qr_transfer_unavailable">Không thể chia sẻ máy chủ này bằng mã QR.</string>
 </resources>

@@ -406,7 +406,12 @@ class MainViewModel(
             MainAction.LocateHandled -> consumeLocateTarget()
             is MainAction.ShareQRCode -> {
                 val bitmap = dataSource.share2QRCode(action.guid)
-                _uiState.update { it.copy(shareQRCodeBitmap = bitmap) }
+                if (bitmap == null) {
+                    toastError(R.string.qr_transfer_unavailable)
+                } else {
+                    val name = MmkvManager.decodeServerConfig(action.guid)?.remarks.orEmpty()
+                    _uiState.update { it.copy(shareQRCodeBitmap = bitmap, shareQRCodeName = name) }
+                }
             }
 
             MainAction.DismissQRCodeDialog -> {

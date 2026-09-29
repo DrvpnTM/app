@@ -40,7 +40,8 @@ data class MainUiState(
     val subscription: net.drvpn.app.dto.entities.SubscriptionItem? = null,
     /** Owner announcement from notice.json, shown as a card on the home tab until dismissed. */
     val announcement: net.drvpn.app.handler.AnnouncementManager.Announcement? = null,
-    val shareQRCodeBitmap: android.graphics.Bitmap? = null
+    val shareQRCodeBitmap: android.graphics.Bitmap? = null,
+    val shareQRCodeName: String = "",
 )
 
 /**
