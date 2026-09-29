@@ -277,6 +277,7 @@ class MainViewModel(
             is MainServiceEvent.MeasureConfigCancelled -> {
                 if (testRequests.completeBulk(event.requestId) != null) {
                     cancelPendingTestResults()
+                    clearPingPending()
                     resetTestStatus()
                 }
             }
@@ -531,9 +532,27 @@ class MainViewModel(
         }
     }
 
+    /**
+     * Servers that were visible when a ping test started. They stay listed while their new result is
+     * pending, so the list (and the TV remote's focus) does not empty out at the start of every test.
+     */
+    @Volatile
+    private var pingPendingGuids: Set<String> = emptySet()
+
     /** Hides servers without a successful ping unless the user ticked "show servers without ping". */
-    private fun visibleRows(allRows: List<ServerRowUiModel>): List<ServerRowUiModel> =
-        if (uiState.value.showServersWithoutPing) allRows else allRows.filter { it.testDelayMillis > 0L }
+    private fun visibleRows(allRows: List<ServerRowUiModel>): List<ServerRowUiModel> {
+        if (uiState.value.showServersWithoutPing) return allRows
+        val pending = pingPendingGuids
+        return allRows.filter { it.testDelayMillis > 0L || (it.testDelayMillis == 0L && it.guid in pending) }
+    }
+
+    private fun clearPingPending() {
+        if (pingPendingGuids.isEmpty()) return
+        pingPendingGuids = emptySet()
+        groupUiFlows.values.forEach { flow ->
+            flow.update { current -> current.copy(rows = visibleRows(current.allRows)) }
+        }
+    }
 
     private fun setShowServersWithoutPing(show: Boolean) {
         if (show == uiState.value.showServersWithoutPing) return
@@ -967,6 +986,7 @@ class MainViewModel(
         testRequests.cancelBulk()
         testRequests.invalidateCurrent()
         cancelPendingTestResults()
+        clearPingPending()
         resetTestStatus()
         dataSource.cancelAllPing()
     }
@@ -989,6 +1009,7 @@ class MainViewModel(
             return
         }
         val serverGuids = servers.map { it.guid }
+        pingPendingGuids = mutableServerGroupState(groupId).value.rows.map { it.guid }.toSet()
         mutableServerGroupState(groupId).update { current ->
             current.copy(
                 servers = current.servers.map { server ->
@@ -1046,6 +1067,7 @@ class MainViewModel(
 
     private fun onTestsFinished(requestId: String) {
         if (testRequests.completeBulk(requestId) == null) return
+        clearPingPending()
         resetTestStatus()
         if (pendingSelectFastest) {
             pendingSelectFastest = false
