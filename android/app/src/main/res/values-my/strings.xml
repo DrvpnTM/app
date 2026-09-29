@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">Dr VPN</string>
     <string name="app_widget_name">ချိတ်ဆက်ရန်</string>
     <string name="app_tile_name">ချိတ်ဆက်ရန်</string>
     <string name="app_tile_first_use">ဤလုပ်ဆောင်ချက်ကို မသုံးမီ အက်ပ်ထဲတွင် ပရိုဖိုင်တစ်ခု ထည့်ပါ။</string>

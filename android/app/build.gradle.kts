@@ -36,6 +36,13 @@ android {
         }
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Per-country editions: -PCOUNTRY_CODE=eg -PCOUNTRY_NAME=Egypt builds "VPN IP Egypt"
+        // with its own applicationId (net.drvpn.app.eg) so editions install side by side.
+        val countryCode = (project.findProperty("COUNTRY_CODE") as? String)?.lowercase()?.takeIf { it.isNotBlank() }
+        val countryName = (project.findProperty("COUNTRY_NAME") as? String)?.takeIf { it.isNotBlank() }
+        if (countryCode != null) applicationIdSuffix = ".$countryCode"
+        resValue("string", "app_name", if (countryName != null) "VPN IP $countryName" else "Dr VPN")
     }
 
     // Release signing key is provided privately by CI (never committed). If it is absent,
@@ -131,7 +138,7 @@ android {
                     else
                         "universal"
 
-                    output.outputFileName = "DrVPN_${variant.versionName}_${abi}.apk"
+                    output.outputFileName = "DrVPN_${(project.findProperty("COUNTRY_CODE") as? String)?.let { "${it}_" } ?: ""}${variant.versionName}_${abi}.apk"
                     if (versionCodes.containsKey(abi)) {
                         output.versionCodeOverride =
                             (1000000 * versionCodes[abi]!!).plus(variant.versionCode)
