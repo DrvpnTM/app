@@ -55,6 +55,12 @@ import net.drvpn.app.R
 import net.drvpn.app.ui.compose.focusHighlight
 import net.drvpn.app.dto.LocateTarget
 import net.drvpn.app.dto.entities.ProfileItem
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.unit.LayoutDirection
 import net.drvpn.app.ui.compose.ItemDivider
 import net.drvpn.app.ui.compose.ReorderableGridItem
 import net.drvpn.app.ui.compose.ReorderableListItem
@@ -322,7 +328,13 @@ private fun ServerListItem(
             .padding(horizontal = if (doubleColumnDisplay) 6.dp else 16.dp, vertical = 4.dp)
             .clip(IosGroupShape)
             .background(MaterialTheme.colorScheme.cell)
-            .then(if (isSelected) Modifier.border(1.5.dp, primary, IosGroupShape) else Modifier)
+            .then(
+                if (isSelected) {
+                    Modifier
+                        .background(primary.copy(alpha = 0.08f))
+                        .border(1.5.dp, primary, IosGroupShape)
+                } else Modifier
+            )
             .semantics {
                 if (selectedStateDescription != null) {
                     stateDescription = selectedStateDescription
@@ -340,15 +352,29 @@ private fun ServerListItem(
                 .padding(start = 12.dp, end = 4.dp, top = 10.dp, bottom = 10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Country flag bubble
+            // Country flag bubble; without a known country, the protocol's initial on its own colour.
+            val protocol = row.profile.configType.name
+            val protocolColor = protocolColor(protocol)
             Box(
                 Modifier
                     .size(42.dp)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                    .background(
+                        if (row.flag.isNotEmpty()) MaterialTheme.colorScheme.surfaceVariant
+                        else protocolColor.copy(alpha = 0.15f)
+                    ),
                 Alignment.Center
             ) {
-                Text(row.flag.ifEmpty { "🌐" }, fontSize = 22.sp)
+                if (row.flag.isNotEmpty()) {
+                    Text(row.flag, fontSize = 22.sp)
+                } else {
+                    Text(
+                        protocol.take(1),
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = protocolColor
+                    )
+                }
             }
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
@@ -374,8 +400,10 @@ private fun ServerListItem(
                         )
                         Spacer(Modifier.width(6.dp))
                     }
+                    // Protocol only: the address is noise in a list (and visible in the editor anyway).
+                    val note = row.profile.description?.takeIf { it.isNotBlank() }
                     Text(
-                        "${row.typeDescription} · ${row.statistics}",
+                        listOfNotNull(row.typeDescription.replace(" / ", " · "), note).joinToString(" · "),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
@@ -406,7 +434,17 @@ private fun ServerListItem(
     }
 }
 
-/** Latency capsule: green / orange / red like iOS signal quality. */
+private fun protocolColor(protocol: String): Color = when (protocol.uppercase()) {
+    "VLESS" -> Color(0xFF007AFF)
+    "VMESS" -> Color(0xFF5856D6)
+    "TROJAN" -> Color(0xFFFF9500)
+    "SHADOWSOCKS" -> Color(0xFF34C759)
+    "HYSTERIA2" -> Color(0xFFFF2D55)
+    "WIREGUARD" -> Color(0xFFAF52DE)
+    else -> Color(0xFF8E8E93)
+}
+
+/** Latency capsule: signal bars + compact "123ms", green / orange / red like iOS signal quality. */
 @Composable
 private fun PingPill(delayMillis: Long) {
     if (delayMillis == 0L) return
@@ -416,18 +454,44 @@ private fun PingPill(delayMillis: Long) {
         delayMillis < 1000L -> IosOrange
         else -> colorPingRed
     }
-    val text = if (delayMillis < 0L) "✕" else stringResource(R.string.server_test_delay_value, delayMillis)
-    Text(
-        text,
-        style = MaterialTheme.typography.labelMedium,
-        fontWeight = FontWeight.SemiBold,
-        color = color,
-        maxLines = 1,
+    val bars = when {
+        delayMillis < 0L -> 0
+        delayMillis < 200L -> 3
+        delayMillis < 600L -> 2
+        else -> 1
+    }
+    val description = if (delayMillis < 0L) "✕" else stringResource(R.string.server_test_delay_value, delayMillis)
+    Row(
         modifier = Modifier
             .clip(RoundedCornerShape(50))
             .background(color.copy(alpha = 0.14f))
-            .padding(horizontal = 8.dp, vertical = 3.dp)
-    )
+            .padding(horizontal = 8.dp, vertical = 4.dp)
+            .clearAndSetSemantics { contentDescription = description },
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // Bars always draw left to right, whatever the layout direction.
+        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+            Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                for (i in 1..3) {
+                    Box(
+                        Modifier
+                            .width(3.dp)
+                            .height((4 + i * 3).dp)
+                            .clip(RoundedCornerShape(1.dp))
+                            .background(if (i <= bars) color else color.copy(alpha = 0.25f))
+                    )
+                }
+            }
+        }
+        Spacer(Modifier.width(6.dp))
+        Text(
+            if (delayMillis < 0L) "✕" else "${delayMillis}ms",
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = color,
+            maxLines = 1,
+        )
+    }
 }
 
 internal suspend fun PagerState.navigateToPageOptimized(
