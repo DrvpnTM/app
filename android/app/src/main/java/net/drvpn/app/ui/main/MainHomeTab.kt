@@ -103,6 +103,7 @@ fun MainHomeTab(
 ) {
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
         val landscape = maxWidth > maxHeight
+        val availableHeight = maxHeight
         val connectBlock: @Composable () -> Unit = {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 ConnectButton(
@@ -110,7 +111,7 @@ fun MainHomeTab(
                     onToggle = { onAction(MainAction.ToggleService) },
                     // In landscape (phones on their side, TVs) the button shrinks with the height so the
                     // status, timer and speed below it stay visible.
-                    size = if (landscape) (maxHeight * 0.42f).coerceIn(110.dp, 200.dp) else 220.dp,
+                    size = if (landscape) (availableHeight * 0.42f).coerceIn(110.dp, 200.dp) else 220.dp,
                 )
                 Spacer(Modifier.height(16.dp))
                 Text(
@@ -148,7 +149,7 @@ fun MainHomeTab(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(24.dp),
             ) {
-                val columnHeight = maxHeight - 24.dp
+                val columnHeight = availableHeight - 24.dp
                 Column(
                     Modifier
                         .weight(1f)

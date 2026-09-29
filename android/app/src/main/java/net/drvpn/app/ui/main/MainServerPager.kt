@@ -320,7 +320,6 @@ private fun ServerListItem(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = if (doubleColumnDisplay) 6.dp else 16.dp, vertical = 4.dp)
-            .focusHighlight()
             .clip(IosGroupShape)
             .background(MaterialTheme.colorScheme.cell)
             .then(if (isSelected) Modifier.border(1.5.dp, primary, IosGroupShape) else Modifier)
@@ -329,63 +328,72 @@ private fun ServerListItem(
                     stateDescription = selectedStateDescription
                 }
             }
-            .clickable { actions.select(row.guid) }
-            .padding(start = 12.dp, end = 4.dp, top = 10.dp, bottom = 10.dp),
+            .padding(end = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Country flag bubble
-        Box(
-            Modifier
-                .size(42.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.surfaceVariant),
-            Alignment.Center
+        // Selecting and the "more" menu are separate focus targets so a TV remote can reach both.
+        Row(
+            modifier = Modifier
+                .weight(1f)
+                .focusHighlight()
+                .clickable { actions.select(row.guid) }
+                .padding(start = 12.dp, end = 4.dp, top = 10.dp, bottom = 10.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(row.flag.ifEmpty { "🌐" }, fontSize = 22.sp)
-        }
-        Spacer(Modifier.width(12.dp))
-        Column(Modifier.weight(1f)) {
-            Text(
-                row.remarks,
-                style = MaterialTheme.typography.bodyLarge.copy(lineBreak = LineBreak.Paragraph),
-                fontWeight = FontWeight.SemiBold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Spacer(Modifier.height(2.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                if (row.subscriptionBadge.isNotBlank()) {
-                    Text(
-                        row.subscriptionBadge.uppercase(),
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = primary,
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(4.dp))
-                            .background(primary.copy(alpha = 0.12f))
-                            .padding(horizontal = 5.dp, vertical = 1.dp)
-                    )
-                    Spacer(Modifier.width(6.dp))
-                }
+            // Country flag bubble
+            Box(
+                Modifier
+                    .size(42.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                Alignment.Center
+            ) {
+                Text(row.flag.ifEmpty { "🌐" }, fontSize = 22.sp)
+            }
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
                 Text(
-                    "${row.typeDescription} · ${row.statistics}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    row.remarks,
+                    style = MaterialTheme.typography.bodyLarge.copy(lineBreak = LineBreak.Paragraph),
+                    fontWeight = FontWeight.SemiBold,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
+                Spacer(Modifier.height(2.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (row.subscriptionBadge.isNotBlank()) {
+                        Text(
+                            row.subscriptionBadge.uppercase(),
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = primary,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(4.dp))
+                                .background(primary.copy(alpha = 0.12f))
+                                .padding(horizontal = 5.dp, vertical = 1.dp)
+                        )
+                        Spacer(Modifier.width(6.dp))
+                    }
+                    Text(
+                        "${row.typeDescription} · ${row.statistics}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
             }
-        }
-        PingPill(row.testDelayMillis)
-        if (isSelected) {
-            Icon(
-                painterResource(R.drawable.ic_action_done),
-                contentDescription = null,
-                tint = primary,
-                modifier = Modifier
-                    .padding(start = 6.dp)
-                    .size(20.dp)
-            )
+            PingPill(row.testDelayMillis)
+            if (isSelected) {
+                Icon(
+                    painterResource(R.drawable.ic_action_done),
+                    contentDescription = null,
+                    tint = primary,
+                    modifier = Modifier
+                        .padding(start = 6.dp)
+                        .size(20.dp)
+                )
+            }
         }
         IconButton(onClick = { actions.more(row.guid, row.profile) }, Modifier.size(40.dp).focusHighlight(CircleShape)) {
             Icon(
