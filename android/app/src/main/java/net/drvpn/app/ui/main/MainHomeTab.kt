@@ -74,9 +74,12 @@ import androidx.compose.ui.unit.coerceIn
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.fillMaxHeight
 import net.drvpn.app.ui.compose.focusHighlight
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 
 private val ConnectedColor = Color(0xFF34C759)
-private val DisconnectedColor = Color(0xFF8E8E93)
 
 /**
  * Hiddify-style home: active profile card, a large connect button, live status (timer + speed)
@@ -106,6 +109,8 @@ fun MainHomeTab(
         val availableHeight = maxHeight
         val connectBlock: @Composable () -> Unit = {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                StatusPill(isRunning)
+                Spacer(Modifier.height(if (landscape) 8.dp else 14.dp))
                 ConnectButton(
                     isRunning = isRunning,
                     onToggle = { onAction(MainAction.ToggleService) },
@@ -113,15 +118,15 @@ fun MainHomeTab(
                     // status, timer and speed below it stay visible.
                     size = if (landscape) (availableHeight * 0.42f).coerceIn(110.dp, 200.dp) else 220.dp,
                 )
-                Spacer(Modifier.height(16.dp))
-                Text(
-                    text = stringResource(if (isRunning) R.string.home_connected else R.string.home_tap_to_connect),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = if (isRunning) ConnectedColor else MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+                Spacer(Modifier.height(12.dp))
+                if (!isRunning) {
+                    Text(
+                        text = stringResource(R.string.home_tap_to_connect),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
                 if (isRunning) {
-                    Spacer(Modifier.height(6.dp))
                     ConnectionTimer(connectedSince)
                     Spacer(Modifier.height(12.dp))
                     SpeedRow(up = speedUp, down = speedDown, totalUp = totalUp, totalDown = totalDown)
@@ -244,23 +249,44 @@ private fun ConnectionTimer(since: Long?) {
 private fun SpeedRow(up: Long, down: Long, totalUp: Long, totalDown: Long) {
     Row(
         modifier = Modifier
-            .clip(RoundedCornerShape(14.dp))
+            .widthIn(max = 360.dp)
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(18.dp))
             .background(MaterialTheme.colorScheme.cell)
-            .padding(horizontal = 18.dp, vertical = 10.dp),
-        horizontalArrangement = Arrangement.spacedBy(22.dp),
+            .height(IntrinsicSize.Min)
+            .padding(vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        SpeedItem(arrow = "↓", label = stringResource(R.string.home_download), value = down.toSpeedString(), total = totalDown.toTrafficString(), color = IosBlue)
-        SpeedItem(arrow = "↑", label = stringResource(R.string.home_upload), value = up.toSpeedString(), total = totalUp.toTrafficString(), color = IosGreen)
+        SpeedItem(arrow = "↓", label = stringResource(R.string.home_download), value = down.toSpeedString(), total = totalDown.toTrafficString(), color = IosBlue, modifier = Modifier.weight(1f))
+        Box(
+            Modifier
+                .fillMaxHeight()
+                .width(1.dp)
+                .background(MaterialTheme.colorScheme.outlineVariant)
+        )
+        SpeedItem(arrow = "↑", label = stringResource(R.string.home_upload), value = up.toSpeedString(), total = totalUp.toTrafficString(), color = IosGreen, modifier = Modifier.weight(1f))
     }
 }
 
 @Composable
-private fun SpeedItem(arrow: String, label: String, value: String, total: String, color: Color) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text("$arrow $label", style = MaterialTheme.typography.labelMedium, color = color, fontWeight = FontWeight.SemiBold)
-        Text(value, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
-        Text(total, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+private fun SpeedItem(arrow: String, label: String, value: String, total: String, color: Color, modifier: Modifier = Modifier) {
+    Column(modifier, horizontalAlignment = Alignment.CenterHorizontally) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                Modifier
+                    .size(20.dp)
+                    .clip(CircleShape)
+                    .background(color.copy(alpha = 0.15f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(arrow, style = MaterialTheme.typography.labelMedium, color = color, fontWeight = FontWeight.Bold)
+            }
+            Spacer(Modifier.width(6.dp))
+            Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        Spacer(Modifier.height(4.dp))
+        Text(value, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, maxLines = 1)
+        Text(total, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
     }
 }
 
@@ -379,16 +405,49 @@ private fun SubscriptionUsage(sub: SubscriptionItem) {
     }
 }
 
+/** Small capsule above the connect button: coloured dot + connection state. */
+@Composable
+private fun StatusPill(isRunning: Boolean) {
+    val color = if (isRunning) ConnectedColor else MaterialTheme.colorScheme.onSurfaceVariant
+    Row(
+        modifier = Modifier
+            .clip(RoundedCornerShape(50))
+            .background(color.copy(alpha = 0.12f))
+            .padding(horizontal = 14.dp, vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            Modifier
+                .size(8.dp)
+                .clip(CircleShape)
+                .background(color)
+        )
+        Spacer(Modifier.width(8.dp))
+        Text(
+            text = stringResource(if (isRunning) R.string.home_connected else R.string.connection_not_connected),
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.SemiBold,
+            color = color,
+        )
+    }
+}
+
 @Composable
 private fun ConnectButton(isRunning: Boolean, onToggle: () -> Unit, size: Dp = 220.dp) {
-    val color by animateColorAsState(
-        targetValue = if (isRunning) ConnectedColor else DisconnectedColor,
-        label = "connectColor",
+    // Off: brand blue (an invitation to tap, not a "disabled" grey). On: green.
+    val top by animateColorAsState(
+        targetValue = if (isRunning) Color(0xFF4CD964) else Color(0xFF3D9BFF),
+        label = "connectTop",
     )
+    val bottom by animateColorAsState(
+        targetValue = if (isRunning) Color(0xFF1FA84A) else Color(0xFF0060DF),
+        label = "connectBottom",
+    )
+    val color = bottom
     val pulse = rememberInfiniteTransition(label = "connectPulse")
     val haloScale by pulse.animateFloat(
         initialValue = 1f,
-        targetValue = if (isRunning) 1.12f else 1.04f,
+        targetValue = if (isRunning) 1.12f else 1.05f,
         animationSpec = infiniteRepeatable(tween(durationMillis = 1400), RepeatMode.Reverse),
         label = "haloScale",
     )
@@ -411,15 +470,22 @@ private fun ConnectButton(isRunning: Boolean, onToggle: () -> Unit, size: Dp = 2
                 .size(size * 0.91f)
                 .scale(haloScale)
                 .clip(CircleShape)
-                .background(color.copy(alpha = 0.15f)),
+                .background(color.copy(alpha = 0.12f)),
+        )
+        Box(
+            modifier = Modifier
+                .size(size * 0.80f)
+                .clip(CircleShape)
+                .background(color.copy(alpha = 0.18f)),
         )
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
-                .size(size * 0.73f)
+                .size(size * 0.68f)
+                .shadow(elevation = 16.dp, shape = CircleShape, ambientColor = color, spotColor = color)
                 .focusHighlight(CircleShape)
                 .clip(CircleShape)
-                .background(color)
+                .background(Brush.verticalGradient(listOf(top, bottom)))
                 .clickable(onClick = onToggle),
         ) {
             Icon(
