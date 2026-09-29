@@ -570,4 +570,5 @@
     <string name="qr_transfer_hint">Escanea este código con Dr VPN en tu móvil (u otra app compatible) para añadir este servidor.</string>
     <string name="qr_transfer_unavailable">Este servidor no se puede compartir como código QR.</string>
     <string name="server_category_all">Todos</string>
+    <string name="server_category_empty">No hay servidores que funcionen en esta categoría. Marca «mostrar servidores sin ping» para verlos todos.</string>
 </resources>

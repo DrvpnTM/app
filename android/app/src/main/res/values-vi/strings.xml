@@ -654,4 +654,5 @@
     <string name="qr_transfer_hint">Quét mã này bằng Dr VPN trên điện thoại (hoặc ứng dụng tương thích khác) để thêm máy chủ này.</string>
     <string name="qr_transfer_unavailable">Không thể chia sẻ máy chủ này bằng mã QR.</string>
     <string name="server_category_all">Tất cả</string>
+    <string name="server_category_empty">Không có máy chủ hoạt động trong mục này. Bật “hiện máy chủ không có ping” để xem tất cả.</string>
 </resources>

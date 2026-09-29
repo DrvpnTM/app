@@ -664,4 +664,5 @@
     <string name="qr_transfer_hint">امسح هذا الرمز باستخدام Dr VPN على هاتفك (أو تطبيق متوافق آخر) لإضافة هذا الخادم هناك.</string>
     <string name="qr_transfer_unavailable">لا يمكن مشاركة هذا الخادم كرمز QR.</string>
     <string name="server_category_all">الكل</string>
+    <string name="server_category_empty">لا يوجد خادم يعمل في هذه الفئة. فعّل «عرض الخوادم بدون ping» لرؤيتها كلها.</string>
 </resources>

@@ -568,4 +568,5 @@
     <string name="qr_transfer_hint">ဤဆာဗာကို ထည့်ရန် ဖုန်းရှိ Dr VPN (သို့မဟုတ် ကိုက်ညီသော အက်ပ်) ဖြင့် ဤကုဒ်ကို scan ဖတ်ပါ။</string>
     <string name="qr_transfer_unavailable">ဤဆာဗာကို QR ကုဒ်အဖြစ် မျှဝေ၍ မရပါ။</string>
     <string name="server_category_all">အားလုံး</string>
+    <string name="server_category_empty">ဤအမျိုးအစားတွင် အလုပ်လုပ်သော ဆာဗာ မရှိပါ။ အားလုံးကြည့်ရန် ping မရှိသော ဆာဗာများ ပြရန် ကို ရွေးပါ။</string>
 </resources>

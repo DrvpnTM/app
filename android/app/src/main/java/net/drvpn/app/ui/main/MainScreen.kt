@@ -33,6 +33,8 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.NavigationBarItemDefaults
@@ -281,11 +283,25 @@ fun MainScreen(
                     val categoryState by remember(categoryGroupId) {
                         mainViewModel.serverGroupState(categoryGroupId)
                     }.collectAsStateWithLifecycle()
+                    // With "hide servers without ping", only offer categories that have a working server.
+                    val categoryRows = if (uiState.showServersWithoutPing) categoryState.allRows
+                    else categoryState.allRows.filter { it.testDelayMillis > 0L }
                     ServerCategoryBar(
-                        rows = categoryState.allRows,
+                        rows = categoryRows,
                         selected = uiState.serverCategory,
                         onSelect = { onAction(MainAction.SetServerCategory(it)) }
                     )
+                    if (uiState.serverCategory != null && categoryState.rows.isEmpty() && !uiState.isTesting) {
+                        Text(
+                            stringResource(R.string.server_category_empty),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 24.dp, vertical = 24.dp)
+                        )
+                    }
                     if (groups.size > 1) {
                         GroupTabBar(
                             groups = groups,

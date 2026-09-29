@@ -656,4 +656,5 @@
     <string name="qr_transfer_hint">Scan this code with Dr VPN on your phone (or another compatible app) to add this server there.</string>
     <string name="qr_transfer_unavailable">This server cannot be shared as a QR code.</string>
     <string name="server_category_all">All</string>
+    <string name="server_category_empty">No working server in this category. Tick “show servers without ping” to see them all.</string>
 </resources>
