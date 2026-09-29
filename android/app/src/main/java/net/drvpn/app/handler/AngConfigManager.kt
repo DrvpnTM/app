@@ -549,7 +549,7 @@ object AngConfigManager {
      * Parses a "subscription-userinfo" header such as
      * `upload=123; download=456; total=10737418240; expire=1767225600` into the subscription.
      */
-    private fun applySubscriptionUserInfo(sub: SubscriptionItem, header: String?) {
+    internal fun applySubscriptionUserInfo(sub: SubscriptionItem, header: String?) {
         if (header.isNullOrBlank()) return
         val values = header.split(';').mapNotNull { part ->
             val kv = part.split('=', limit = 2)
