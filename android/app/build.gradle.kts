@@ -13,8 +13,8 @@ android {
         applicationId = "net.drvpn.app"
         minSdk = 24
         targetSdk = 37
-        versionCode = 12
-        versionName = "0.1.2"
+        versionCode = 13
+        versionName = "0.1.3"
 
         val abiFilterList = (properties["ABI_FILTERS"] as? String)?.split(';')
         splits {

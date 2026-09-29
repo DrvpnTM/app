@@ -645,4 +645,9 @@
     <string name="per_app_iran_direct">伊朗應用不走 VPN</string>
     <string name="per_app_iran_done">已有 %1$d 個伊朗應用繞過 VPN</string>
     <string name="per_app_iran_none">未找到伊朗應用</string>
+    <string name="phone_link_title">從手機傳送</string>
+    <string name="phone_link_tile">從手機</string>
+    <string name="phone_link_hint">用手機（同一 Wi-Fi）掃描此 QR 碼，在開啟的頁面貼上訂閱連結並點擊傳送。</string>
+    <string name="phone_link_waiting">正在等待手機…</string>
+    <string name="phone_link_no_network">電視未連接 Wi-Fi 或有線網路。</string>
 </resources>

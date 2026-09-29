@@ -188,6 +188,7 @@ fun AppListItem(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 3.dp)
+            .focusHighlight()
             .clip(IosGroupShape)
             .background(MaterialTheme.colorScheme.cell)
             .clickable { onCheckedChange(!checked) }

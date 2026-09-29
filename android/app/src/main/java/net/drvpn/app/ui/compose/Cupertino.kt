@@ -18,6 +18,12 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.composed
+import androidx.compose.foundation.border
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -245,4 +251,16 @@ fun IosIconBadge(icon: Painter, tint: Color = MaterialTheme.colorScheme.primary,
     ) {
         Icon(painter = icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp))
     }
+}
+
+/**
+ * TV / remote-control support: draws a clear primary-colored ring around the element while it has
+ * D-pad focus. Put it before the clickable/selectable modifier so it observes that element's focus.
+ */
+fun Modifier.focusHighlight(shape: androidx.compose.ui.graphics.Shape = IosGroupShape): Modifier = composed {
+    var focused by remember { mutableStateOf(false) }
+    val ring = MaterialTheme.colorScheme.primary
+    this
+        .onFocusChanged { focused = it.hasFocus }
+        .then(if (focused) Modifier.border(3.dp, ring, shape) else Modifier)
 }

@@ -44,6 +44,8 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.asPaddingValues
 import net.drvpn.app.R
+import androidx.compose.foundation.shape.RoundedCornerShape
+import net.drvpn.app.ui.compose.focusHighlight
 import net.drvpn.app.dto.entities.ProfileItem
 import net.drvpn.app.ui.compose.QRCodeDialog
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -211,6 +213,7 @@ fun MainScreen(
                 ) {
                     MainTab.entries.forEach { tab ->
                         NavigationBarItem(
+                            modifier = Modifier.focusHighlight(RoundedCornerShape(16.dp)),
                             selected = selectedTab == tab,
                             onClick = {
                                 if (tab == MainTab.Home && showSearch) {

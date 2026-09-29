@@ -32,6 +32,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import net.drvpn.app.R
+import androidx.compose.ui.graphics.RectangleShape
 
 @Composable
 fun PreferenceGroupHeader(title: String, modifier: Modifier = Modifier) {
@@ -98,6 +99,7 @@ private fun SettingsItemRow(
         modifier = modifier
             .fillMaxWidth()
             .iosStandaloneCell(inGroup, MaterialTheme.colorScheme.cell)
+            .focusHighlight(if (inGroup) RectangleShape else IosGroupShape)
             .then(if (onClick != null) Modifier.clickable(enabled = enabled, onClick = onClick) else Modifier)
             .heightIn(min = 48.dp)
             .padding(horizontal = 16.dp, vertical = 11.dp),

@@ -15,6 +15,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import net.drvpn.app.R
+import androidx.compose.foundation.shape.RoundedCornerShape
+import net.drvpn.app.ui.compose.focusHighlight
 
 /**
  * Above the server list: a checkbox to also show servers without a ping result,
@@ -36,6 +38,7 @@ fun PingFilterBar(
         Row(
             modifier = Modifier
                 .weight(1f)
+                .focusHighlight(RoundedCornerShape(10.dp))
                 .toggleable(
                     value = showServersWithoutPing,
                     role = Role.Checkbox,

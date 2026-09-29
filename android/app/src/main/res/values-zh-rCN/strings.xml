@@ -645,4 +645,9 @@
     <string name="per_app_iran_direct">伊朗应用不走 VPN</string>
     <string name="per_app_iran_done">已有 %1$d 个伊朗应用绕过 VPN</string>
     <string name="per_app_iran_none">未找到伊朗应用</string>
+    <string name="phone_link_title">从手机发送</string>
+    <string name="phone_link_tile">从手机</string>
+    <string name="phone_link_hint">用手机（同一 Wi-Fi）扫描此二维码，在打开的页面粘贴订阅链接并点击发送。</string>
+    <string name="phone_link_waiting">正在等待手机…</string>
+    <string name="phone_link_no_network">电视未连接 Wi-Fi 或有线网络。</string>
 </resources>

@@ -49,6 +49,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.ui.text.font.FontWeight
 import net.drvpn.app.R
+import androidx.compose.ui.graphics.RectangleShape
 
 @Composable
 fun ConfirmDialog(
@@ -254,6 +255,7 @@ fun <T> SelectListDialog(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .focusHighlight(RectangleShape)
                             .then(
                                 if (showRadio) Modifier.selectable(
                                     selected = isSelected,
@@ -292,6 +294,7 @@ fun <T> SelectListDialog(
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .fillMaxWidth()
+                        .focusHighlight(RectangleShape)
                         .clickable(onClick = onDismiss)
                         .padding(vertical = 14.dp)
                 )
