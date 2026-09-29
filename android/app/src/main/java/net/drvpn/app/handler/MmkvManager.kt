@@ -69,11 +69,17 @@ object MmkvManager {
         ) = Unit
     }
 
-    private val mainStorage by lazy { MMKV.mmkvWithID(ID_MAIN, MMKV.MULTI_PROCESS_MODE) }
-    private val profileFullStorage by lazy { MMKV.mmkvWithID(ID_PROFILE_FULL_CONFIG, MMKV.MULTI_PROCESS_MODE) }
-    private val serverRawStorage by lazy { MMKV.mmkvWithID(ID_SERVER_RAW, MMKV.MULTI_PROCESS_MODE) }
+    /** Stores that hold credentials (server passwords/UUIDs, subscription URLs); encrypted at rest. */
+    private val SENSITIVE_IDS = listOf(ID_MAIN, ID_PROFILE_FULL_CONFIG, ID_SERVER_RAW, ID_SUB)
+
+    private fun openSensitive(id: String): MMKV =
+        MMKV.mmkvWithID(id, MMKV.MULTI_PROCESS_MODE, MmkvCrypto.cryptKey)
+
+    private val mainStorage by lazy { openSensitive(ID_MAIN) }
+    private val profileFullStorage by lazy { openSensitive(ID_PROFILE_FULL_CONFIG) }
+    private val serverRawStorage by lazy { openSensitive(ID_SERVER_RAW) }
     private val serverAffStorage by lazy { MMKV.mmkvWithID(ID_SERVER_AFF, MMKV.MULTI_PROCESS_MODE) }
-    private val subStorage by lazy { MMKV.mmkvWithID(ID_SUB, MMKV.MULTI_PROCESS_MODE) }
+    private val subStorage by lazy { openSensitive(ID_SUB) }
     private val assetStorage by lazy { MMKV.mmkvWithID(ID_ASSET, MMKV.MULTI_PROCESS_MODE) }
     private val settingsStorage by lazy { MMKV.mmkvWithID(ID_SETTING, MMKV.MULTI_PROCESS_MODE) }
 
@@ -147,6 +153,19 @@ object MmkvManager {
             logLevel,
             recoveryHandler
         )
+        MmkvCrypto.prepare(context, SENSITIVE_IDS)
+    }
+
+    /** Backup copies must not depend on this device's Keystore: decrypt the copies in [dir]. */
+    fun decryptBackupCopies(dir: String) {
+        val key = MmkvCrypto.cryptKey ?: return
+        SENSITIVE_IDS.forEach { MmkvCrypto.rekeyCopy(it, dir, key, null) }
+    }
+
+    /** Encrypts plaintext store copies in [dir] with this device's key before they are restored. */
+    fun encryptRestoreCopies(dir: String) {
+        val key = MmkvCrypto.cryptKey ?: return
+        SENSITIVE_IDS.forEach { MmkvCrypto.rekeyCopy(it, dir, null, key) }
     }
 
     private fun recoverFromStorageError(mmapID: String, error: String): MMKVRecoverStrategic {

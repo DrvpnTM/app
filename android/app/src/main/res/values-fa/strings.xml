@@ -652,4 +652,7 @@
     <string name="phone_link_hint">این کد را با گوشی (متصل به همین وای‌فای) اسکن کنید، لینک اشتراک را در صفحه باز شده بچسبانید و «ارسال» را بزنید.</string>
     <string name="phone_link_waiting">در انتظار گوشی…</string>
     <string name="phone_link_no_network">تلویزیون به وای‌فای یا شبکه کابلی وصل نیست.</string>
+    <string name="qr_transfer_title">نمایش کد QR</string>
+    <string name="qr_transfer_hint">این کد را با Dr VPN روی گوشی (یا برنامه سازگار دیگر) اسکن کنید تا این سرور آنجا اضافه شود.</string>
+    <string name="qr_transfer_unavailable">این سرور را نمی‌توان به صورت کد QR منتقل کرد.</string>
 </resources>

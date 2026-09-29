@@ -152,7 +152,12 @@ fun MainScreen(
         )
     }
     if (shareQRCodeBitmap != null) {
-        QRCodeDialog(bitmap = shareQRCodeBitmap, onDismiss = { onAction(MainAction.DismissQRCodeDialog) })
+        QRCodeDialog(
+            bitmap = shareQRCodeBitmap,
+            onDismiss = { onAction(MainAction.DismissQRCodeDialog) },
+            title = uiState.shareQRCodeName.ifBlank { null },
+            hint = stringResource(R.string.qr_transfer_hint)
+        )
     }
 
     ModalNavigationDrawer(
@@ -247,6 +252,7 @@ fun MainScreen(
                     subscription = uiState.subscription,
                     announcement = uiState.announcement,
                     selectedServerName = uiState.selectedServerName,
+                    selectedGuid = uiState.selectedGuid,
                     isRunning = isRunning,
                     statusText = displayText,
                     connectedSince = uiState.connectedSince,

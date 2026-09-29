@@ -566,4 +566,7 @@
     <string name="phone_link_hint">Escanea este código con tu móvil (misma Wi-Fi), pega tu enlace de suscripción en la página y toca Enviar.</string>
     <string name="phone_link_waiting">Esperando a tu móvil…</string>
     <string name="phone_link_no_network">El televisor no está conectado a Wi-Fi ni a Ethernet.</string>
+    <string name="qr_transfer_title">Mostrar código QR</string>
+    <string name="qr_transfer_hint">Escanea este código con Dr VPN en tu móvil (u otra app compatible) para añadir este servidor.</string>
+    <string name="qr_transfer_unavailable">Este servidor no se puede compartir como código QR.</string>
 </resources>

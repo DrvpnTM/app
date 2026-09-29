@@ -387,7 +387,7 @@ private fun ServerListItem(
                     .size(20.dp)
             )
         }
-        IconButton(onClick = { actions.more(row.guid, row.profile) }, Modifier.size(40.dp)) {
+        IconButton(onClick = { actions.more(row.guid, row.profile) }, Modifier.size(40.dp).focusHighlight(CircleShape)) {
             Icon(
                 painterResource(R.drawable.ic_more_vert_24dp),
                 stringResource(R.string.acc_more),

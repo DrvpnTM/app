@@ -652,4 +652,7 @@
     <string name="phone_link_hint">Scan this code with your phone (same Wi-Fi), paste your subscription link on the page that opens and tap Send.</string>
     <string name="phone_link_waiting">Waiting for your phone…</string>
     <string name="phone_link_no_network">The TV is not connected to Wi-Fi or Ethernet.</string>
+    <string name="qr_transfer_title">Show QR code</string>
+    <string name="qr_transfer_hint">Scan this code with Dr VPN on your phone (or another compatible app) to add this server there.</string>
+    <string name="qr_transfer_unavailable">This server cannot be shared as a QR code.</string>
 </resources>

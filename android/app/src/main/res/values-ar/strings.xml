@@ -660,4 +660,7 @@
     <string name="phone_link_hint">امسح هذا الرمز بهاتفك (على نفس شبكة Wi-Fi)، والصق رابط الاشتراك في الصفحة ثم اضغط إرسال.</string>
     <string name="phone_link_waiting">بانتظار هاتفك…</string>
     <string name="phone_link_no_network">التلفاز غير متصل بشبكة Wi-Fi أو سلكية.</string>
+    <string name="qr_transfer_title">عرض رمز QR</string>
+    <string name="qr_transfer_hint">امسح هذا الرمز باستخدام Dr VPN على هاتفك (أو تطبيق متوافق آخر) لإضافة هذا الخادم هناك.</string>
+    <string name="qr_transfer_unavailable">لا يمكن مشاركة هذا الخادم كرمز QR.</string>
 </resources>

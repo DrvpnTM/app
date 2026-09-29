@@ -650,4 +650,7 @@
     <string name="phone_link_hint">用手机（同一 Wi-Fi）扫描此二维码，在打开的页面粘贴订阅链接并点击发送。</string>
     <string name="phone_link_waiting">正在等待手机…</string>
     <string name="phone_link_no_network">电视未连接 Wi-Fi 或有线网络。</string>
+    <string name="qr_transfer_title">显示二维码</string>
+    <string name="qr_transfer_hint">用手机上的 Dr VPN（或其他兼容应用）扫描此码即可添加该服务器。</string>
+    <string name="qr_transfer_unavailable">此服务器无法以二维码分享。</string>
 </resources>

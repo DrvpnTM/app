@@ -85,6 +85,7 @@ fun MainHomeTab(
     subscription: SubscriptionItem?,
     announcement: AnnouncementManager.Announcement?,
     selectedServerName: String,
+    selectedGuid: String?,
     isRunning: Boolean,
     statusText: String,
     connectedSince: Long?,
@@ -158,7 +159,11 @@ fun MainHomeTab(
                         onUpdate = { onAction(MainAction.UpdateSubscriptions) },
                     )
                     Spacer(Modifier.height(12.dp))
-                    ServerCard(serverName = selectedServerName, onClick = onOpenProxies)
+                    ServerCard(
+                    serverName = selectedServerName,
+                    onClick = onOpenProxies,
+                    onShowQr = selectedGuid?.let { guid -> { onAction(MainAction.ShareQRCode(guid)) } }
+                )
                     Spacer(Modifier.height(10.dp))
                     FastestButton(busy = isTesting, onClick = { onAction(MainAction.SelectFastest) })
                 }
@@ -183,7 +188,11 @@ fun MainHomeTab(
                 Spacer(Modifier.height(36.dp))
                 connectBlock()
                 Spacer(Modifier.height(32.dp))
-                ServerCard(serverName = selectedServerName, onClick = onOpenProxies)
+                ServerCard(
+                    serverName = selectedServerName,
+                    onClick = onOpenProxies,
+                    onShowQr = selectedGuid?.let { guid -> { onAction(MainAction.ShareQRCode(guid)) } }
+                )
                 Spacer(Modifier.height(10.dp))
                 FastestButton(busy = isTesting, onClick = { onAction(MainAction.SelectFastest) })
             }
@@ -405,7 +414,7 @@ private fun ConnectButton(isRunning: Boolean, onToggle: () -> Unit, size: Dp = 2
 }
 
 @Composable
-private fun ServerCard(serverName: String, onClick: () -> Unit) {
+private fun ServerCard(serverName: String, onClick: () -> Unit, onShowQr: (() -> Unit)? = null) {
     val title = stringResource(R.string.home_current_server)
     val name = serverName.ifBlank { stringResource(R.string.home_no_server) }
     Card(
@@ -441,6 +450,15 @@ private fun ServerCard(serverName: String, onClick: () -> Unit) {
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
+            }
+            if (onShowQr != null && serverName.isNotBlank()) {
+                IconButton(onClick = onShowQr, modifier = Modifier.focusHighlight(CircleShape)) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_qu_scan_24dp),
+                        contentDescription = stringResource(R.string.qr_transfer_title),
+                        tint = MaterialTheme.colorScheme.primary,
+                    )
+                }
             }
             Icon(
                 painter = painterResource(R.drawable.ic_chevron_right_24dp),
