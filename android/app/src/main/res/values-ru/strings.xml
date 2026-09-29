@@ -659,4 +659,5 @@
     <string name="qr_transfer_title">Показать QR-код</string>
     <string name="qr_transfer_hint">Отсканируйте код в Dr VPN на телефоне (или другом совместимом приложении), чтобы добавить этот сервер.</string>
     <string name="qr_transfer_unavailable">Этот сервер нельзя передать QR-кодом.</string>
+    <string name="server_category_all">Все</string>
 </resources>

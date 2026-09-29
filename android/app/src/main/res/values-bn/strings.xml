@@ -655,4 +655,5 @@
     <string name="qr_transfer_title">QR কোড দেখান</string>
     <string name="qr_transfer_hint">এই সার্ভারটি যোগ করতে ফোনের Dr VPN (বা অন্য সামঞ্জস্যপূর্ণ অ্যাপ) দিয়ে কোডটি স্ক্যান করুন।</string>
     <string name="qr_transfer_unavailable">এই সার্ভারটি QR কোড হিসেবে শেয়ার করা যাবে না।</string>
+    <string name="server_category_all">সব</string>
 </resources>

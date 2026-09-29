@@ -61,6 +61,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.platform.LocalConfiguration
 import net.drvpn.app.ui.compose.ItemDivider
 import net.drvpn.app.ui.compose.ReorderableGridItem
 import net.drvpn.app.ui.compose.ReorderableListItem
@@ -352,37 +353,24 @@ private fun ServerListItem(
                 .padding(start = 12.dp, end = 4.dp, top = 10.dp, bottom = 10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Country flag bubble; without a known country, the protocol's initial on its own colour.
-            val protocol = row.profile.configType.name
-            val protocolColor = protocolColor(protocol)
+            // Country flag bubble; a globe when the location is unknown (e.g. behind a CDN).
             Box(
                 Modifier
                     .size(42.dp)
                     .clip(CircleShape)
-                    .background(
-                        if (row.flag.isNotEmpty()) MaterialTheme.colorScheme.surfaceVariant
-                        else protocolColor.copy(alpha = 0.15f)
-                    ),
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
                 Alignment.Center
             ) {
-                if (row.flag.isNotEmpty()) {
-                    Text(row.flag, fontSize = 22.sp)
-                } else {
-                    Text(
-                        protocolShort(protocol),
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = protocolColor
-                    )
-                }
+                Text(row.flag.ifEmpty { "🌐" }, fontSize = 24.sp)
             }
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
+                // Branded name instead of the seller's config name; the real name stays in the editor.
                 Text(
-                    row.remarks,
+                    serverDisplayName(row.country, LocalConfiguration.current.locales[0]),
                     style = MaterialTheme.typography.bodyLarge.copy(lineBreak = LineBreak.Paragraph),
                     fontWeight = FontWeight.SemiBold,
-                    maxLines = 2,
+                    maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 Spacer(Modifier.height(2.dp))
@@ -400,9 +388,21 @@ private fun ServerListItem(
                         )
                         Spacer(Modifier.width(6.dp))
                     }
-                    // Protocol only: the address is noise in a list (and visible in the editor anyway).
+                    // Protocol type under the name, e.g. "VLESS · xhttp · tls".
+                    val protocolColor = protocolColor(row.protocol)
                     Text(
-                        row.typeDescription.replace(" / ", " · "),
+                        row.protocol,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = protocolColor,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(protocolColor.copy(alpha = 0.12f))
+                            .padding(horizontal = 5.dp, vertical = 1.dp)
+                    )
+                    Spacer(Modifier.width(6.dp))
+                    Text(
+                        row.typeDescription.split(" / ").drop(1).joinToString(" · "),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
@@ -433,18 +433,7 @@ private fun ServerListItem(
     }
 }
 
-private fun protocolShort(protocol: String): String = when (protocol.uppercase()) {
-    "VLESS" -> "VL"
-    "VMESS" -> "VM"
-    "TROJAN" -> "TR"
-    "SHADOWSOCKS" -> "SS"
-    "HYSTERIA2" -> "HY"
-    "WIREGUARD" -> "WG"
-    "SOCKS" -> "S5"
-    else -> protocol.take(2)
-}
-
-private fun protocolColor(protocol: String): Color = when (protocol.uppercase()) {
+internal fun protocolColor(protocol: String): Color = when (protocol.uppercase()) {
     "VLESS" -> Color(0xFF007AFF)
     "VMESS" -> Color(0xFF5856D6)
     "TROJAN" -> Color(0xFFFF9500)

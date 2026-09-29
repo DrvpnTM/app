@@ -663,4 +663,5 @@
     <string name="qr_transfer_title">عرض رمز QR</string>
     <string name="qr_transfer_hint">امسح هذا الرمز باستخدام Dr VPN على هاتفك (أو تطبيق متوافق آخر) لإضافة هذا الخادم هناك.</string>
     <string name="qr_transfer_unavailable">لا يمكن مشاركة هذا الخادم كرمز QR.</string>
+    <string name="server_category_all">الكل</string>
 </resources>

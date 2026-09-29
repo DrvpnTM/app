@@ -28,6 +28,8 @@ data class MainUiState(
     val confirmRemove: Boolean = false,
     val doubleColumnDisplay: Boolean = false,
     val showServersWithoutPing: Boolean = false,
+    /** Selected server category chip ("c:DE", "p:VLESS"), null = all. */
+    val serverCategory: String? = null,
     /** Live traffic speed in bytes/s while connected. */
     val speedUp: Long = 0L,
     val speedDown: Long = 0L,
@@ -75,6 +77,8 @@ sealed interface MainAction {
     data class EditServer(val guid: String, val profile: net.drvpn.app.dto.entities.ProfileItem) : MainAction
     data class Search(val query: String) : MainAction
     data class SetShowServersWithoutPing(val show: Boolean) : MainAction
+    /** Server list category chip: "c:<country>", "p:<protocol>" or null for all. */
+    data class SetServerCategory(val category: String?) : MainAction
     data object SelectFastest : MainAction
     data class DismissAnnouncement(val id: String) : MainAction
     data class ShareQRCode(val guid: String) : MainAction

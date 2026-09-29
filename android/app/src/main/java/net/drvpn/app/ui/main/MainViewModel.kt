@@ -181,8 +181,10 @@ class MainViewModel(
                         withContext(ioDispatcher) {
                             runCatching {
                                 dataSource.decodeServerConfig(guid)?.let { profile ->
+                                    val country = serverCountry(profile)
                                     val flag = serverFlag(profile)
-                                    if (flag.isEmpty()) profile.remarks else "$flag ${profile.remarks}"
+                                    val name = serverDisplayName(country, appLocale())
+                                    if (flag.isEmpty()) name else "$flag $name"
                                 }.orEmpty()
                             }
                                 .onFailure { LogUtil.e(AppConfig.TAG, "Failed to resolve selected server name", it) }
@@ -398,6 +400,7 @@ class MainViewModel(
             is MainAction.RemoveServer -> removeServerAndRefresh(action.guid)
             is MainAction.Search -> filterConfig(action.query)
             is MainAction.SetShowServersWithoutPing -> setShowServersWithoutPing(action.show)
+            is MainAction.SetServerCategory -> setServerCategory(action.category)
             MainAction.SelectFastest -> selectFastest()
             is MainAction.DismissAnnouncement -> {
                 AnnouncementManager.dismiss(action.id)
@@ -526,7 +529,9 @@ class MainViewModel(
             val port = if (uiState.value.isRunning) SettingsManager.getHttpPort() else 0
             if (!ServerCountryManager.resolveMissing(hosts, port)) return@launch
             mutableServerGroupState(groupId).update { current ->
-                val allRows = current.allRows.map { it.copy(flag = serverFlag(it.profile)) }
+                val allRows = current.allRows.map {
+                    it.copy(flag = serverFlag(it.profile), country = serverCountry(it.profile).orEmpty())
+                }
                 current.copy(rows = visibleRows(allRows), allRows = allRows)
             }
         }
@@ -541,9 +546,23 @@ class MainViewModel(
 
     /** Hides servers without a successful ping unless the user ticked "show servers without ping". */
     private fun visibleRows(allRows: List<ServerRowUiModel>): List<ServerRowUiModel> {
-        if (uiState.value.showServersWithoutPing) return allRows
+        val ui = uiState.value
         val pending = pingPendingGuids
-        return allRows.filter { it.testDelayMillis > 0L || (it.testDelayMillis == 0L && it.guid in pending) }
+        val rows = allRows.filter { row ->
+            row.matchesCategory(ui.serverCategory) &&
+                (ui.showServersWithoutPing || row.testDelayMillis > 0L ||
+                    (row.testDelayMillis == 0L && row.guid in pending))
+        }
+        // Fastest first. Not while a test runs: rows would jump under the user's finger / TV focus.
+        return if (ui.isTesting) rows else rows.sortedWith(serverPingOrder)
+    }
+
+    private fun setServerCategory(category: String?) {
+        if (category == uiState.value.serverCategory) return
+        _uiState.update { it.copy(serverCategory = category) }
+        groupUiFlows.values.forEach { flow ->
+            flow.update { current -> current.copy(rows = visibleRows(current.allRows)) }
+        }
     }
 
     private fun clearPingPending() {
