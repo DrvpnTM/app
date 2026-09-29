@@ -209,9 +209,9 @@ fun MainHomeTab(
                     subscription = subscription,
                     onUpdate = { onAction(MainAction.UpdateSubscriptions) },
                 )
-                Spacer(Modifier.height(36.dp))
+                Spacer(Modifier.height(20.dp))
                 connectBlock()
-                Spacer(Modifier.height(32.dp))
+                Spacer(Modifier.height(20.dp))
                 ServerCard(
                     serverName = selectedServerName,
                     onClick = onOpenProxies,

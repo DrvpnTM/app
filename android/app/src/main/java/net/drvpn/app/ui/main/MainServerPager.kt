@@ -369,8 +369,8 @@ private fun ServerListItem(
                     Text(row.flag, fontSize = 22.sp)
                 } else {
                     Text(
-                        protocol.take(1),
-                        fontSize = 18.sp,
+                        protocolShort(protocol),
+                        fontSize = 15.sp,
                         fontWeight = FontWeight.Bold,
                         color = protocolColor
                     )
@@ -382,7 +382,7 @@ private fun ServerListItem(
                     row.remarks,
                     style = MaterialTheme.typography.bodyLarge.copy(lineBreak = LineBreak.Paragraph),
                     fontWeight = FontWeight.SemiBold,
-                    maxLines = 1,
+                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
                 Spacer(Modifier.height(2.dp))
@@ -401,9 +401,8 @@ private fun ServerListItem(
                         Spacer(Modifier.width(6.dp))
                     }
                     // Protocol only: the address is noise in a list (and visible in the editor anyway).
-                    val note = row.profile.description?.takeIf { it.isNotBlank() }
                     Text(
-                        listOfNotNull(row.typeDescription.replace(" / ", " · "), note).joinToString(" · "),
+                        row.typeDescription.replace(" / ", " · "),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
@@ -432,6 +431,17 @@ private fun ServerListItem(
             )
         }
     }
+}
+
+private fun protocolShort(protocol: String): String = when (protocol.uppercase()) {
+    "VLESS" -> "VL"
+    "VMESS" -> "VM"
+    "TROJAN" -> "TR"
+    "SHADOWSOCKS" -> "SS"
+    "HYSTERIA2" -> "HY"
+    "WIREGUARD" -> "WG"
+    "SOCKS" -> "S5"
+    else -> protocol.take(2)
 }
 
 private fun protocolColor(protocol: String): Color = when (protocol.uppercase()) {
