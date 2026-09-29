@@ -634,7 +634,7 @@
     <string name="home_download">تنزيل</string>
     <string name="home_upload">رفع</string>
     <string name="kill_switch_title">مفتاح الإيقاف (منع تسريب IP)</string>
-    <string name="kill_switch_message">عند تفعيل مفتاح الإيقاف، إذا انقطع الـVPN أو الاشتراك ينقطع الإنترنت أيضًا حتى لا يظهر عنوان IP الحقيقي.\n\nفي الشاشة التالية:\n١. اضغط على الترس بجانب Dr VPN.\n٢. فعّل «VPN دائم التشغيل».\n٣. فعّل «حظر الاتصالات بدون VPN».</string>
+    <string name="kill_switch_message">‏عند تفعيل مفتاح الإيقاف، إذا انقطع الـVPN أو الاشتراك ينقطع الإنترنت أيضًا حتى لا يظهر عنوان IP الحقيقي.\n\n‏في الشاشة التالية:\n‏١. اضغط على الترس بجانب Dr VPN.\n‏٢. فعّل «VPN دائم التشغيل».\n‏٣. فعّل «حظر الاتصالات بدون VPN».</string>
     <string name="kill_switch_open">فتح إعدادات VPN</string>
     <string name="home_sub_usage">%1$s من %2$s</string>
     <string name="home_sub_usage_unlimited">تم استخدام %1$s (غير محدود)</string>
@@ -665,7 +665,5 @@
     <string name="qr_transfer_unavailable">لا يمكن مشاركة هذا الخادم كرمز QR.</string>
     <string name="server_category_all">الكل</string>
     <string name="server_category_empty">لا يوجد خادم يعمل في هذه الفئة. فعّل «عرض الخوادم بدون ping» لرؤيتها كلها.</string>
-    <string name="kill_switch_unavailable">لا يحتوي هذا الجهاز على شاشة إعدادات VPN (شائع في أجهزة التلفاز)، لذا لا يمكن تفعيل مفتاح الإيقاف هنا.
-
-يعيد Dr VPN الاتصال تلقائياً عند انقطاعه. لحماية كاملة لكل الأجهزة استخدم Dr VPN على الراوتر.</string>
+    <string name="kill_switch_unavailable">‏لا يحتوي هذا الجهاز على شاشة إعدادات VPN (شائع في أجهزة التلفاز)، لذا لا يمكن تفعيل مفتاح الإيقاف هنا.\n\n‏يعيد Dr VPN الاتصال تلقائياً عند انقطاعه. لحماية كاملة لكل الأجهزة استخدم Dr VPN على الراوتر.</string>
 </resources>
