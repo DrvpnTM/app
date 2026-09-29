@@ -4,6 +4,12 @@ name: Build country versions
 # applicationId, and attaches them all to a single GitHub release.
 on:
   workflow_dispatch:
+  # Rebuild every country edition automatically after a successful main build, but only
+  # when the app version changed (a countries-v<version> release does not exist yet).
+  workflow_run:
+    workflows: ["Build Dr VPN APK"]
+    types: [completed]
+    branches: [main]
 
 permissions:
   contents: write
@@ -16,8 +22,10 @@ env:
 
 jobs:
   setup:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     outputs:
+      skip: ${{ steps.m.outputs.skip }}
       matrix: ${{ steps.m.outputs.matrix }}
       tag: ${{ steps.m.outputs.tag }}
     steps:
@@ -27,15 +35,26 @@ jobs:
           echo "matrix=$(jq -c . countries.json)" >> "$GITHUB_OUTPUT"
           ver=$(grep -oE 'versionName = "[^"]+"' android/app/build.gradle.kts | sed -E 's/.*"([^"]+)".*/\1/')
           echo "tag=countries-v$ver" >> "$GITHUB_OUTPUT"
+          # Skip automatic runs when this version's country release already exists.
+          if [ "${{ github.event_name }}" = "workflow_run" ] && gh release view "countries-v$ver" >/dev/null 2>&1; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
       - name: Create release
+        if: ${{ steps.m.outputs.skip != 'true' }}
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.m.outputs.tag }}
           name: Dr VPN country editions ${{ steps.m.outputs.tag }}
           body: One "VPN IP <Country>" build per country. Download the APK named with your country code.
+          make_latest: "false"
 
   build:
     needs: setup
+    if: ${{ needs.setup.outputs.skip != 'true' }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -124,4 +143,5 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ needs.setup.outputs.tag }}
+          make_latest: "false"
           files: android/app/build/outputs/apk/playstore/release/*universal*.apk

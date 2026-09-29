@@ -42,6 +42,7 @@ android {
         val countryCode = (project.findProperty("COUNTRY_CODE") as? String)?.lowercase()?.takeIf { it.isNotBlank() }
         val countryName = (project.findProperty("COUNTRY_NAME") as? String)?.takeIf { it.isNotBlank() }
         if (countryCode != null) applicationIdSuffix = ".$countryCode"
+        buildConfigField("String", "COUNTRY_CODE", "\"${countryCode ?: ""}\"")
         resValue("string", "app_name", if (countryName != null) "VPN IP $countryName" else "Dr VPN")
     }
 
