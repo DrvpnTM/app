@@ -70,6 +70,9 @@ import androidx.compose.material3.LinearProgressIndicator
 import net.drvpn.app.handler.AnnouncementManager
 import androidx.compose.ui.platform.LocalUriHandler
 import net.drvpn.app.R
+import androidx.compose.ui.unit.coerceIn
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.fillMaxHeight
 import net.drvpn.app.ui.compose.focusHighlight
 
 private val ConnectedColor = Color(0xFF34C759)
@@ -105,7 +108,9 @@ fun MainHomeTab(
                 ConnectButton(
                     isRunning = isRunning,
                     onToggle = { onAction(MainAction.ToggleService) },
-                    size = if (landscape) 170.dp else 220.dp,
+                    // In landscape (phones on their side, TVs) the button shrinks with the height so the
+                    // status, timer and speed below it stay visible.
+                    size = if (landscape) (maxHeight * 0.42f).coerceIn(110.dp, 200.dp) else 220.dp,
                 )
                 Spacer(Modifier.height(16.dp))
                 Text(
@@ -143,7 +148,20 @@ fun MainHomeTab(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(24.dp),
             ) {
-                Box(Modifier.weight(1f), contentAlignment = Alignment.Center) { connectBlock() }
+                val columnHeight = maxHeight - 24.dp
+                Column(
+                    Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    Box(
+                        Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = columnHeight),
+                        contentAlignment = Alignment.Center
+                    ) { connectBlock() }
+                }
                 Column(
                     Modifier
                         .weight(1f)
@@ -454,7 +472,7 @@ private fun ServerCard(serverName: String, onClick: () -> Unit, onShowQr: (() ->
             if (onShowQr != null && serverName.isNotBlank()) {
                 IconButton(onClick = onShowQr, modifier = Modifier.focusHighlight(CircleShape)) {
                     Icon(
-                        painter = painterResource(R.drawable.ic_qu_scan_24dp),
+                        painter = painterResource(R.drawable.ic_qr_code_24dp),
                         contentDescription = stringResource(R.string.qr_transfer_title),
                         tint = MaterialTheme.colorScheme.primary,
                     )

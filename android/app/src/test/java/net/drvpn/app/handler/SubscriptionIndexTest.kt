@@ -103,8 +103,8 @@ class SubscriptionIndexTest {
         @JvmStatic
         fun initializeHandles() {
             mockStatic(MMKV::class.java).use {
-                it.`when`<MMKV> { MMKV.mmkvWithID("MAIN", MMKV.MULTI_PROCESS_MODE) }.thenReturn(main)
-                it.`when`<MMKV> { MMKV.mmkvWithID("SUB", MMKV.MULTI_PROCESS_MODE) }.thenReturn(subs)
+                it.`when`<MMKV> { MMKV.mmkvWithID("MAIN", MMKV.MULTI_PROCESS_MODE, null as String?) }.thenReturn(main)
+                it.`when`<MMKV> { MMKV.mmkvWithID("SUB", MMKV.MULTI_PROCESS_MODE, null as String?) }.thenReturn(subs)
                 it.`when`<MMKV> { MMKV.mmkvWithID("SETTING", MMKV.MULTI_PROCESS_MODE) }.thenReturn(settings)
                 MmkvManager.decodeSubscriptions()
                 MmkvManager.decodeSettingsString("test-initialize")
