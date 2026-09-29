@@ -5,6 +5,7 @@ import net.drvpn.app.dto.entities.ServersCache
 import net.drvpn.app.extension.isComplexType
 import net.drvpn.app.extension.nullIfBlank
 import net.drvpn.app.handler.AngConfigManager
+import net.drvpn.app.handler.GeoIpLookup
 import net.drvpn.app.handler.ServerCountryManager
 
 internal data class ServerRowUiModel(
@@ -77,8 +78,11 @@ internal fun serverCountry(profile: ProfileItem): String? =
     ServerCountryManager.countryFromRemarks(profile.remarks)
         ?: ServerCountryManager.countryCode(profile.server)
 
-internal fun serverFlag(profile: ProfileItem): String =
-    ServerCountryManager.flagOf(serverCountry(profile)).orEmpty()
+internal fun serverFlag(profile: ProfileItem): String = countryBadge(serverCountry(profile))
+
+/** Flag emoji for a country, a cloud for a CDN address, empty when unknown. */
+internal fun countryBadge(country: String?): String =
+    if (country == GeoIpLookup.CDN) "☁️" else ServerCountryManager.flagOf(country).orEmpty()
 
 /** The in-app language (falls back to the system one). */
 internal fun appLocale(): java.util.Locale =
@@ -86,6 +90,7 @@ internal fun appLocale(): java.util.Locale =
 
 /** Branded display name used instead of the seller's config name: "DRVPN · Germany". */
 internal fun serverDisplayName(country: String?, locale: java.util.Locale): String {
+    if (country == GeoIpLookup.CDN) return "DRVPN · CDN"
     val countryName = country?.takeIf { it.length == 2 }
         ?.let { java.util.Locale("", it).getDisplayCountry(locale) }
         ?.takeIf { it.isNotBlank() && it != country }

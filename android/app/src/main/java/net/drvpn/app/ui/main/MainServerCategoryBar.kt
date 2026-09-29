@@ -23,7 +23,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import net.drvpn.app.R
-import net.drvpn.app.handler.ServerCountryManager
+import net.drvpn.app.handler.GeoIpLookup
 import net.drvpn.app.ui.compose.cell
 import net.drvpn.app.ui.compose.focusHighlight
 import java.util.Locale
@@ -59,9 +59,8 @@ internal fun ServerCategoryBar(
             }
         }
         items(countries, key = { "c:$it" }) { code ->
-            val name = Locale("", code).getDisplayCountry(locale)
-            val flag = ServerCountryManager.flagOf(code).orEmpty()
-            CategoryChip("$flag $name".trim(), selected == "c:$code", MaterialTheme.colorScheme.primary) {
+            val name = if (code == GeoIpLookup.CDN) "CDN" else Locale("", code).getDisplayCountry(locale)
+            CategoryChip("${countryBadge(code)} $name".trim(), selected == "c:$code", MaterialTheme.colorScheme.primary) {
                 onSelect("c:$code")
             }
         }
