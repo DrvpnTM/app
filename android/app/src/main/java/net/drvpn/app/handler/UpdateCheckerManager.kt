@@ -15,11 +15,9 @@ import kotlinx.coroutines.withContext
 
 object UpdateCheckerManager {
     suspend fun checkForUpdate(includePreRelease: Boolean = false): CheckUpdateResult = withContext(Dispatchers.IO) {
-        val url = if (includePreRelease) {
-            AppConfig.APP_API_URL
-        } else {
-            AppConfig.APP_API_URL.concatUrl("latest")
-        }
+        // Always read the release list: the repo also holds "countries-v*" releases for the
+        // per-country editions, so "releases/latest" could point at the wrong channel.
+        val url = AppConfig.APP_API_URL
 
         val proxyUsername = SettingsManager.getSocksUsername()
         val proxyPassword = SettingsManager.getSocksPassword()
@@ -44,18 +42,16 @@ object UpdateCheckerManager {
                 ?: throw IllegalStateException("Failed to get response")
         }
 
-        val latestRelease = if (includePreRelease) {
-            JsonUtil.fromJsonSafe(response, Array<GitHubRelease>::class.java)
-                ?.firstOrNull()
-                ?: throw IllegalStateException("No pre-release found")
-        } else {
-            JsonUtil.fromJsonSafe(response, GitHubRelease::class.java)
-        }
-        if (latestRelease == null) {
-            return@withContext CheckUpdateResult(hasUpdate = false)
-        }
+        val tagPrefix = if (isCountryEdition()) COUNTRY_TAG_PREFIX else "v"
+        val latestRelease = JsonUtil.fromJsonSafe(response, Array<GitHubRelease>::class.java)
+            ?.firstOrNull { release ->
+                release.tagName.startsWith(tagPrefix) &&
+                    (isCountryEdition() || !release.tagName.startsWith(COUNTRY_TAG_PREFIX)) &&
+                    (includePreRelease || !release.prerelease)
+            }
+            ?: return@withContext CheckUpdateResult(hasUpdate = false)
 
-        val latestVersion = latestRelease.tagName.removePrefix("v")
+        val latestVersion = latestRelease.tagName.removePrefix(tagPrefix)
         LogUtil.i(
             AppConfig.TAG,
             "Found new version: $latestVersion (current: ${BuildConfig.VERSION_NAME})"
@@ -80,14 +76,26 @@ object UpdateCheckerManager {
         val v2 = version2.split(".")
 
         for (i in 0 until maxOf(v1.size, v2.size)) {
-            val num1 = if (i < v1.size) v1[i].toInt() else 0
-            val num2 = if (i < v2.size) v2[i].toInt() else 0
+            val num1 = v1.getOrNull(i)?.toIntOrNull() ?: 0
+            val num2 = v2.getOrNull(i)?.toIntOrNull() ?: 0
             if (num1 != num2) return num1 - num2
         }
         return 0
     }
 
+    private const val COUNTRY_TAG_PREFIX = "countries-v"
+
+    private fun isCountryEdition(): Boolean = BuildConfig.COUNTRY_CODE.isNotEmpty()
+
     private fun getDownloadUrl(release: GitHubRelease, abi: String): String {
+        if (isCountryEdition()) {
+            // Country editions only ship a universal APK named DrVPN_<code>_<version>_universal.apk,
+            // so the update keeps the same app name, id and the user's chosen language.
+            val prefix = "DrVPN_${BuildConfig.COUNTRY_CODE}_"
+            return release.assets.firstOrNull { it.name.startsWith(prefix) }?.browserDownloadUrl
+                ?: throw IllegalStateException("No APK found for this country edition")
+        }
+
         val fDroid = "fdroid"
 
         val assetsByAbi = release.assets.filter {
