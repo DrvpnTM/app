@@ -45,7 +45,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
       - name: Create release
         if: ${{ steps.m.outputs.skip != 'true' }}
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ steps.m.outputs.tag }}
           name: Dr VPN country editions ${{ steps.m.outputs.tag }}
@@ -140,7 +140,7 @@ jobs:
 
       - name: Attach to release
         if: ${{ steps.keystore.outputs.signed == 'true' }}
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ needs.setup.outputs.tag }}
           make_latest: "false"
