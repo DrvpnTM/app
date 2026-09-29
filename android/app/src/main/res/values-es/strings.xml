@@ -561,4 +561,9 @@
         <item>Aleatorio</item>
         <item>Rotación</item>
     </string-array>
+    <string name="phone_link_title">Enviar desde el móvil</string>
+    <string name="phone_link_tile">Desde el móvil</string>
+    <string name="phone_link_hint">Escanea este código con tu móvil (misma Wi-Fi), pega tu enlace de suscripción en la página y toca Enviar.</string>
+    <string name="phone_link_waiting">Esperando a tu móvil…</string>
+    <string name="phone_link_no_network">El televisor no está conectado a Wi-Fi ni a Ethernet.</string>
 </resources>

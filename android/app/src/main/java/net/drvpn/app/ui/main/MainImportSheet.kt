@@ -33,6 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import net.drvpn.app.R
+import net.drvpn.app.ui.compose.focusHighlight
 import net.drvpn.app.ui.compose.IosBlue
 import net.drvpn.app.ui.compose.IosGray
 import net.drvpn.app.ui.compose.IosGreen
@@ -73,7 +74,7 @@ private fun shortLabel(label: String): String =
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ImportSheet(onDismiss: () -> Unit, onAction: (MainAction) -> Unit) {
+fun ImportSheet(onDismiss: () -> Unit, onAction: (MainAction) -> Unit, onFromPhone: (() -> Unit)? = null) {
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
@@ -112,6 +113,11 @@ fun ImportSheet(onDismiss: () -> Unit, onAction: (MainAction) -> Unit) {
                 QuickTile(R.drawable.ic_file_24dp, stringResource(R.string.import_quick_file), IosOrange, Modifier.weight(1f)) {
                     onAction(MainAction.ImportConfigLocal)
                 }
+                if (onFromPhone != null) {
+                    QuickTile(R.drawable.ic_share_24dp, stringResource(R.string.phone_link_tile), IosIndigo, Modifier.weight(1f)) {
+                        onFromPhone()
+                    }
+                }
             }
 
             PreferenceGroupHeader(stringResource(R.string.import_section_manual))
@@ -145,6 +151,7 @@ fun ImportSheet(onDismiss: () -> Unit, onAction: (MainAction) -> Unit) {
 private fun QuickTile(iconRes: Int, label: String, color: Color, modifier: Modifier, onClick: () -> Unit) {
     Column(
         modifier = modifier
+            .focusHighlight(RoundedCornerShape(14.dp))
             .clip(RoundedCornerShape(14.dp))
             .background(MaterialTheme.colorScheme.cell)
             .clickable(role = Role.Button, onClick = onClick)

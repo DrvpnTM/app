@@ -647,4 +647,9 @@
     <string name="per_app_iran_direct">برنامه‌های ایرانی بدون VPN</string>
     <string name="per_app_iran_done">%1$d برنامه ایرانی بدون VPN کار می‌کنند</string>
     <string name="per_app_iran_none">برنامه ایرانی‌ای روی گوشی پیدا نشد</string>
+    <string name="phone_link_title">ارسال از گوشی</string>
+    <string name="phone_link_tile">از گوشی</string>
+    <string name="phone_link_hint">این کد را با گوشی (متصل به همین وای‌فای) اسکن کنید، لینک اشتراک را در صفحه باز شده بچسبانید و «ارسال» را بزنید.</string>
+    <string name="phone_link_waiting">در انتظار گوشی…</string>
+    <string name="phone_link_no_network">تلویزیون به وای‌فای یا شبکه کابلی وصل نیست.</string>
 </resources>

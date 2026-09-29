@@ -655,4 +655,9 @@
     <string name="per_app_iran_direct">التطبيقات الإيرانية بدون VPN</string>
     <string name="per_app_iran_done">%1$d تطبيقًا إيرانيًا يعمل الآن بدون VPN</string>
     <string name="per_app_iran_none">لم يُعثر على تطبيقات إيرانية</string>
+    <string name="phone_link_title">إرسال من الهاتف</string>
+    <string name="phone_link_tile">من الهاتف</string>
+    <string name="phone_link_hint">امسح هذا الرمز بهاتفك (على نفس شبكة Wi-Fi)، والصق رابط الاشتراك في الصفحة ثم اضغط إرسال.</string>
+    <string name="phone_link_waiting">بانتظار هاتفك…</string>
+    <string name="phone_link_no_network">التلفاز غير متصل بشبكة Wi-Fi أو سلكية.</string>
 </resources>

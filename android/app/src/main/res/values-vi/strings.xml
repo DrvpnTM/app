@@ -645,4 +645,9 @@
     <string name="per_app_iran_direct">Ứng dụng Iran không qua VPN</string>
     <string name="per_app_iran_done">%1$d ứng dụng Iran giờ không qua VPN</string>
     <string name="per_app_iran_none">Không tìm thấy ứng dụng Iran</string>
+    <string name="phone_link_title">Gửi từ điện thoại</string>
+    <string name="phone_link_tile">Từ điện thoại</string>
+    <string name="phone_link_hint">Quét mã bằng điện thoại (cùng Wi-Fi), dán liên kết đăng ký vào trang vừa mở rồi nhấn Gửi.</string>
+    <string name="phone_link_waiting">Đang chờ điện thoại…</string>
+    <string name="phone_link_no_network">TV chưa kết nối Wi-Fi hoặc mạng dây.</string>
 </resources>

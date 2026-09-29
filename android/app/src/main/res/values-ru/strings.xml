@@ -651,4 +651,9 @@
     <string name="per_app_iran_direct">Иранские приложения без VPN</string>
     <string name="per_app_iran_done">Иранских приложений в обход VPN: %1$d</string>
     <string name="per_app_iran_none">Иранские приложения не найдены</string>
+    <string name="phone_link_title">Отправить с телефона</string>
+    <string name="phone_link_tile">С телефона</string>
+    <string name="phone_link_hint">Отсканируйте код телефоном (в той же Wi-Fi сети), вставьте ссылку на подписку на открывшейся странице и нажмите «Отправить».</string>
+    <string name="phone_link_waiting">Ожидание телефона…</string>
+    <string name="phone_link_no_network">Телевизор не подключён к Wi-Fi или Ethernet.</string>
 </resources>

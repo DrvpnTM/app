@@ -647,4 +647,9 @@
     <string name="per_app_iran_direct">ইরানি অ্যাপ VPN ছাড়া</string>
     <string name="per_app_iran_done">%1$dটি ইরানি অ্যাপ এখন VPN ছাড়া চলবে</string>
     <string name="per_app_iran_none">কোনো ইরানি অ্যাপ পাওয়া যায়নি</string>
+    <string name="phone_link_title">ফোন থেকে পাঠান</string>
+    <string name="phone_link_tile">ফোন থেকে</string>
+    <string name="phone_link_hint">একই Wi-Fi-তে থাকা ফোন দিয়ে কোডটি স্ক্যান করুন, খোলা পেজে সাবস্ক্রিপশন লিংক পেস্ট করে পাঠান চাপুন।</string>
+    <string name="phone_link_waiting">ফোনের অপেক্ষায়…</string>
+    <string name="phone_link_no_network">টিভি Wi-Fi বা ইথারনেটে যুক্ত নয়।</string>
 </resources>

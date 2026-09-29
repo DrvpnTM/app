@@ -24,6 +24,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import net.drvpn.app.R
+import androidx.compose.foundation.shape.CircleShape
+import net.drvpn.app.ui.compose.focusHighlight
+import androidx.compose.ui.platform.LocalContext
+import net.drvpn.app.ui.compose.PhoneLinkDialog
+import net.drvpn.app.util.DeviceUtil
 import net.drvpn.app.ui.compose.SelectListDialog
 import net.drvpn.app.ui.compose.AppTopBar
 import net.drvpn.app.ui.compose.verticalScrollbar
@@ -43,6 +48,8 @@ fun MainTopBar(
     onMoreMenuAction: (MainMoreMenuAction) -> Unit
 ) {
     var showImportMenu by remember { mutableStateOf(false) }
+    var showPhoneLink by remember { mutableStateOf(false) }
+    val isTv = DeviceUtil.isTv(LocalContext.current)
     var showMenu by remember { mutableStateOf(false) }
     val importMenuScrollState = rememberScrollState()
     val moreMenuScrollState = rememberScrollState()
@@ -61,23 +68,23 @@ fun MainTopBar(
         searchPlaceholder = stringResource(R.string.menu_item_search),
         navigationIcon = {
             if (showSearch) {
-                IconButton(onClick = onSearchClose) {
+                IconButton(onClick = onSearchClose, modifier = Modifier.focusHighlight(CircleShape)) {
                     Icon(painterResource(R.drawable.ic_arrow_back_24dp), contentDescription = stringResource(R.string.acc_back))
                 }
             } else {
-                IconButton(onClick = onMenuClick) {
+                IconButton(onClick = onMenuClick, modifier = Modifier.focusHighlight(CircleShape)) {
                     Icon(painterResource(R.drawable.ic_menu_24dp), contentDescription = stringResource(R.string.acc_open_menu))
                 }
             }
         },
         actions = {
             if (showListActions && !showSearch) {
-                IconButton(onClick = { onSearchToggle(true) }) {
+                IconButton(onClick = { onSearchToggle(true) }, modifier = Modifier.focusHighlight(CircleShape)) {
                     Icon(painterResource(R.drawable.ic_search_24dp), contentDescription = stringResource(R.string.acc_search))
                 }
             }
             Box(modifier = Modifier.wrapContentSize(Alignment.TopEnd)) {
-                IconButton(onClick = { showImportMenu = true }) {
+                IconButton(onClick = { showImportMenu = true }, modifier = Modifier.focusHighlight(CircleShape)) {
                     Icon(painterResource(R.drawable.ic_add_24dp), contentDescription = stringResource(R.string.acc_add))
                 }
                 if (showImportMenu) {
@@ -86,12 +93,24 @@ fun MainTopBar(
                         onAction = { action ->
                             showImportMenu = false
                             onAction(action)
-                        }
+                        },
+                        onFromPhone = if (isTv) {
+                            {
+                                showImportMenu = false
+                                showPhoneLink = true
+                            }
+                        } else null
+                    )
+                }
+                if (showPhoneLink) {
+                    PhoneLinkDialog(
+                        onLink = { onAction(MainAction.ImportBatchConfig(it)) },
+                        onDismiss = { showPhoneLink = false }
                     )
                 }
             }
             if (showListActions) Box(modifier = Modifier.wrapContentSize(Alignment.TopEnd)) {
-                IconButton(onClick = { showMenu = true }) {
+                IconButton(onClick = { showMenu = true }, modifier = Modifier.focusHighlight(CircleShape)) {
                     Icon(painterResource(R.drawable.ic_more_vert_24dp), contentDescription = stringResource(R.string.acc_more))
                 }
                 if (showMenu) {

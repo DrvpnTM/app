@@ -647,4 +647,9 @@
     <string name="per_app_iran_direct">Iranian apps without VPN</string>
     <string name="per_app_iran_done">%1$d Iranian apps now bypass the VPN</string>
     <string name="per_app_iran_none">No Iranian apps found on this phone</string>
+    <string name="phone_link_title">Send from phone</string>
+    <string name="phone_link_tile">From phone</string>
+    <string name="phone_link_hint">Scan this code with your phone (same Wi-Fi), paste your subscription link on the page that opens and tap Send.</string>
+    <string name="phone_link_waiting">Waiting for your phone…</string>
+    <string name="phone_link_no_network">The TV is not connected to Wi-Fi or Ethernet.</string>
 </resources>

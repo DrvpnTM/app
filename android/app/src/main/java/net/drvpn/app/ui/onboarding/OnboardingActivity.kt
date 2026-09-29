@@ -42,6 +42,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import net.drvpn.app.R
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.platform.LocalContext
+import net.drvpn.app.ui.compose.focusHighlight
+import net.drvpn.app.ui.compose.PhoneLinkDialog
+import net.drvpn.app.util.DeviceUtil
 import net.drvpn.app.ui.compose.IosGroupShape
 import net.drvpn.app.ui.compose.iosFieldColors
 import androidx.compose.ui.platform.LocalClipboardManager
@@ -221,6 +228,7 @@ private fun OptionRow(leading: String?, label: String, selected: Boolean, onClic
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .focusHighlight(RoundedCornerShape(16.dp))
             .selectable(selected = selected, onClick = onClick, role = Role.RadioButton),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
@@ -252,6 +260,11 @@ private fun OptionRow(leading: String?, label: String, selected: Boolean, onClic
 @Composable
 private fun SubscriptionStep(link: String, onLinkChange: (String) -> Unit, modifier: Modifier = Modifier) {
     val clipboard = LocalClipboardManager.current
+    val isTv = DeviceUtil.isTv(LocalContext.current)
+    var showPhoneLink by remember { mutableStateOf(false) }
+    if (showPhoneLink) {
+        PhoneLinkDialog(onLink = { onLinkChange(it.trim()) }, onDismiss = { showPhoneLink = false })
+    }
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
             text = stringResource(R.string.onboarding_add_sub_hint),
@@ -271,12 +284,22 @@ private fun SubscriptionStep(link: String, onLinkChange: (String) -> Unit, modif
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(Modifier.height(12.dp))
-        Button(
-            onClick = { clipboard.getText()?.text?.let { onLinkChange(it.trim()) } },
-            modifier = Modifier.fillMaxWidth(),
-            contentPadding = PaddingValues(vertical = 14.dp)
-        ) {
-            Text(stringResource(R.string.onboarding_paste))
+        if (isTv) {
+            Button(
+                onClick = { showPhoneLink = true },
+                modifier = Modifier.fillMaxWidth(),
+                contentPadding = PaddingValues(vertical = 14.dp)
+            ) {
+                Text(stringResource(R.string.phone_link_title))
+            }
+        } else {
+            Button(
+                onClick = { clipboard.getText()?.text?.let { onLinkChange(it.trim()) } },
+                modifier = Modifier.fillMaxWidth(),
+                contentPadding = PaddingValues(vertical = 14.dp)
+            ) {
+                Text(stringResource(R.string.onboarding_paste))
+            }
         }
     }
 }

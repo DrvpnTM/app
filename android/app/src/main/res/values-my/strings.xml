@@ -559,4 +559,9 @@
         <item>Neumorphism</item>
         <item>Glassmorphism</item>
     </string-array>
+    <string name="phone_link_title">ဖုန်းမှ ပို့ရန်</string>
+    <string name="phone_link_tile">ဖုန်းမှ</string>
+    <string name="phone_link_hint">ဤကုဒ်ကို ဖုန်းဖြင့် (Wi-Fi တစ်ခုတည်း) scan ဖတ်ပြီး ဖွင့်လာသော စာမျက်နှာတွင် subscription လင့်ခ်ကို ကူးထည့်ကာ ပို့ရန် နှိပ်ပါ။</string>
+    <string name="phone_link_waiting">ဖုန်းကို စောင့်နေသည်…</string>
+    <string name="phone_link_no_network">TV သည် Wi-Fi သို့မဟုတ် ကြိုးကွန်ရက်နှင့် မချိတ်ထားပါ။</string>
 </resources>

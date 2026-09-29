@@ -70,6 +70,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import net.drvpn.app.handler.AnnouncementManager
 import androidx.compose.ui.platform.LocalUriHandler
 import net.drvpn.app.R
+import net.drvpn.app.ui.compose.focusHighlight
 
 private val ConnectedColor = Color(0xFF34C759)
 private val DisconnectedColor = Color(0xFF8E8E93)
@@ -240,6 +241,7 @@ private fun FastestButton(busy: Boolean, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .focusHighlight(RoundedCornerShape(20.dp))
             .clip(RoundedCornerShape(20.dp))
             .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
             .clickable(enabled = !busy, onClick = onClick)
@@ -283,7 +285,7 @@ private fun ProfileCard(profileName: String, subscription: SubscriptionItem?, on
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f),
             )
-            IconButton(onClick = onUpdate) {
+            IconButton(onClick = onUpdate, modifier = Modifier.focusHighlight(CircleShape)) {
                 Icon(
                     painter = painterResource(R.drawable.ic_refresh_24dp),
                     contentDescription = stringResource(R.string.title_sub_update),
@@ -387,6 +389,7 @@ private fun ConnectButton(isRunning: Boolean, onToggle: () -> Unit, size: Dp = 2
             contentAlignment = Alignment.Center,
             modifier = Modifier
                 .size(size * 0.73f)
+                .focusHighlight(CircleShape)
                 .clip(CircleShape)
                 .background(color)
                 .clickable(onClick = onToggle),
@@ -408,6 +411,7 @@ private fun ServerCard(serverName: String, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .focusHighlight(RoundedCornerShape(20.dp))
             .semantics(mergeDescendants = true) {},
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
@@ -453,6 +457,7 @@ private fun AnnouncementCard(notice: AnnouncementManager.Announcement, onDismiss
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .focusHighlight(RoundedCornerShape(16.dp))
             .clip(RoundedCornerShape(16.dp))
             .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
             .clickable(enabled = notice.link != null) { notice.link?.let { runCatching { uriHandler.openUri(it) } } }

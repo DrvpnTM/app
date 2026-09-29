@@ -52,6 +52,7 @@ import net.drvpn.app.ui.compose.IosGroupShape
 import net.drvpn.app.ui.compose.IosOrange
 import net.drvpn.app.ui.compose.cell
 import net.drvpn.app.R
+import net.drvpn.app.ui.compose.focusHighlight
 import net.drvpn.app.dto.LocateTarget
 import net.drvpn.app.dto.entities.ProfileItem
 import net.drvpn.app.ui.compose.ItemDivider
@@ -319,6 +320,7 @@ private fun ServerListItem(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = if (doubleColumnDisplay) 6.dp else 16.dp, vertical = 4.dp)
+            .focusHighlight()
             .clip(IosGroupShape)
             .background(MaterialTheme.colorScheme.cell)
             .then(if (isSelected) Modifier.border(1.5.dp, primary, IosGroupShape) else Modifier)
