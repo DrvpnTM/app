@@ -49,6 +49,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.ui.text.font.FontWeight
 import net.drvpn.app.R
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.ui.text.style.TextOverflow
@@ -198,14 +199,21 @@ fun QRCodeDialog(
     if (bitmap == null) return
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = title?.let { { Text(it, maxLines = 2, overflow = TextOverflow.Ellipsis) } },
+        title = title?.let { { Text(it, maxLines = 1, overflow = TextOverflow.Ellipsis) } },
         text = {
-            Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+            // Keep the code small enough for landscape screens (TVs) so the hint stays visible.
+            val maxQr = (LocalConfiguration.current.screenHeightDp * 0.45f).coerceIn(160f, 320f).dp
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 Image(
                     bitmap = bitmap.asImageBitmap(),
                     contentDescription = stringResource(R.string.acc_qr_code),
                     modifier = Modifier
-                        .widthIn(max = 320.dp)
+                        .widthIn(max = maxQr)
                         .fillMaxWidth()
                         .aspectRatio(1f)
                         .background(Color.White)
