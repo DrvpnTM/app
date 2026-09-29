@@ -571,7 +571,5 @@
     <string name="qr_transfer_unavailable">Este servidor no se puede compartir como código QR.</string>
     <string name="server_category_all">Todos</string>
     <string name="server_category_empty">No hay servidores que funcionen en esta categoría. Marca «mostrar servidores sin ping» para verlos todos.</string>
-    <string name="kill_switch_unavailable">Este dispositivo no tiene pantalla de ajustes de VPN (habitual en televisores), así que aquí no se puede activar el kill switch del sistema.
-
-Dr VPN se reconecta solo si se corta la conexión. Para proteger todos los dispositivos, usa Dr VPN en tu router.</string>
+    <string name="kill_switch_unavailable">Este dispositivo no tiene pantalla de ajustes de VPN (habitual en televisores), así que aquí no se puede activar el kill switch del sistema.\n\nDr VPN se reconecta solo si se corta la conexión. Para proteger todos los dispositivos, usa Dr VPN en tu router.</string>
 </resources>

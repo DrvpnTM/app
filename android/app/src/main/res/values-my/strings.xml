@@ -569,7 +569,5 @@
     <string name="qr_transfer_unavailable">ဤဆာဗာကို QR ကုဒ်အဖြစ် မျှဝေ၍ မရပါ။</string>
     <string name="server_category_all">အားလုံး</string>
     <string name="server_category_empty">ဤအမျိုးအစားတွင် အလုပ်လုပ်သော ဆာဗာ မရှိပါ။ အားလုံးကြည့်ရန် ping မရှိသော ဆာဗာများ ပြရန် ကို ရွေးပါ။</string>
-    <string name="kill_switch_unavailable">ဤစက်တွင် VPN ဆက်တင် စာမျက်နှာ မရှိပါ (TV များတွင် အဖြစ်များသည်)၊ ထို့ကြောင့် kill switch ကို ဤနေရာတွင် ဖွင့်၍ မရပါ။
-
-ချိတ်ဆက်မှု ပြတ်သွားပါက Dr VPN က အလိုအလျောက် ပြန်ချိတ်ပါသည်။ စက်အားလုံးကို အပြည့်အဝ ကာကွယ်ရန် router ပေါ်တွင် Dr VPN သုံးပါ။</string>
+    <string name="kill_switch_unavailable">ဤစက်တွင် VPN ဆက်တင် စာမျက်နှာ မရှိပါ (TV များတွင် အဖြစ်များသည်)၊ ထို့ကြောင့် kill switch ကို ဤနေရာတွင် ဖွင့်၍ မရပါ။\n\nချိတ်ဆက်မှု ပြတ်သွားပါက Dr VPN က အလိုအလျောက် ပြန်ချိတ်ပါသည်။ စက်အားလုံးကို အပြည့်အဝ ကာကွယ်ရန် router ပေါ်တွင် Dr VPN သုံးပါ။</string>
 </resources>

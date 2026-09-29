@@ -657,7 +657,5 @@
     <string name="qr_transfer_unavailable">This server cannot be shared as a QR code.</string>
     <string name="server_category_all">All</string>
     <string name="server_category_empty">No working server in this category. Tick “show servers without ping” to see them all.</string>
-    <string name="kill_switch_unavailable">This device has no VPN settings screen (common on TVs), so Android’s kill switch cannot be turned on here.
-
-Dr VPN still reconnects on its own if the connection drops. For full protection of every device, use Dr VPN on your router.</string>
+    <string name="kill_switch_unavailable">This device has no VPN settings screen (common on TVs), so Android’s kill switch cannot be turned on here.\n\nDr VPN still reconnects on its own if the connection drops. For full protection of every device, use Dr VPN on your router.</string>
 </resources>

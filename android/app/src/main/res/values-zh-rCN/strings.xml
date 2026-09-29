@@ -655,7 +655,5 @@
     <string name="qr_transfer_unavailable">此服务器无法以二维码分享。</string>
     <string name="server_category_all">全部</string>
     <string name="server_category_empty">此分类中没有可用的服务器。勾选“显示无延迟的服务器”即可查看全部。</string>
-    <string name="kill_switch_unavailable">此设备没有 VPN 设置页面（电视上很常见），因此无法在这里开启系统断网保护。
-
-连接中断时 Dr VPN 仍会自动重连。如需保护所有设备，请在路由器上使用 Dr VPN。</string>
+    <string name="kill_switch_unavailable">此设备没有 VPN 设置页面（电视上很常见），因此无法在这里开启系统断网保护。\n\n连接中断时 Dr VPN 仍会自动重连。如需保护所有设备，请在路由器上使用 Dr VPN。</string>
 </resources>

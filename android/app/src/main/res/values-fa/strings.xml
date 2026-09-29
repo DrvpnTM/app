@@ -626,7 +626,7 @@
     <string name="home_download">دانلود</string>
     <string name="home_upload">آپلود</string>
     <string name="kill_switch_title">کیل‌سوییچ (جلوگیری از لو رفتن IP)</string>
-    <string name="kill_switch_message">با کیل‌سوییچ، اگر VPN یا اشتراک شما قطع شود، اینترنت گوشی هم قطع می‌شود تا IP واقعی شما لو نرود.\n\nدر صفحه‌ای که باز می‌شود:\n۱. روی چرخ‌دنده کنار «Dr VPN» بزنید.\n۲. «VPN همیشه روشن» را روشن کنید.\n۳. «مسدود کردن اتصال‌های بدون VPN» را روشن کنید.</string>
+    <string name="kill_switch_message">‏با کیل‌سوییچ، اگر VPN یا اشتراک شما قطع شود، اینترنت گوشی هم قطع می‌شود تا IP واقعی شما لو نرود.\n\n‏در صفحه‌ای که باز می‌شود:\n‏۱. روی چرخ‌دنده کنار «Dr VPN» بزنید.\n‏۲. «VPN همیشه روشن» را روشن کنید.\n‏۳. «مسدود کردن اتصال‌های بدون VPN» را روشن کنید.</string>
     <string name="kill_switch_open">باز کردن تنظیمات VPN</string>
     <string name="home_sub_usage">%1$s از %2$s</string>
     <string name="home_sub_usage_unlimited">%1$s مصرف‌شده (نامحدود)</string>
@@ -657,7 +657,5 @@
     <string name="qr_transfer_unavailable">این سرور را نمی‌توان به صورت کد QR منتقل کرد.</string>
     <string name="server_category_all">همه</string>
     <string name="server_category_empty">در این دسته سرور سالمی نیست. برای دیدن همه، «نمایش سرورهای بدون پینگ» را بزنید.</string>
-    <string name="kill_switch_unavailable">این دستگاه صفحه تنظیمات VPN ندارد (در تلویزیون‌ها رایج است)، پس Kill Switch خود اندروید اینجا روشن نمی‌شود.
-
-Dr VPN در صورت قطع شدن، خودش دوباره وصل می‌شود. برای محافظت کامل همه دستگاه‌ها، Dr VPN را روی روتر استفاده کنید.</string>
+    <string name="kill_switch_unavailable">‏این دستگاه صفحه تنظیمات VPN ندارد (در تلویزیون‌ها رایج است)، پس Kill Switch خود اندروید اینجا روشن نمی‌شود.\n\n‏Dr VPN در صورت قطع شدن، خودش دوباره وصل می‌شود. برای محافظت کامل همه دستگاه‌ها، Dr VPN را روی روتر استفاده کنید.</string>
 </resources>
