@@ -653,4 +653,5 @@
     <string name="qr_transfer_title">Hiện mã QR</string>
     <string name="qr_transfer_hint">Quét mã này bằng Dr VPN trên điện thoại (hoặc ứng dụng tương thích khác) để thêm máy chủ này.</string>
     <string name="qr_transfer_unavailable">Không thể chia sẻ máy chủ này bằng mã QR.</string>
+    <string name="server_category_all">Tất cả</string>
 </resources>

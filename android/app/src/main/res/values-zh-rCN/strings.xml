@@ -653,4 +653,5 @@
     <string name="qr_transfer_title">显示二维码</string>
     <string name="qr_transfer_hint">用手机上的 Dr VPN（或其他兼容应用）扫描此码即可添加该服务器。</string>
     <string name="qr_transfer_unavailable">此服务器无法以二维码分享。</string>
+    <string name="server_category_all">全部</string>
 </resources>

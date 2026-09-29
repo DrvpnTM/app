@@ -277,6 +277,15 @@ fun MainScreen(
                         onShowChange = { onAction(MainAction.SetShowServersWithoutPing(it)) },
                         onTestAll = { onAction(MainAction.TestRealAllServers) }
                     )
+                    val categoryGroupId = uiState.selectedGroupId
+                    val categoryState by remember(categoryGroupId) {
+                        mainViewModel.serverGroupState(categoryGroupId)
+                    }.collectAsStateWithLifecycle()
+                    ServerCategoryBar(
+                        rows = categoryState.allRows,
+                        selected = uiState.serverCategory,
+                        onSelect = { onAction(MainAction.SetServerCategory(it)) }
+                    )
                     if (groups.size > 1) {
                         GroupTabBar(
                             groups = groups,
