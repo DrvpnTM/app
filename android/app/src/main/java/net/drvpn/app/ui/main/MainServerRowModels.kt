@@ -24,14 +24,6 @@ internal data class ServerRowUiModel(
     val protocol: String = profile.configType.name,
 )
 
-/** Server category chip: a country ("c:DE") or a protocol ("p:VLESS"). */
-internal fun ServerRowUiModel.matchesCategory(category: String?): Boolean = when {
-    category.isNullOrEmpty() -> true
-    category.startsWith("c:") -> country == category.substring(2)
-    category.startsWith("p:") -> protocol == category.substring(2)
-    else -> true
-}
-
 /** Lowest ping first; untested next; failed last. */
 internal val serverPingOrder: Comparator<ServerRowUiModel> =
     compareBy<ServerRowUiModel>({

@@ -400,7 +400,6 @@ class MainViewModel(
             is MainAction.RemoveServer -> removeServerAndRefresh(action.guid)
             is MainAction.Search -> filterConfig(action.query)
             is MainAction.SetShowServersWithoutPing -> setShowServersWithoutPing(action.show)
-            is MainAction.SetServerCategory -> setServerCategory(action.category)
             MainAction.SelectFastest -> selectFastest()
             is MainAction.DismissAnnouncement -> {
                 AnnouncementManager.dismiss(action.id)
@@ -549,20 +548,11 @@ class MainViewModel(
         val ui = uiState.value
         val pending = pingPendingGuids
         val rows = allRows.filter { row ->
-            row.matchesCategory(ui.serverCategory) &&
-                (ui.showServersWithoutPing || row.testDelayMillis > 0L ||
-                    (row.testDelayMillis == 0L && row.guid in pending))
+            ui.showServersWithoutPing || row.testDelayMillis > 0L ||
+                (row.testDelayMillis == 0L && row.guid in pending)
         }
         // Fastest first. Not while a test runs: rows would jump under the user's finger / TV focus.
         return if (ui.isTesting) rows else rows.sortedWith(serverPingOrder)
-    }
-
-    private fun setServerCategory(category: String?) {
-        if (category == uiState.value.serverCategory) return
-        _uiState.update { it.copy(serverCategory = category) }
-        groupUiFlows.values.forEach { flow ->
-            flow.update { current -> current.copy(rows = visibleRows(current.allRows)) }
-        }
     }
 
     private fun clearPingPending() {
