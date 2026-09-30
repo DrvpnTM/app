@@ -664,4 +664,6 @@
     <string name="qr_transfer_hint">امسح هذا الرمز باستخدام Dr VPN على هاتفك (أو تطبيق متوافق آخر) لإضافة هذا الخادم هناك.</string>
     <string name="qr_transfer_unavailable">لا يمكن مشاركة هذا الخادم كرمز QR.</string>
     <string name="kill_switch_unavailable">‏لا يحتوي هذا الجهاز على شاشة إعدادات VPN (شائع في أجهزة التلفاز)، لذا لا يمكن تفعيل مفتاح الإيقاف هنا.\n\n‏يعيد Dr VPN الاتصال تلقائياً عند انقطاعه. لحماية كاملة لكل الأجهزة استخدم Dr VPN على الراوتر.</string>
+    <string name="server_section_fast">الأسرع</string>
+    <string name="server_section_other">خوادم أخرى</string>
 </resources>

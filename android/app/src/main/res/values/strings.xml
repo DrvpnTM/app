@@ -656,4 +656,6 @@
     <string name="qr_transfer_hint">Scan this code with Dr VPN on your phone (or another compatible app) to add this server there.</string>
     <string name="qr_transfer_unavailable">This server cannot be shared as a QR code.</string>
     <string name="kill_switch_unavailable">This device has no VPN settings screen (common on TVs), so Android’s kill switch cannot be turned on here.\n\nDr VPN still reconnects on its own if the connection drops. For full protection of every device, use Dr VPN on your router.</string>
+    <string name="server_section_fast">Fastest</string>
+    <string name="server_section_other">Other servers</string>
 </resources>

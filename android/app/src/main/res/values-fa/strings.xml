@@ -656,4 +656,6 @@
     <string name="qr_transfer_hint">این کد را با Dr VPN روی گوشی (یا برنامه سازگار دیگر) اسکن کنید تا این سرور آنجا اضافه شود.</string>
     <string name="qr_transfer_unavailable">این سرور را نمی‌توان به صورت کد QR منتقل کرد.</string>
     <string name="kill_switch_unavailable">‏این دستگاه صفحه تنظیمات VPN ندارد (در تلویزیون‌ها رایج است)، پس Kill Switch خود اندروید اینجا روشن نمی‌شود.\n\n‏Dr VPN در صورت قطع شدن، خودش دوباره وصل می‌شود. برای محافظت کامل همه دستگاه‌ها، Dr VPN را روی روتر استفاده کنید.</string>
+    <string name="server_section_fast">سریع‌ترین‌ها</string>
+    <string name="server_section_other">سایر سرورها</string>
 </resources>
