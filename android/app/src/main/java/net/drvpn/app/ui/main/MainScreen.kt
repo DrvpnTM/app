@@ -279,7 +279,7 @@ fun MainScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(innerPadding)
-                        .background(MaterialTheme.colorScheme.cell)
+                        .background(MaterialTheme.colorScheme.surface)
                 ) {
                     PingFilterBar(
                         showServersWithoutPing = uiState.showServersWithoutPing,

@@ -43,12 +43,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import net.drvpn.app.R
-import net.drvpn.app.ui.compose.IosDark
+import net.drvpn.app.ui.compose.cell
 import net.drvpn.app.ui.compose.sheetDragHandle
 
-private val SheetTop = Color(0xFF14408F)
-private val SheetBottom = Color(0xFF0A1A3F)
-private val MarkerColor = Color(0xFF7CC4FF)
 
 /**
  * "Select server" sheet opened by pulling Home up: a world map with a dot on every server country
@@ -60,6 +57,8 @@ internal fun ServerPickerSheet(
     rows: List<ServerRowUiModel>,
     selectedGuid: String?,
     onSelect: (String) -> Unit,
+    onSelectFastest: () -> Unit,
+    testing: Boolean,
     onDismiss: () -> Unit,
 ) {
     val sorted = rows.sortedWith(serverPingOrder)
@@ -68,21 +67,15 @@ internal fun ServerPickerSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        containerColor = SheetBottom,
+        containerColor = MaterialTheme.colorScheme.surface,
         dragHandle = sheetDragHandle(),
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
     ) {
-        MaterialTheme(colorScheme = IosDark.copy(primary = MarkerColor)) {
-            Column(
-                Modifier
-                    .fillMaxWidth()
-                    .background(Brush.verticalGradient(listOf(SheetTop, SheetBottom)))
-            ) {
+        run {
+            Column(Modifier.fillMaxWidth()) {
                 Text(
                     stringResource(R.string.server_picker_title),
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Color.White,
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
                         .padding(top = 4.dp, bottom = 12.dp)
@@ -92,6 +85,12 @@ internal fun ServerPickerSheet(
                     selectedCountry = selectedCountry,
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
+                Box(Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp)) {
+                    FastestButton(busy = testing, onClick = {
+                        onSelectFastest()
+                        onDismiss()
+                    })
+                }
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -125,16 +124,20 @@ private fun WorldMap(countries: Set<String>, selectedCountry: String?, modifier:
         animationSpec = infiniteRepeatable(tween(1200), RepeatMode.Reverse),
         label = "glow"
     )
+    val marker = MaterialTheme.colorScheme.primary
+    val ink = MaterialTheme.colorScheme.onSurface
     BoxWithConstraints(
         modifier
             .fillMaxWidth()
+            .clip(RoundedCornerShape(18.dp))
+            .background(MaterialTheme.colorScheme.cell)
             .aspectRatio(WORLD_MAP_ASPECT)
     ) {
         Image(
             painterResource(R.drawable.world_map),
             contentDescription = null,
             contentScale = ContentScale.FillBounds,
-            colorFilter = ColorFilter.tint(Color.White.copy(alpha = 0.22f)),
+            colorFilter = ColorFilter.tint(ink.copy(alpha = 0.10f)),
             modifier = Modifier.fillMaxSize()
         )
         for (code in countries) {
@@ -152,14 +155,14 @@ private fun WorldMap(countries: Set<String>, selectedCountry: String?, modifier:
                             .fillMaxSize()
                             .scale(glow)
                             .clip(CircleShape)
-                            .background(MarkerColor.copy(alpha = 0.35f))
+                            .background(marker.copy(alpha = 0.25f))
                     )
                 }
                 Box(
                     Modifier
                         .fillMaxSize()
                         .clip(CircleShape)
-                        .background(if (selected) Color.White else MarkerColor)
+                        .background(if (selected) marker else marker.copy(alpha = 0.55f))
                 )
             }
         }

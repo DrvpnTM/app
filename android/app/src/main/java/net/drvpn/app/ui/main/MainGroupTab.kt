@@ -94,7 +94,7 @@ private fun GroupChip(
         modifier = Modifier
             .focusHighlight(shape)
             .clip(shape)
-            .background(if (selected) primary else MaterialTheme.colorScheme.background)
+            .background(if (selected) primary else MaterialTheme.colorScheme.cell)
             .semantics { this.selected = selected }
             .clickable(role = Role.Tab, onClick = onClick)
             .padding(start = 12.dp, end = 14.dp, top = 8.dp, bottom = 8.dp),
