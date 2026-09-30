@@ -70,6 +70,10 @@ import androidx.compose.material3.LinearProgressIndicator
 import net.drvpn.app.handler.AnnouncementManager
 import androidx.compose.ui.platform.LocalUriHandler
 import net.drvpn.app.R
+import net.drvpn.app.ui.compose.DrVpnFont
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.style.TextDirection
+import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.runtime.rememberUpdatedState
@@ -121,6 +125,7 @@ internal fun MainHomeTab(
 ) {
     // Pulling Home up (or tapping the handle / server card) opens the server picker sheet.
     var showPicker by rememberSaveable { mutableStateOf(false) }
+    val selectedRow = serverRows.firstOrNull { it.guid == selectedGuid }
     val openPicker: () -> Unit = { if (serverRows.isNotEmpty()) showPicker = true else onOpenProxies() }
     val latestOpen by rememberUpdatedState(openPicker)
     val pullUp = remember {
@@ -148,6 +153,8 @@ internal fun MainHomeTab(
             rows = serverRows,
             selectedGuid = selectedGuid,
             onSelect = { onAction(MainAction.SelectServer(it)) },
+            onSelectFastest = { onAction(MainAction.SelectFastest) },
+            testing = isTesting,
             onDismiss = { showPicker = false }
         )
     }
@@ -247,13 +254,12 @@ internal fun MainHomeTab(
                         onUpdate = { onAction(MainAction.UpdateSubscriptions) },
                     )
                     Spacer(Modifier.height(12.dp))
-                    ServerCard(
-                    serverName = selectedServerName,
-                    onClick = openPicker,
-                    onShowQr = selectedGuid?.let { guid -> { onAction(MainAction.ShareQRCode(guid)) } }
-                )
-                    Spacer(Modifier.height(10.dp))
-                    FastestButton(busy = isTesting, onClick = { onAction(MainAction.SelectFastest) })
+                    LocationCard(
+                        row = selectedRow,
+                        fallbackName = selectedServerName,
+                        onClick = openPicker,
+                        onShowQr = selectedGuid?.let { guid -> { onAction(MainAction.ShareQRCode(guid)) } }
+                    )
                 }
             }
         } else {
@@ -276,13 +282,12 @@ internal fun MainHomeTab(
                 Spacer(Modifier.height(20.dp))
                 connectBlock()
                 Spacer(Modifier.height(20.dp))
-                ServerCard(
-                    serverName = selectedServerName,
+                LocationCard(
+                    row = selectedRow,
+                    fallbackName = selectedServerName,
                     onClick = openPicker,
                     onShowQr = selectedGuid?.let { guid -> { onAction(MainAction.ShareQRCode(guid)) } }
                 )
-                Spacer(Modifier.height(10.dp))
-                FastestButton(busy = isTesting, onClick = { onAction(MainAction.SelectFastest) })
             }
         }
     }
@@ -336,8 +341,10 @@ private fun ConnectionTimer(since: Long?) {
     val text = String.format(Locale.US, "%02d:%02d:%02d", total / 3600, (total % 3600) / 60, total % 60)
     Text(
         text = text,
-        style = MaterialTheme.typography.headlineSmall,
-        fontFamily = FontFamily.Monospace,
+        fontSize = 30.sp,
+        fontWeight = FontWeight.ExtraBold,
+        fontFamily = DrVpnFont,
+        style = MaterialTheme.typography.headlineMedium.copy(fontFeatureSettings = "tnum", textDirection = TextDirection.Ltr),
         color = MaterialTheme.colorScheme.onSurface,
     )
 }
@@ -388,7 +395,7 @@ private fun SpeedItem(arrow: String, label: String, value: String, total: String
 }
 
 @Composable
-private fun FastestButton(busy: Boolean, onClick: () -> Unit) {
+internal fun FastestButton(busy: Boolean, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -546,11 +553,11 @@ private fun StatusPill(isRunning: Boolean) {
 private fun ConnectButton(isRunning: Boolean, onToggle: () -> Unit, size: Dp = 220.dp, focusRequester: FocusRequester? = null) {
     // Off: brand blue (an invitation to tap, not a "disabled" grey). On: green.
     val top by animateColorAsState(
-        targetValue = if (isRunning) Color(0xFF4CD964) else Color(0xFF3D9BFF),
+        targetValue = if (isRunning) Color(0xFF4ADE80) else Color(0xFF60A5FA),
         label = "connectTop",
     )
     val bottom by animateColorAsState(
-        targetValue = if (isRunning) Color(0xFF1FA84A) else Color(0xFF0060DF),
+        targetValue = if (isRunning) Color(0xFF16A34A) else Color(0xFF2563EB),
         label = "connectBottom",
     )
     val color = bottom
@@ -609,58 +616,65 @@ private fun ConnectButton(isRunning: Boolean, onToggle: () -> Unit, size: Dp = 2
     }
 }
 
+/**
+ * The selected server as design B draws it: round flag, country, protocol and signal bars on a
+ * white card; tapping it opens the server picker.
+ */
 @Composable
-private fun ServerCard(serverName: String, onClick: () -> Unit, onShowQr: (() -> Unit)? = null) {
-    val title = stringResource(R.string.home_current_server)
-    val name = serverName.ifBlank { stringResource(R.string.home_no_server) }
-    Card(
+private fun LocationCard(
+    row: ServerRowUiModel?,
+    fallbackName: String,
+    onClick: () -> Unit,
+    onShowQr: (() -> Unit)?,
+) {
+    val shape = RoundedCornerShape(20.dp)
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .focusHighlight(RoundedCornerShape(20.dp))
-            .semantics(mergeDescendants = true) {},
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
-        onClick = onClick,
+            .shadow(10.dp, shape, ambientColor = Color(0x140F172A), spotColor = Color(0x140F172A))
+            .clip(shape)
+            .background(MaterialTheme.colorScheme.surface)
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, shape)
+            .focusHighlight(shape)
+            .clickable(role = Role.Button, onClick = onClick)
+            .padding(start = 14.dp, end = 6.dp, top = 12.dp, bottom = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_proxies_24dp),
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
+        if (row != null) {
+            FlagCircle(row.flag, row.country.length == 2, size = 42.dp)
+        } else {
+            FlagCircle("", false, size = 42.dp)
+        }
+        Spacer(Modifier.width(12.dp))
+        Column(Modifier.weight(1f)) {
+            Text(
+                text = row?.let { serverRowTitle(it.country) } ?: fallbackName.ifBlank { stringResource(R.string.home_no_server) },
+                style = MaterialTheme.typography.titleSmall,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
-            Column(modifier = Modifier.weight(1f)) {
+            if (row != null) {
                 Text(
-                    text = title,
-                    style = MaterialTheme.typography.labelMedium,
+                    text = row.typeDescription.replace(" / ", " · "),
+                    style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Text(
-                    text = name,
-                    style = MaterialTheme.typography.titleMedium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
             }
-            if (onShowQr != null && serverName.isNotBlank()) {
-                IconButton(onClick = onShowQr, modifier = Modifier.focusHighlight(CircleShape)) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_qr_code_24dp),
-                        contentDescription = stringResource(R.string.qr_transfer_title),
-                        tint = MaterialTheme.colorScheme.primary,
-                    )
-                }
+        }
+        if (row != null && row.testDelayMillis != 0L) {
+            SignalBars(row.testDelayMillis, Modifier.padding(horizontal = 6.dp))
+        }
+        if (onShowQr != null && row != null) {
+            IconButton(onClick = onShowQr, modifier = Modifier.focusHighlight(CircleShape)) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_qr_code_24dp),
+                    contentDescription = stringResource(R.string.qr_transfer_title),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(20.dp)
+                )
             }
-            Icon(
-                painter = painterResource(R.drawable.ic_chevron_right_24dp),
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
         }
     }
 }
