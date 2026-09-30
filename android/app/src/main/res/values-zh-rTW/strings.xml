@@ -656,4 +656,6 @@
     <string name="kill_switch_unavailable">此裝置沒有 VPN 設定頁面（電視上很常見），因此無法在這裡開啟系統斷網保護。\n\n連線中斷時 Dr VPN 仍會自動重新連線。如需保護所有裝置，請在路由器上使用 Dr VPN。</string>
     <string name="server_section_fast">最快</string>
     <string name="server_section_other">其他伺服器</string>
+    <string name="home_sub_update">更新</string>
+    <string name="server_picker_title">選擇伺服器</string>
 </resources>

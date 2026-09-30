@@ -70,6 +70,14 @@ import androidx.compose.material3.LinearProgressIndicator
 import net.drvpn.app.handler.AnnouncementManager
 import androidx.compose.ui.platform.LocalUriHandler
 import net.drvpn.app.R
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.unit.Velocity
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import net.drvpn.app.util.DeviceUtil
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.mutableStateOf
@@ -108,8 +116,41 @@ fun MainHomeTab(
     isTesting: Boolean,
     onAction: (MainAction) -> Unit,
     onOpenProxies: () -> Unit,
+    serverRows: List<ServerRowUiModel> = emptyList(),
     modifier: Modifier = Modifier,
 ) {
+    // Pulling Home up (or tapping the handle / server card) opens the server picker sheet.
+    var showPicker by rememberSaveable { mutableStateOf(false) }
+    val openPicker: () -> Unit = { if (serverRows.isNotEmpty()) showPicker = true else onOpenProxies() }
+    val latestOpen by rememberUpdatedState(openPicker)
+    val pullUp = remember {
+        object : NestedScrollConnection {
+            private var pulled = 0f
+            override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
+                if (source == NestedScrollSource.UserInput && available.y < 0f) {
+                    pulled -= available.y
+                    if (pulled > 140f) {
+                        pulled = 0f
+                        latestOpen()
+                    }
+                }
+                return Offset.Zero
+            }
+
+            override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
+                pulled = 0f
+                return Velocity.Zero
+            }
+        }
+    }
+    if (showPicker) {
+        ServerPickerSheet(
+            rows = serverRows,
+            selectedGuid = selectedGuid,
+            onSelect = { onAction(MainAction.SelectServer(it)) },
+            onDismiss = { showPicker = false }
+        )
+    }
     // On a TV the remote starts on the connect button instead of the first control on screen.
     val isTv = DeviceUtil.isTv(LocalContext.current)
     val connectFocus = remember { FocusRequester() }
@@ -120,7 +161,13 @@ fun MainHomeTab(
             initialFocusDone = true
         }
     }
-    BoxWithConstraints(modifier = modifier.fillMaxSize()) {
+    Column(modifier.fillMaxSize()) {
+    BoxWithConstraints(
+        Modifier
+            .weight(1f)
+            .fillMaxWidth()
+            .nestedScroll(pullUp)
+    ) {
         val landscape = maxWidth > maxHeight
         val availableHeight = maxHeight
         val connectBlock: @Composable () -> Unit = {
@@ -202,7 +249,7 @@ fun MainHomeTab(
                     Spacer(Modifier.height(12.dp))
                     ServerCard(
                     serverName = selectedServerName,
-                    onClick = onOpenProxies,
+                    onClick = openPicker,
                     onShowQr = selectedGuid?.let { guid -> { onAction(MainAction.ShareQRCode(guid)) } }
                 )
                     Spacer(Modifier.height(10.dp))
@@ -231,13 +278,46 @@ fun MainHomeTab(
                 Spacer(Modifier.height(20.dp))
                 ServerCard(
                     serverName = selectedServerName,
-                    onClick = onOpenProxies,
+                    onClick = openPicker,
                     onShowQr = selectedGuid?.let { guid -> { onAction(MainAction.ShareQRCode(guid)) } }
                 )
                 Spacer(Modifier.height(10.dp))
                 FastestButton(busy = isTesting, onClick = { onAction(MainAction.SelectFastest) })
             }
         }
+    }
+    PullUpHandle(onOpen = openPicker)
+    }
+}
+
+@Composable
+private fun PullUpHandle(onOpen: () -> Unit) {
+    val latest by rememberUpdatedState(onOpen)
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .focusHighlight(RoundedCornerShape(16.dp))
+            .clickable(role = Role.Button, onClick = onOpen)
+            .pointerInput(Unit) {
+                detectVerticalDragGestures { _, dragAmount -> if (dragAmount < -6f) latest() }
+            }
+            .padding(top = 6.dp, bottom = 10.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(
+            Modifier
+                .width(40.dp)
+                .height(5.dp)
+                .clip(RoundedCornerShape(50))
+                .background(MaterialTheme.colorScheme.outlineVariant)
+        )
+        Spacer(Modifier.height(6.dp))
+        Text(
+            stringResource(R.string.server_picker_title),
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.primary
+        )
     }
 }
 
@@ -329,49 +409,67 @@ private fun FastestButton(busy: Boolean, onClick: () -> Unit) {
     }
 }
 
+/**
+ * Compact subscription card: icon, name, usage and days left on one line, a slim usage bar, and a
+ * clear "Update" pill (a spinning-arrow icon alone was not obvious to users).
+ */
 @Composable
 private fun ProfileCard(profileName: String, subscription: SubscriptionItem?, onUpdate: () -> Unit) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+    val primary = MaterialTheme.colorScheme.primary
+    val shape = RoundedCornerShape(18.dp)
+    val sub = subscription?.takeIf { it.usedBytes > 0 || it.totalBytes > 0 || it.expireAt > 0 }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(MaterialTheme.colorScheme.cell)
+            .padding(start = 12.dp, end = 10.dp, top = 10.dp, bottom = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Column {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 20.dp, end = 8.dp, top = 12.dp, bottom = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
+        Box(
+            Modifier
+                .size(38.dp)
+                .clip(RoundedCornerShape(11.dp))
+                .background(primary.copy(alpha = 0.12f)),
+            contentAlignment = Alignment.Center
         ) {
             Icon(
                 painter = painterResource(R.drawable.ic_subscriptions_24dp),
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
+                tint = primary,
+                modifier = Modifier.size(20.dp)
             )
-            Spacer(Modifier.width(12.dp))
+        }
+        Spacer(Modifier.width(12.dp))
+        Column(Modifier.weight(1f)) {
             Text(
                 text = profileName.ifBlank { stringResource(R.string.app_name) },
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f),
             )
-            IconButton(onClick = onUpdate, modifier = Modifier.focusHighlight(CircleShape)) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_refresh_24dp),
-                    contentDescription = stringResource(R.string.title_sub_update),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
+            if (sub != null) SubscriptionUsage(sub)
         }
-        if (subscription != null && (subscription.usedBytes > 0 || subscription.totalBytes > 0 || subscription.expireAt > 0)) {
-            SubscriptionUsage(subscription)
-        }
-        }
+        Spacer(Modifier.width(10.dp))
+        val pill = RoundedCornerShape(50)
+        Text(
+            text = stringResource(R.string.home_sub_update),
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.SemiBold,
+            color = primary,
+            maxLines = 1,
+            modifier = Modifier
+                .focusHighlight(pill)
+                .clip(pill)
+                .background(primary.copy(alpha = 0.12f))
+                .clickable(role = Role.Button, onClick = onUpdate)
+                .padding(horizontal = 14.dp, vertical = 7.dp)
+        )
     }
 }
 
-/** Used/total bar and days left, from the panel's subscription-userinfo header. */
+/** "136 MB of 33 GB · 177 days left" and a slim usage bar, from the subscription-userinfo header. */
 @Composable
 private fun SubscriptionUsage(sub: SubscriptionItem) {
     val total = sub.totalBytes
@@ -387,38 +485,33 @@ private fun SubscriptionUsage(sub: SubscriptionItem) {
     } else {
         stringResource(R.string.home_sub_usage_unlimited, used.toTrafficString())
     }
+    val expired = sub.expireAt in 1 until System.currentTimeMillis()
     val expiryText = when {
         sub.expireAt <= 0 -> null
-        sub.expireAt < System.currentTimeMillis() -> stringResource(R.string.home_sub_expired)
-        else -> {
-            val days = ((sub.expireAt - System.currentTimeMillis()) / 86_400_000L).toInt()
-            stringResource(R.string.home_sub_days_left, days)
-        }
+        expired -> stringResource(R.string.home_sub_expired)
+        else -> stringResource(R.string.home_sub_days_left, ((sub.expireAt - System.currentTimeMillis()) / 86_400_000L).toInt())
     }
-    Column(Modifier.padding(start = 20.dp, end = 20.dp, bottom = 14.dp)) {
-        if (total > 0) {
-            LinearProgressIndicator(
-                progress = { fraction },
-                color = barColor,
-                trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(6.dp)
-                    .clip(RoundedCornerShape(3.dp)),
-            )
-            Spacer(Modifier.height(6.dp))
-        }
-        Row(Modifier.fillMaxWidth()) {
-            Text(usageText, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.weight(1f))
-            if (expiryText != null) {
-                Text(
-                    expiryText,
-                    style = MaterialTheme.typography.bodySmall,
-                    fontWeight = FontWeight.SemiBold,
-                    color = if (sub.expireAt < System.currentTimeMillis()) IosRed else MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-        }
+    Text(
+        text = listOfNotNull(usageText, expiryText).joinToString("  ·  "),
+        style = MaterialTheme.typography.bodySmall,
+        color = if (expired) IosRed else MaterialTheme.colorScheme.onSurfaceVariant,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+        modifier = Modifier.padding(top = 1.dp)
+    )
+    if (total > 0) {
+        LinearProgressIndicator(
+            progress = { fraction },
+            color = barColor,
+            trackColor = MaterialTheme.colorScheme.surfaceVariant,
+            drawStopIndicator = {},
+            gapSize = 0.dp,
+            modifier = Modifier
+                .padding(top = 6.dp)
+                .fillMaxWidth()
+                .height(4.dp)
+                .clip(RoundedCornerShape(2.dp)),
+        )
     }
 }
 
