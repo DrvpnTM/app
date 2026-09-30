@@ -100,7 +100,7 @@ private val ConnectedColor = Color(0xFF34C759)
  * and the selected server card. Switches to two columns in landscape.
  */
 @Composable
-fun MainHomeTab(
+internal fun MainHomeTab(
     profileName: String,
     subscription: SubscriptionItem?,
     announcement: AnnouncementManager.Announcement?,
