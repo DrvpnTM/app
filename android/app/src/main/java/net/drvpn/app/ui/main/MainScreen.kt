@@ -279,44 +279,20 @@ fun MainScreen(
                         onShowChange = { onAction(MainAction.SetShowServersWithoutPing(it)) },
                         onTestAll = { onAction(MainAction.TestRealAllServers) }
                     )
-                    val categoryGroupId = uiState.selectedGroupId
-                    val categoryState by remember(categoryGroupId) {
-                        mainViewModel.serverGroupState(categoryGroupId)
-                    }.collectAsStateWithLifecycle()
-                    // With "hide servers without ping", only offer categories that have a working server.
-                    val categoryRows = if (uiState.showServersWithoutPing) categoryState.allRows
-                    else categoryState.allRows.filter { it.testDelayMillis > 0L }
-                    ServerCategoryBar(
-                        rows = categoryRows,
-                        selected = uiState.serverCategory,
-                        onSelect = { onAction(MainAction.SetServerCategory(it)) }
-                    )
-                    if (uiState.serverCategory != null && categoryState.rows.isEmpty() && !uiState.isTesting) {
-                        Text(
-                            stringResource(R.string.server_category_empty),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 24.dp, vertical = 24.dp)
-                        )
-                    }
-                    if (groups.size > 1) {
-                        GroupTabBar(
-                            groups = groups,
-                            selectedTabIndex = pagerState.currentPage.coerceIn(0, groups.lastIndex),
-                            mainViewModel = mainViewModel,
-                            onTabClick = { targetIndex ->
-                                scope.launch {
-                                    pagerState.navigateToPageOptimized(
-                                        targetPage = targetIndex,
-                                        animateAdjacentPage = true
-                                    )
-                                }
+                    // Subscription switcher: one chip per subscription profile.
+                    GroupTabBar(
+                        groups = groups,
+                        selectedTabIndex = pagerState.currentPage.coerceIn(0, groups.lastIndex),
+                        mainViewModel = mainViewModel,
+                        onTabClick = { targetIndex ->
+                            scope.launch {
+                                pagerState.navigateToPageOptimized(
+                                    targetPage = targetIndex,
+                                    animateAdjacentPage = true
+                                )
                             }
-                        )
-                    }
+                        }
+                    )
 
                     HorizontalPager(
                         state = pagerState,
