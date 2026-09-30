@@ -208,7 +208,12 @@ private fun ServerListPage(
             }
         } else null
 
-        LocateTargetEffect(locateTarget, rows, listState, onLocateHandled)
+        // "Fastest" / "Other servers" sections, only when rows are not being reordered by hand.
+        val fast = if (canReorder) 0 else fastCount(rows)
+        val sectioned = fast > 0
+        LocateTargetEffect(locateTarget, rows, listState, onLocateHandled) { index ->
+            if (!sectioned) index else if (index < fast) index + 1 else index + 2
+        }
 
         LazyColumn(
             state = listState,
@@ -217,7 +222,16 @@ private fun ServerListPage(
                 .verticalScrollbar(listState),
             contentPadding = contentPadding
         ) {
-            itemsIndexed(items = rows, key = { _, item -> item.guid }) { _, row ->
+            if (sectioned) {
+                item(key = "header-fast") { ServerSectionHeader(stringResource(R.string.server_section_fast)) }
+                itemsIndexed(items = rows.take(fast), key = { _, item -> item.guid }) { _, row ->
+                    ServerItemRow(row = row, isSelected = row.guid == selectedGuid, actions = actions, fast = true)
+                }
+                if (rows.size > fast) {
+                    item(key = "header-other") { ServerSectionHeader(stringResource(R.string.server_section_other)) }
+                }
+            }
+            itemsIndexed(items = if (sectioned) rows.drop(fast) else rows, key = { _, item -> item.guid }) { _, row ->
                 if (canReorder && reorderableState != null) {
                     ReorderableItem(
                         reorderableState,
@@ -253,12 +267,13 @@ private fun LocateTargetEffect(
     rows: List<ServerRowUiModel>,
     state: LazyListState,
     onHandled: () -> Unit,
+    itemIndexOf: (Int) -> Int = { it },
 ) {
     if (target == null) return
     LaunchedEffect(target, rows) {
         val index = rows.indexOfFirst { it.guid == target.serverGuid }
         if (index < 0) return@LaunchedEffect
-        state.scrollToItem(index, -state.layoutInfo.viewportSize.height / 3)
+        state.scrollToItem(itemIndexOf(index), -state.layoutInfo.viewportSize.height / 3)
         onHandled()
     }
 }
@@ -283,13 +298,15 @@ private fun LocateTargetEffect(
 private fun ServerItemRow(
     row: ServerRowUiModel,
     isSelected: Boolean,
-    actions: ServerRowActions
+    actions: ServerRowActions,
+    fast: Boolean = false,
 ) {
     ServerListItem(
         row = row,
         isSelected = isSelected,
         doubleColumnDisplay = false,
-        actions = actions
+        actions = actions,
+        fast = fast,
     )
 }
 
@@ -315,183 +332,24 @@ private fun ServerListItem(
     row: ServerRowUiModel,
     isSelected: Boolean,
     doubleColumnDisplay: Boolean,
-    actions: ServerRowActions
+    actions: ServerRowActions,
+    fast: Boolean = false,
 ) {
-    val selectedStateDescription = if (isSelected) {
-        stringResource(R.string.acc_selected_server)
-    } else {
-        null
-    }
-    val primary = MaterialTheme.colorScheme.primary
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = if (doubleColumnDisplay) 6.dp else 16.dp, vertical = 4.dp)
-            .clip(IosGroupShape)
-            .background(MaterialTheme.colorScheme.cell)
-            .then(
-                if (isSelected) {
-                    Modifier
-                        .background(primary.copy(alpha = 0.08f))
-                        .border(1.5.dp, primary, IosGroupShape)
-                } else Modifier
-            )
-            .semantics {
-                if (selectedStateDescription != null) {
-                    stateDescription = selectedStateDescription
-                }
-            }
-            .padding(end = 4.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        // Selecting and the "more" menu are separate focus targets so a TV remote can reach both.
-        Row(
-            modifier = Modifier
-                .weight(1f)
-                .focusHighlight()
-                .clickable { actions.select(row.guid) }
-                .padding(start = 12.dp, end = 4.dp, top = 10.dp, bottom = 10.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Country flag bubble; a globe when the location is unknown (e.g. behind a CDN).
-            Box(
-                Modifier
-                    .size(42.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surfaceVariant),
-                Alignment.Center
-            ) {
-                Text(row.flag.ifEmpty { "🌐" }, fontSize = 24.sp)
-            }
-            Spacer(Modifier.width(12.dp))
-            Column(Modifier.weight(1f)) {
-                // Branded name instead of the seller's config name; the real name stays in the editor.
-                Text(
-                    serverDisplayName(row.country, LocalConfiguration.current.locales[0]),
-                    style = MaterialTheme.typography.bodyLarge.copy(lineBreak = LineBreak.Paragraph),
-                    fontWeight = FontWeight.SemiBold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Spacer(Modifier.height(2.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    if (row.subscriptionBadge.isNotBlank()) {
-                        Text(
-                            row.subscriptionBadge.uppercase(),
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = primary,
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(4.dp))
-                                .background(primary.copy(alpha = 0.12f))
-                                .padding(horizontal = 5.dp, vertical = 1.dp)
-                        )
-                        Spacer(Modifier.width(6.dp))
-                    }
-                    // Protocol type under the name, e.g. "VLESS · xhttp · tls".
-                    val protocolColor = protocolColor(row.protocol)
-                    Text(
-                        row.protocol,
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = protocolColor,
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(4.dp))
-                            .background(protocolColor.copy(alpha = 0.12f))
-                            .padding(horizontal = 5.dp, vertical = 1.dp)
-                    )
-                    Spacer(Modifier.width(6.dp))
-                    Text(
-                        row.typeDescription.split(" / ").drop(1).joinToString(" · "),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-            }
-            PingPill(row.testDelayMillis)
-            if (isSelected) {
-                Icon(
-                    painterResource(R.drawable.ic_action_done),
-                    contentDescription = null,
-                    tint = primary,
-                    modifier = Modifier
-                        .padding(start = 6.dp)
-                        .size(20.dp)
-                )
-            }
-        }
-        IconButton(onClick = { actions.more(row.guid, row.profile) }, Modifier.size(40.dp).focusHighlight(CircleShape)) {
-            Icon(
-                painterResource(R.drawable.ic_more_vert_24dp),
-                stringResource(R.string.acc_more),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(20.dp)
-            )
-        }
-    }
+    ServerLocationRow(
+        row = row,
+        isSelected = isSelected,
+        fast = fast,
+        onClick = { actions.select(row.guid) },
+        onMore = { actions.more(row.guid, row.profile) },
+        modifier = if (doubleColumnDisplay) Modifier.padding(horizontal = 0.dp) else Modifier,
+    )
 }
 
-internal fun protocolColor(protocol: String): Color = when (protocol.uppercase()) {
-    "VLESS" -> Color(0xFF007AFF)
-    "VMESS" -> Color(0xFF5856D6)
-    "TROJAN" -> Color(0xFFFF9500)
-    "SHADOWSOCKS" -> Color(0xFF34C759)
-    "HYSTERIA2" -> Color(0xFFFF2D55)
-    "WIREGUARD" -> Color(0xFFAF52DE)
-    else -> Color(0xFF8E8E93)
-}
+/** How many of the (ping-sorted) rows form the "Fastest" section. */
+private fun fastCount(rows: List<ServerRowUiModel>): Int =
+    rows.take(FAST_SECTION_SIZE).takeWhile { it.testDelayMillis > 0L }.size
 
-/** Latency capsule: signal bars + compact "123ms", green / orange / red like iOS signal quality. */
-@Composable
-private fun PingPill(delayMillis: Long) {
-    if (delayMillis == 0L) return
-    val color = when {
-        delayMillis < 0L -> colorPingRed
-        delayMillis < 400L -> colorPing
-        delayMillis < 1000L -> IosOrange
-        else -> colorPingRed
-    }
-    val bars = when {
-        delayMillis < 0L -> 0
-        delayMillis < 200L -> 3
-        delayMillis < 600L -> 2
-        else -> 1
-    }
-    val description = if (delayMillis < 0L) "✕" else stringResource(R.string.server_test_delay_value, delayMillis)
-    Row(
-        modifier = Modifier
-            .clip(RoundedCornerShape(50))
-            .background(color.copy(alpha = 0.14f))
-            .padding(horizontal = 8.dp, vertical = 4.dp)
-            .clearAndSetSemantics { contentDescription = description },
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        // Bars always draw left to right, whatever the layout direction.
-        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-            Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                for (i in 1..3) {
-                    Box(
-                        Modifier
-                            .width(3.dp)
-                            .height((4 + i * 3).dp)
-                            .clip(RoundedCornerShape(1.dp))
-                            .background(if (i <= bars) color else color.copy(alpha = 0.25f))
-                    )
-                }
-            }
-        }
-        Spacer(Modifier.width(6.dp))
-        Text(
-            if (delayMillis < 0L) "✕" else "${delayMillis}ms",
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = FontWeight.SemiBold,
-            color = color,
-            maxLines = 1,
-        )
-    }
-}
+private const val FAST_SECTION_SIZE = 3
 
 internal suspend fun PagerState.navigateToPageOptimized(
     targetPage: Int,

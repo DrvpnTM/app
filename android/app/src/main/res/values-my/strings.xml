@@ -568,4 +568,6 @@
     <string name="qr_transfer_hint">ဤဆာဗာကို ထည့်ရန် ဖုန်းရှိ Dr VPN (သို့မဟုတ် ကိုက်ညီသော အက်ပ်) ဖြင့် ဤကုဒ်ကို scan ဖတ်ပါ။</string>
     <string name="qr_transfer_unavailable">ဤဆာဗာကို QR ကုဒ်အဖြစ် မျှဝေ၍ မရပါ။</string>
     <string name="kill_switch_unavailable">ဤစက်တွင် VPN ဆက်တင် စာမျက်နှာ မရှိပါ (TV များတွင် အဖြစ်များသည်)၊ ထို့ကြောင့် kill switch ကို ဤနေရာတွင် ဖွင့်၍ မရပါ။\n\nချိတ်ဆက်မှု ပြတ်သွားပါက Dr VPN က အလိုအလျောက် ပြန်ချိတ်ပါသည်။ စက်အားလုံးကို အပြည့်အဝ ကာကွယ်ရန် router ပေါ်တွင် Dr VPN သုံးပါ။</string>
+    <string name="server_section_fast">အမြန်ဆုံး</string>
+    <string name="server_section_other">အခြား ဆာဗာများ</string>
 </resources>

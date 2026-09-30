@@ -46,6 +46,8 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.asPaddingValues
 import net.drvpn.app.R
+import net.drvpn.app.ui.compose.cell
+import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.RoundedCornerShape
 import net.drvpn.app.ui.compose.focusHighlight
 import net.drvpn.app.dto.entities.ProfileItem
@@ -272,6 +274,7 @@ fun MainScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(innerPadding)
+                        .background(MaterialTheme.colorScheme.cell)
                 ) {
                     PingFilterBar(
                         showServersWithoutPing = uiState.showServersWithoutPing,

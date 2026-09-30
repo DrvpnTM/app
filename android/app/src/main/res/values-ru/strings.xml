@@ -660,4 +660,6 @@
     <string name="qr_transfer_hint">Отсканируйте код в Dr VPN на телефоне (или другом совместимом приложении), чтобы добавить этот сервер.</string>
     <string name="qr_transfer_unavailable">Этот сервер нельзя передать QR-кодом.</string>
     <string name="kill_switch_unavailable">На этом устройстве нет экрана настроек VPN (частое явление на ТВ), поэтому системный kill switch здесь не включить.\n\nDr VPN сам переподключается при обрыве. Для полной защиты всех устройств используйте Dr VPN на роутере.</string>
+    <string name="server_section_fast">Самые быстрые</string>
+    <string name="server_section_other">Другие серверы</string>
 </resources>

@@ -654,4 +654,6 @@
     <string name="qr_transfer_hint">Quét mã này bằng Dr VPN trên điện thoại (hoặc ứng dụng tương thích khác) để thêm máy chủ này.</string>
     <string name="qr_transfer_unavailable">Không thể chia sẻ máy chủ này bằng mã QR.</string>
     <string name="kill_switch_unavailable">Thiết bị này không có màn hình cài đặt VPN (thường gặp trên TV), nên không bật được kill switch ở đây.\n\nDr VPN vẫn tự kết nối lại khi mất kết nối. Để bảo vệ mọi thiết bị, hãy dùng Dr VPN trên router.</string>
+    <string name="server_section_fast">Nhanh nhất</string>
+    <string name="server_section_other">Máy chủ khác</string>
 </resources>

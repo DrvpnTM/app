@@ -654,4 +654,6 @@
     <string name="qr_transfer_hint">用手机上的 Dr VPN（或其他兼容应用）扫描此码即可添加该服务器。</string>
     <string name="qr_transfer_unavailable">此服务器无法以二维码分享。</string>
     <string name="kill_switch_unavailable">此设备没有 VPN 设置页面（电视上很常见），因此无法在这里开启系统断网保护。\n\n连接中断时 Dr VPN 仍会自动重连。如需保护所有设备，请在路由器上使用 Dr VPN。</string>
+    <string name="server_section_fast">最快</string>
+    <string name="server_section_other">其他服务器</string>
 </resources>
