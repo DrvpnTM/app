@@ -160,6 +160,7 @@ class MainActivity : HelperBaseComponentActivity() {
             MainDestination.Advanced -> Intent(this, AdvancedScanActivity::class.java)
             MainDestination.AppLogView -> Intent(this, AppLogActivity::class.java)
             MainDestination.Usage -> Intent(this, UsageActivity::class.java)
+            MainDestination.NetworkCheck -> Intent(this, net.drvpn.app.ui.check.NetworkCheckActivity::class.java)
             MainDestination.KillSwitch -> {
                 showKillSwitchDialog()
                 return
