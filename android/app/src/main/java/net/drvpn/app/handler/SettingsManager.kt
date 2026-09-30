@@ -456,6 +456,16 @@ object SettingsManager {
      * Ensure default settings are present in MMKV.
      */
     private fun ensureDefaultSettings() {
+        // Users who never changed the DNS move from the old built-in defaults to Google DNS.
+        mapOf(
+            AppConfig.PREF_REMOTE_DNS to AppConfig.DNS_PROXY,
+            AppConfig.PREF_DOMESTIC_DNS to AppConfig.DNS_DIRECT,
+            AppConfig.PREF_VPN_DNS to AppConfig.DNS_VPN,
+        ).forEach { (key, value) ->
+            if (MmkvManager.decodeSettingsString(key) == AppConfig.LEGACY_DNS_DEFAULTS[key]) {
+                MmkvManager.encodeSettings(key, value)
+            }
+        }
         // Write defaults in the exact order requested by the user
         ensureDefaultValue(AppConfig.PREF_MODE, VPN)
         ensureDefaultValue(AppConfig.PREF_VPN_DNS, AppConfig.DNS_VPN)

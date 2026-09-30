@@ -662,4 +662,6 @@
     <string name="kill_switch_unavailable">На этом устройстве нет экрана настроек VPN (частое явление на ТВ), поэтому системный kill switch здесь не включить.\n\nDr VPN сам переподключается при обрыве. Для полной защиты всех устройств используйте Dr VPN на роутере.</string>
     <string name="server_section_fast">Самые быстрые</string>
     <string name="server_section_other">Другие серверы</string>
+    <string name="home_sub_update">Обновить</string>
+    <string name="server_picker_title">Выбор сервера</string>
 </resources>

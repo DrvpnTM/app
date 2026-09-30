@@ -658,4 +658,6 @@
     <string name="kill_switch_unavailable">এই ডিভাইসে VPN সেটিংস স্ক্রিন নেই (টিভিতে সাধারণ), তাই এখানে কিল সুইচ চালু করা যায় না।\n\nসংযোগ কেটে গেলে Dr VPN নিজে আবার যুক্ত হয়। সব ডিভাইসের পূর্ণ সুরক্ষার জন্য রাউটারে Dr VPN ব্যবহার করুন।</string>
     <string name="server_section_fast">সবচেয়ে দ্রুত</string>
     <string name="server_section_other">অন্যান্য সার্ভার</string>
+    <string name="home_sub_update">আপডেট</string>
+    <string name="server_picker_title">সার্ভার বাছাই</string>
 </resources>

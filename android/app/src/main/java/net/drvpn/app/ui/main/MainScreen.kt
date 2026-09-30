@@ -251,6 +251,10 @@ fun MainScreen(
             val layoutDirection = LocalLayoutDirection.current
 
             if (selectedTab == MainTab.Home) {
+                val homeGroupId = uiState.selectedGroupId
+                val homeGroupState by remember(homeGroupId) {
+                    mainViewModel.serverGroupState(homeGroupId)
+                }.collectAsStateWithLifecycle()
                 MainHomeTab(
                     profileName = profileName,
                     subscription = uiState.subscription,
@@ -267,6 +271,7 @@ fun MainScreen(
                     isTesting = uiState.isTesting,
                     onAction = onAction,
                     onOpenProxies = { selectedTab = MainTab.Proxies },
+                    serverRows = homeGroupState.rows.ifEmpty { homeGroupState.allRows },
                     modifier = Modifier.padding(innerPadding)
                 )
             } else if (groups.isNotEmpty()) {
