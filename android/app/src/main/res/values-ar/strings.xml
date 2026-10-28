@@ -692,4 +692,7 @@
     <string name="check_dns_note">تم الفحص عبر bash.ws؛ يُقرأ مزودك مرة واحدة من api.ip.sb.</string>
     <string name="check_dns_start">بدء الفحص</string>
     <string name="check_dns_own_isp">مزودك: %1$s</string>
+    <string name="free_sub_promo">لشراء اشتراك عالي السرعة، تفضل بزيارة الموقع الرسمي لـ Dr VPN</string>
+    <string name="server_lab_cipher_suites">مجموعات التشفير (Cipher Suites)</string>
+    <string name="toast_cipher_suites_need_unsafe">لا تُطبَّق cipherSuites إلا مع البصمة unsafe. اختر unsafe أو امسح cipherSuites.</string>
 </resources>

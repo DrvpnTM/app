@@ -40,6 +40,7 @@ object SettingsManager {
     fun initApp(context: Context) {
         ensureDefaultSettings()
         //ensureDefaultSubscription()
+        MmkvManager.ensureFreeSubscription()
         initRoutingRulesets(context)
         migrateServerListToSubscriptions()
         migrateHysteria2PinSHA256()
@@ -236,6 +237,7 @@ object SettingsManager {
      * it creates a new default subscription to ensure that ungroup
      **/
     fun removeSubscriptionWithDefault(subid: String) {
+        if (MmkvManager.isFreeSubscription(subid)) return
         SubscriptionUpdater.cancelOne(subId = subid)
         // Remove the subscription
         removeSubscription(subid)

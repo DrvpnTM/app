@@ -45,6 +45,7 @@ class SubscriptionsViewModel(application: Application) : BaseViewModel(applicati
     }
 
     fun remove(subId: String): Boolean {
+        if (MmkvManager.isFreeSubscription(subId)) return false
         val changed = subscriptions.removeAll { it.guid == subId }
         if (changed) {
             SettingsManager.removeSubscriptionWithDefault(subId)
@@ -55,6 +56,7 @@ class SubscriptionsViewModel(application: Application) : BaseViewModel(applicati
     }
 
     fun update(subId: String, item: SubscriptionItem) {
+        if (MmkvManager.isFreeSubscription(subId)) return
         val idx = subscriptions.indexOfFirst { it.guid == subId }
         if (idx >= 0) {
             subscriptions[idx] = SubscriptionCache(subId, item)

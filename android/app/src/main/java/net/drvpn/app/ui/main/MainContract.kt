@@ -21,6 +21,8 @@ data class MainUiState(
     val selectedGroupId: String = "",
     val selectedGuid: String? = null,
     val selectedServerName: String = "",
+    /** True when the selected server comes from the built-in Dr VPN free subscription. */
+    val onFreeServer: Boolean = false,
     val isRunning: Boolean = false,
     val isTesting: Boolean = false,
     val status: MainStatus = MainStatus.Disconnected,

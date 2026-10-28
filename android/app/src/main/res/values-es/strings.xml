@@ -598,4 +598,7 @@
     <string name="check_dns_note">Comprobado con bash.ws; tu proveedor se lee una vez de api.ip.sb.</string>
     <string name="check_dns_start">Iniciar prueba</string>
     <string name="check_dns_own_isp">Tu proveedor: %1$s</string>
+    <string name="free_sub_promo">Para una suscripción de alta velocidad, visita el sitio web oficial de Dr VPN</string>
+    <string name="server_lab_cipher_suites">Cipher Suites</string>
+    <string name="toast_cipher_suites_need_unsafe">cipherSuites solo se aplican con la huella unsafe. Elige unsafe o vacía cipherSuites.</string>
 </resources>

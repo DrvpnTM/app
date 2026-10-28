@@ -684,4 +684,7 @@
     <string name="check_dns_note">بررسی با سرویس bash.ws؛ اپراتور شما یک بار از api.ip.sb خوانده می‌شود.</string>
     <string name="check_dns_start">شروع بررسی</string>
     <string name="check_dns_own_isp">اپراتور شما: %1$s</string>
+    <string name="free_sub_promo">برای خرید اشتراک پرسرعت به سایت رسمی دکتر وی پی ان مراجعه کنید</string>
+    <string name="server_lab_cipher_suites">مجموعه رمزنگاری (Cipher Suites)</string>
+    <string name="toast_cipher_suites_need_unsafe">cipherSuites فقط با fingerprint از نوع unsafe اعمال می‌شود. unsafe را انتخاب کنید یا cipherSuites را خالی کنید.</string>
 </resources>

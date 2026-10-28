@@ -12,6 +12,7 @@ import com.tencent.mmkv.MMKV
 import com.tencent.mmkv.MMKVHandler
 import com.tencent.mmkv.MMKVLogLevel
 import com.tencent.mmkv.MMKVRecoverStrategic
+import net.drvpn.app.AppConfig
 import net.drvpn.app.AppConfig.DEFAULT_SUBSCRIPTION_ID
 import net.drvpn.app.AppConfig.PREF_IS_BOOTED
 import net.drvpn.app.AppConfig.PREF_ROUTING_RULESET
@@ -667,6 +668,9 @@ object MmkvManager {
      */
     fun decodeSubscriptions(): List<SubscriptionCache> {
         initSubsList()
+        if (!subStorage.containsKey(AppConfig.FREE_SUBSCRIPTION_ID)) {
+            ensureFreeSubscription()
+        }
 
         val subscriptions = mutableListOf<SubscriptionCache>()
         decodeSubsList().forEach { key ->
@@ -685,6 +689,7 @@ object MmkvManager {
      * @param subid The subscription ID.
      */
     fun removeSubscription(subid: String) {
+        if (isFreeSubscription(subid)) return
         subStorage.remove(subid)
         val subsList = decodeSubsList()
         subsList.remove(subid)
@@ -701,12 +706,50 @@ object MmkvManager {
      */
     fun encodeSubscription(guid: String, subItem: SubscriptionItem) {
         val key = guid.ifBlank { Utils.getUuid() }
-        subStorage.encode(key, JsonUtil.toJson(subItem))
+        val item = if (isFreeSubscription(key)) lockFreeSubscription(subItem) else subItem
+        subStorage.encode(key, JsonUtil.toJson(item))
 
         val subsList = decodeSubsList()
         if (!subsList.contains(key)) {
             subsList.add(key)
             encodeSubsList(subsList)
+        }
+    }
+
+    /** True for the built-in Dr VPN free subscription, which users can't edit or delete. */
+    fun isFreeSubscription(subscriptionId: String?): Boolean =
+        subscriptionId == AppConfig.FREE_SUBSCRIPTION_ID
+
+    /** Forces the fixed name, link and update settings onto the free subscription; keeps update state and usage. */
+    private fun lockFreeSubscription(item: SubscriptionItem): SubscriptionItem =
+        item.copy(
+            remarks = AppConfig.FREE_SUBSCRIPTION_NAME,
+            url = AppConfig.FREE_SUBSCRIPTION_URL,
+            enabled = true,
+            autoUpdate = true,
+            updateInterval = 360,
+            prevProfile = null,
+            nextProfile = null,
+            filter = null,
+            allowInsecureUrl = false,
+            userAgent = null,
+            requestHeaders = null,
+        )
+
+    /**
+     * Adds the built-in free subscription at the top of the list if it is missing, and
+     * re-applies its fixed name and link (e.g. after a backup restore changed them).
+     */
+    fun ensureFreeSubscription() {
+        val id = AppConfig.FREE_SUBSCRIPTION_ID
+        val isNew = !subStorage.containsKey(id)
+        encodeSubscription(id, decodeSubscription(id) ?: SubscriptionItem())
+        if (isNew) {
+            val subsList = decodeSubsList()
+            if (subsList.remove(id)) {
+                subsList.add(0, id)
+                encodeSubsList(subsList)
+            }
         }
     }
 

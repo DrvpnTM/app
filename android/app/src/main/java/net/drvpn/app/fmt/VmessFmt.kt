@@ -81,6 +81,7 @@ object VmessFmt : FmtBase() {
         config.security = vmessQRCode.tls
         config.sni = vmessQRCode.sni
         config.fingerPrint = vmessQRCode.fp
+        config.cipherSuites = vmessQRCode.cs
         config.alpn = vmessQRCode.alpn
         config.insecure = when (vmessQRCode.insecure) {
             "1" -> true
@@ -137,6 +138,7 @@ object VmessFmt : FmtBase() {
         vmessQRCode.tls = config.security.orEmpty()
         vmessQRCode.sni = config.sni.orEmpty()
         vmessQRCode.fp = config.fingerPrint.orEmpty()
+        vmessQRCode.cs = config.cipherSuites.orEmpty()
         vmessQRCode.alpn = config.alpn.orEmpty()
         vmessQRCode.insecure = when (config.insecure) {
             true -> "1"

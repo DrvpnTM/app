@@ -15,9 +15,6 @@ permissions:
   contents: write
 
 env:
-  # Xray core bundle (AndroidLibXrayLite release). auto-update-core.yml bumps this
-  # whenever a newer Xray core is published.
-  LIBV2RAY_TAG: v26.9.9
   NDK_VERSION: 29.0.14206865
 
 jobs:
@@ -29,7 +26,7 @@ jobs:
       matrix: ${{ steps.m.outputs.matrix }}
       tag: ${{ steps.m.outputs.tag }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - id: m
         run: |
           echo "matrix=$(jq -c . countries.json)" >> "$GITHUB_OUTPUT"
@@ -63,10 +60,10 @@ jobs:
         country: ${{ fromJson(needs.setup.outputs.matrix) }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
           java-version: '21'
@@ -98,10 +95,12 @@ jobs:
         run: cp -r libs android/app/
 
       - name: Download libv2ray.aar
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          mkdir -p android/app/libs
-          curl -fsSL -o android/app/libs/libv2ray.aar \
-            "https://github.com/2dust/AndroidLibXrayLite/releases/download/${LIBV2RAY_TAG}/libv2ray.aar"
+          # The core the main build made for core-version.txt (see the "core" job in build.yml).
+          tag=$(tr -d '[:space:]' < core-version.txt)
+          gh release download "core-$tag" --repo "$GITHUB_REPOSITORY" -p libv2ray.aar -D android/app/libs
 
       - name: Decrypt release keystore
         id: keystore

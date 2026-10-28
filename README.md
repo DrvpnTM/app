@@ -69,8 +69,9 @@
 # نیازمندی‌ها: JDK 21، Android SDK (platform 37)، Android NDK 29
 export NDK_HOME=/path/to/android-ndk
 bash compile-hevtun.sh && cp -r libs android/app/
-curl -fsSL -o android/app/libs/libv2ray.aar \
-  https://github.com/2dust/AndroidLibXrayLite/releases/download/v26.9.9/libv2ray.aar
+# هسته‌ی Xray (نسخه‌ی PattN) را برای اندروید ۷ به بالا می‌سازد؛ به Go هم نیاز دارد
+export ANDROID_NDK_HOME=$NDK_HOME
+bash build-core.sh
 cd android && ./gradlew assemblePlaystoreRelease
 ```
 

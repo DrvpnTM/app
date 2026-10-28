@@ -12,20 +12,74 @@ permissions:
   contents: write
 
 env:
-  # Xray core bundle (AndroidLibXrayLite release). auto-update-core.yml bumps this
-  # whenever a newer Xray core is published.
-  LIBV2RAY_TAG: v26.9.9
   NDK_VERSION: 29.0.14206865
 
 jobs:
-  unit-tests:
+  # The Xray core (libv2ray.aar), built by build-core.sh from PattN's patched core for the tag in
+  # core-version.txt. Each tag is built once and kept as a "core-<tag>" pre-release, which the
+  # in-app updater ignores (it reads only "v*" tags).
+  core:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
+
+      - name: Download the built core
+        id: cached
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag=$(tr -d '[:space:]' < core-version.txt)
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          mkdir -p out
+          if gh release download "core-$tag" --repo "$GITHUB_REPOSITORY" -p libv2ray.aar -D out; then
+            echo "hit=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Setup Go
+        if: steps.cached.outputs.hit != 'true'
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.27'
+          cache: false
+
+      - name: Setup Android SDK
+        if: steps.cached.outputs.hit != 'true'
+        uses: android-actions/setup-android@v3
+        with:
+          log-accepted-android-sdk-licenses: false
+          packages: 'platforms;android-37.0 build-tools;37.0.0 platform-tools'
+
+      - name: Build the core
+        if: steps.cached.outputs.hit != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "y" | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --channel=0 --install "ndk;${NDK_VERSION}"
+          export ANDROID_NDK_HOME="$ANDROID_HOME/ndk/${NDK_VERSION}"
+          tag="${{ steps.cached.outputs.tag }}"
+          bash build-core.sh "$tag" out/libv2ray.aar
+          # Keep it for the next runs; another run may have published it meanwhile.
+          gh release create "core-$tag" out/libv2ray.aar --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" --prerelease --latest=false --title "Xray core $tag" \
+            --notes "libv2ray.aar built by build-core.sh from patterniha/AndroidLibXrayLite $tag for Android 7+." \
+            || echo "Release core-$tag exists already; not replacing it."
+
+      - name: Upload the core
+        uses: actions/upload-artifact@v4
+        with:
+          name: libv2ray
+          path: out/libv2ray.aar
+
+  unit-tests:
+    needs: core
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
 
       - name: Setup Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
           java-version: '21'
@@ -37,10 +91,11 @@ jobs:
           log-accepted-android-sdk-licenses: false
           packages: 'platforms;android-37.0 build-tools;37.0.0 platform-tools'
 
-      - name: Download libv2ray.aar
-        run: |
-          mkdir -p android/app/libs
-          curl -fsSL -o android/app/libs/libv2ray.aar             "https://github.com/2dust/AndroidLibXrayLite/releases/download/${LIBV2RAY_TAG}/libv2ray.aar"
+      - name: Get libv2ray.aar
+        uses: actions/download-artifact@v4
+        with:
+          name: libv2ray
+          path: android/app/libs
 
       - name: Run unit tests
         working-directory: android
@@ -57,14 +112,15 @@ jobs:
           path: android/app/build/reports/tests/
 
   build:
+    needs: core
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
           java-version: '21'
@@ -95,11 +151,11 @@ jobs:
       - name: Copy libhevtun
         run: cp -r libs android/app/
 
-      - name: Download libv2ray.aar
-        run: |
-          mkdir -p android/app/libs
-          curl -fsSL -o android/app/libs/libv2ray.aar \
-            "https://github.com/2dust/AndroidLibXrayLite/releases/download/${LIBV2RAY_TAG}/libv2ray.aar"
+      - name: Get libv2ray.aar
+        uses: actions/download-artifact@v4
+        with:
+          name: libv2ray
+          path: android/app/libs
 
       - name: Decrypt release keystore
         id: keystore

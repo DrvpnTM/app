@@ -684,4 +684,7 @@
     <string name="check_dns_note">bash.ws দিয়ে যাচাই; প্রদানকারী একবার api.ip.sb থেকে পড়া হয়।</string>
     <string name="check_dns_start">যাচাই শুরু</string>
     <string name="check_dns_own_isp">আপনার প্রদানকারী: %1$s</string>
+    <string name="free_sub_promo">উচ্চ-গতির সাবস্ক্রিপশন কিনতে Dr VPN-এর অফিসিয়াল ওয়েবসাইটে যান</string>
+    <string name="server_lab_cipher_suites">সাইফার স্যুট (Cipher Suites)</string>
+    <string name="toast_cipher_suites_need_unsafe">cipherSuites শুধু unsafe ফিঙ্গারপ্রিন্টের সাথে কাজ করে। unsafe বেছে নিন, অথবা cipherSuites খালি করুন।</string>
 </resources>
