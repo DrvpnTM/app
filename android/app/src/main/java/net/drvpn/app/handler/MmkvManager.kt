@@ -740,11 +740,11 @@ object MmkvManager {
      * Adds the built-in free subscription at the top of the list if it is missing, and
      * re-applies its fixed name and link (e.g. after a backup restore changed them).
      */
-    fun ensureFreeSubscription() {
+    fun ensureFreeSubscription(first: Boolean = false) {
         val id = AppConfig.FREE_SUBSCRIPTION_ID
         val isNew = !subStorage.containsKey(id)
         encodeSubscription(id, decodeSubscription(id) ?: SubscriptionItem())
-        if (isNew) {
+        if (isNew || first) {
             val subsList = decodeSubsList()
             if (subsList.remove(id)) {
                 subsList.add(0, id)

@@ -170,6 +170,8 @@ object CoreConfigContextBuilder {
                 .filter { it.server.isNotNullEmpty() }
                 .filter { Utils.isPureIpAddress(it.server!!) || Utils.isValidUrl(it.server!!) }
                 .filter { !it.configType.isComplexType() }
+                // Aether runs only as the selected server, not as a member of a group or chain.
+                .filter { it.configType != EConfigType.AETHER }
                 .toList()
         } catch (e: Exception) {
             LogUtil.e(AppConfig.TAG, "Failed to resolve policy group profiles for '${config.remarks}'", e)
@@ -189,6 +191,8 @@ object CoreConfigContextBuilder {
                 .filter { it.server.isNotNullEmpty() }
                 .filter { Utils.isPureIpAddress(it.server!!) || Utils.isValidUrl(it.server!!) }
                 .filter { !it.configType.isComplexType() }
+                // Aether runs only as the selected server, not as a member of a group or chain.
+                .filter { it.configType != EConfigType.AETHER }
                 .toList()
                 .reversed()
         } catch (e: Exception) {

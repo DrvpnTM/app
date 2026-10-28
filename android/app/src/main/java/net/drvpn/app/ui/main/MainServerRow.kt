@@ -47,6 +47,12 @@ import net.drvpn.app.ui.compose.colorPing
 import net.drvpn.app.ui.compose.colorPingRed
 import net.drvpn.app.ui.compose.focusHighlight
 
+/** Title of a server row; an Aether (WARP) server has no fixed country and keeps its own name. */
+@Composable
+internal fun serverRowTitle(row: ServerRowUiModel): String =
+    if (row.profile.configType == net.drvpn.app.enums.EConfigType.AETHER) row.remarks.ifBlank { "Aether WARP" }
+    else serverRowTitle(row.country)
+
 /** Title of a server row: the country name, or DRVPN when the location is unknown. */
 @Composable
 internal fun serverRowTitle(country: String): String {
@@ -183,7 +189,7 @@ internal fun ServerLocationRow(
             Spacer(Modifier.width(14.dp))
             Column(Modifier.weight(1f)) {
                 Text(
-                    serverRowTitle(row.country),
+                    serverRowTitle(row),
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.SemiBold,
                     maxLines = 1,

@@ -164,6 +164,16 @@ fun MainScreen(
         )
     }
 
+    uiState.update?.let { update ->
+        UpdateDialog(
+            version = update.latestVersion.orEmpty(),
+            progress = uiState.updateProgress,
+            failed = uiState.updateFailed,
+            onUpdate = { onAction(MainAction.StartUpdate) },
+            onLater = { onAction(MainAction.UpdateLater) },
+        )
+    }
+
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {

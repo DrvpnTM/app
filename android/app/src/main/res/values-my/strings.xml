@@ -617,4 +617,13 @@
     <string name="aether_command">Aether command (အဆင့်မြင့်)</string>
     <string name="aether_command_hint">အထက်ပါ ဆက်တင်များအစား Aether command line အပြည့်အစုံ အလုပ်လုပ်မည်။ ပုံမှန်အားဖြင့် အလွတ်ထားပါ။</string>
     <string name="aether_not_supported">ဤဗားရှင်းတွင် ဤဖုန်း၏ processor အမျိုးအစားအတွက် Aether မပါပါ။</string>
+    <string name="update_channel_name">အက်ပ် အပ်ဒိတ်များ</string>
+    <string name="update_title">Dr VPN %1$s ရောက်ပါပြီ</string>
+    <string name="update_notification_text">ဗားရှင်းအသစ်သို့ အပ်ဒိတ်ရန် နှိပ်ပါ</string>
+    <string name="update_message">ပိုကောင်းသော ဗားရှင်းအသစ် အသင့်ဖြစ်ပြီ။ ယခုပင် အပ်ဒိတ်လုပ်ပါ။</string>
+    <string name="update_downloading">ဗားရှင်းအသစ်ကို ဒေါင်းလုဒ်လုပ်နေသည်…</string>
+    <string name="update_failed">ဒေါင်းလုဒ် မအောင်မြင်ပါ။ ထပ်ကြိုးစားပါ သို့မဟုတ် လင့်ခ်မှ ဒေါင်းလုဒ်လုပ်ပါ။</string>
+    <string name="update_download_link">ဒေါင်းလုဒ် လင့်ခ်</string>
+    <string name="update_try_again">ထပ်ကြိုးစားရန်</string>
+    <string name="update_later">နောက်မှ</string>
 </resources>

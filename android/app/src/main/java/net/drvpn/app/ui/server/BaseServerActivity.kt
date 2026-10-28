@@ -66,7 +66,10 @@ abstract class BaseServerActivity : BaseComponentActivity() {
                 && editGuid.isNotEmpty()
                 && editGuid == MmkvManager.getSelectServer()
     }
-    protected val subscriptionId by lazy { intent.getStringExtra("subscriptionId") }
+    /** The group a new server joins; never the built-in free subscription, whose updates replace it. */
+    protected val subscriptionId by lazy {
+        intent.getStringExtra("subscriptionId")?.takeUnless { MmkvManager.isFreeSubscription(it) }
+    }
 
     protected lateinit var initialConfig: ProfileItem
 

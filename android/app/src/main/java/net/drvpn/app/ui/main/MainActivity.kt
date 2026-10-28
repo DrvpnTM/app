@@ -21,6 +21,7 @@ import net.drvpn.app.extension.toast
 import net.drvpn.app.extension.toastError
 import net.drvpn.app.extension.toastSuccess
 import net.drvpn.app.handler.AngConfigManager
+import net.drvpn.app.handler.AppUpdater
 import net.drvpn.app.handler.MmkvManager
 import net.drvpn.app.handler.SettingsChangeManager
 import net.drvpn.app.handler.SettingsManager
@@ -97,7 +98,10 @@ class MainActivity : HelperBaseComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Opened from the "new version" notification: check at once so the update dialog shows.
+        if (intent?.getBooleanExtra(AppUpdater.EXTRA_FROM_UPDATE, false) == true) AppUpdater.forgetLastCheck()
         mainViewModel.onAction(MainAction.Initialize)
+        AppUpdater.schedule(this)
         if (savedInstanceState == null &&
             !MmkvManager.decodeSettingsBool(AppConfig.PREF_DRVPN_ONBOARDING_DONE, false)
         ) {
@@ -105,6 +109,14 @@ class MainActivity : HelperBaseComponentActivity() {
         }
 
         checkAndRequestPermission(PermissionType.POST_NOTIFICATIONS) {}
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        if (intent.getBooleanExtra(AppUpdater.EXTRA_FROM_UPDATE, false)) {
+            AppUpdater.forgetLastCheck()
+            mainViewModel.onAction(MainAction.CheckUpdate)
+        }
     }
 
     @Composable

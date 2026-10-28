@@ -705,4 +705,13 @@
     <string name="aether_command">فرمان Aether (پیشرفته)</string>
     <string name="aether_command_hint">یک خط فرمان کامل Aether به جای تنظیمات بالا اجرا می‌شود. معمولاً خالی بگذارید.</string>
     <string name="aether_not_supported">نوع پردازنده این گوشی در این نسخه Aether ندارد.</string>
+    <string name="update_channel_name">به‌روزرسانی برنامه</string>
+    <string name="update_title">نسخه جدید %1$s آمد</string>
+    <string name="update_notification_text">برای به‌روزرسانی به نسخه جدید بزنید</string>
+    <string name="update_message">نسخه جدید و بهتر آماده است. همین حالا به‌روز کنید؛ فقط چند لحظه طول می‌کشد.</string>
+    <string name="update_downloading">در حال دانلود نسخه جدید…</string>
+    <string name="update_failed">دانلود انجام نشد. دوباره امتحان کنید یا از لینک دانلود کنید.</string>
+    <string name="update_download_link">لینک دانلود</string>
+    <string name="update_try_again">دوباره امتحان کن</string>
+    <string name="update_later">بعداً</string>
 </resources>

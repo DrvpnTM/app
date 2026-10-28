@@ -153,7 +153,11 @@ class MainRepository(
                 }
             )
         }
-        result += MmkvManager.decodeSubscriptions()
+        // The internal "Default" group holds servers the user added by hand; with none it is hidden,
+        // so a new user sees the free Dr VPN servers first.
+        result += MmkvManager.decodeSubscriptions().filter { cache ->
+            cache.guid != AppConfig.DEFAULT_SUBSCRIPTION_ID || MmkvManager.decodeServerList(cache.guid).isNotEmpty()
+        }
         return result
     }
 

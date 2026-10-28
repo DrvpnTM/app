@@ -182,7 +182,10 @@ object AngConfigManager {
      * @param append Whether to append the configurations.
      * @return A pair containing the number of configurations and subscriptions imported.
      */
-    fun importBatchConfig(server: String?, subid: String, append: Boolean): Pair<Int, Int> {
+    fun importBatchConfig(server: String?, subscriptionId: String, append: Boolean): Pair<Int, Int> {
+        // The built-in free subscription holds only what its link gives (an update replaces it);
+        // what the user adds while it is open goes to their own servers.
+        val subid = if (MmkvManager.isFreeSubscription(subscriptionId)) "" else subscriptionId
         return try {
             var count = parseBatchConfig(Utils.decode(server), subid, append)
             if (count <= 0) {

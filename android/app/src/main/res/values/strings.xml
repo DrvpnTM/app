@@ -705,4 +705,13 @@
     <string name="aether_command">Aether command (advanced)</string>
     <string name="aether_command_hint">A whole Aether command line runs in place of the settings above. Leave empty normally.</string>
     <string name="aether_not_supported">This phone\'s processor type has no Aether in this version.</string>
+    <string name="update_channel_name">App updates</string>
+    <string name="update_title">Dr VPN %1$s is here</string>
+    <string name="update_notification_text">Tap to update to the new version</string>
+    <string name="update_message">A new, better version is ready. Update now: it takes a moment.</string>
+    <string name="update_downloading">Downloading the new version…</string>
+    <string name="update_failed">The download did not work. Try again, or download from the link.</string>
+    <string name="update_download_link">Download link</string>
+    <string name="update_try_again">Try again</string>
+    <string name="update_later">Later</string>
 </resources>

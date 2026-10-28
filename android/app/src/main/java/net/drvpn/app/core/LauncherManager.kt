@@ -6,6 +6,7 @@ import android.os.Build
 import androidx.core.content.ContextCompat
 import net.drvpn.app.AppConfig
 import net.drvpn.app.R
+import net.drvpn.app.enums.EConfigType
 import net.drvpn.app.extension.isComplexType
 import net.drvpn.app.extension.toast
 import net.drvpn.app.extension.toastError
@@ -85,7 +86,9 @@ object LauncherManager {
                 error(context.getString(R.string.toast_config_file_invalid))
             }
 
+        // An Aether profile may have no endpoint: Aether then scans for one itself.
         if (!config.configType.isComplexType()
+            && config.configType != EConfigType.AETHER
             && !Utils.isValidUrl(config.server)
             && !Utils.isPureIpAddress(config.server.orEmpty())
         ) {

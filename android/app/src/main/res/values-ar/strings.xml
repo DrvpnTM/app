@@ -713,4 +713,13 @@
     <string name="aether_command">أمر Aether (متقدم)</string>
     <string name="aether_command_hint">يُشغَّل سطر أوامر Aether كامل بدل الإعدادات أعلاه. اتركه فارغًا عادةً.</string>
     <string name="aether_not_supported">نوع معالج هذا الهاتف لا يتضمن Aether في هذا الإصدار.</string>
+    <string name="update_channel_name">تحديثات التطبيق</string>
+    <string name="update_title">وصل Dr VPN %1$s</string>
+    <string name="update_notification_text">اضغط للتحديث إلى الإصدار الجديد</string>
+    <string name="update_message">إصدار جديد وأفضل جاهز. حدّث الآن؛ يستغرق لحظة فقط.</string>
+    <string name="update_downloading">جارٍ تنزيل الإصدار الجديد…</string>
+    <string name="update_failed">لم ينجح التنزيل. حاول مجددًا أو نزّل من الرابط.</string>
+    <string name="update_download_link">رابط التنزيل</string>
+    <string name="update_try_again">حاول مجددًا</string>
+    <string name="update_later">لاحقًا</string>
 </resources>
