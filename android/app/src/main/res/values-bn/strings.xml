@@ -714,4 +714,5 @@
     <string name="update_download_link">ডাউনলোড লিংক</string>
     <string name="update_try_again">আবার চেষ্টা</string>
     <string name="update_later">পরে</string>
+    <string name="group_my_servers">আমার সার্ভার</string>
 </resources>

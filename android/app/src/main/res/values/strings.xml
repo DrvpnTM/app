@@ -714,4 +714,5 @@
     <string name="update_download_link">Download link</string>
     <string name="update_try_again">Try again</string>
     <string name="update_later">Later</string>
+    <string name="group_my_servers">My servers</string>
 </resources>

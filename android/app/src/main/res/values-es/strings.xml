@@ -628,4 +628,5 @@
     <string name="update_download_link">Enlace de descarga</string>
     <string name="update_try_again">Reintentar</string>
     <string name="update_later">Más tarde</string>
+    <string name="group_my_servers">Mis servidores</string>
 </resources>

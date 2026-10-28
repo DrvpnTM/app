@@ -712,4 +712,5 @@
     <string name="update_download_link">下载链接</string>
     <string name="update_try_again">重试</string>
     <string name="update_later">稍后</string>
+    <string name="group_my_servers">我的服务器</string>
 </resources>

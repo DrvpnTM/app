@@ -157,6 +157,13 @@ class MainRepository(
         // so a new user sees the free Dr VPN servers first.
         result += MmkvManager.decodeSubscriptions().filter { cache ->
             cache.guid != AppConfig.DEFAULT_SUBSCRIPTION_ID || MmkvManager.decodeServerList(cache.guid).isNotEmpty()
+        }.map { cache ->
+            // Shown as "My servers" in the app's language rather than the internal name "Default".
+            if (cache.guid == AppConfig.DEFAULT_SUBSCRIPTION_ID && cache.subscription.remarks == "Default") {
+                SubscriptionCache(cache.guid, cache.subscription.copy(remarks = localizedContext.getString(R.string.group_my_servers)))
+            } else {
+                cache
+            }
         }
         return result
     }
