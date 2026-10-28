@@ -17,6 +17,9 @@ set -euo pipefail
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 tag="${1:-$(tr -d '[:space:]' < "$root/core-version.txt")}"
 out="${2:-$root/android/app/libs/libv2ray.aar}"
+# Make the output path absolute: the build runs in a temporary folder.
+mkdir -p "$(dirname "$out")"
+out="$(cd "$(dirname "$out")" && pwd)/$(basename "$out")"
 export ANDROID_NDK_HOME="${ANDROID_NDK_HOME:-${NDK_HOME:-}}"
 if [ -z "$ANDROID_NDK_HOME" ] || [ ! -d "$ANDROID_NDK_HOME" ]; then
   echo "Set ANDROID_NDK_HOME (or NDK_HOME) to an Android NDK" >&2

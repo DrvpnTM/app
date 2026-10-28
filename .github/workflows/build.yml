@@ -59,17 +59,22 @@ jobs:
           export ANDROID_NDK_HOME="$ANDROID_HOME/ndk/${NDK_VERSION}"
           tag="${{ steps.cached.outputs.tag }}"
           bash build-core.sh "$tag" out/libv2ray.aar
-          # Keep it for the next runs; another run may have published it meanwhile.
-          gh release create "core-$tag" out/libv2ray.aar --repo "$GITHUB_REPOSITORY" \
-            --target "$GITHUB_SHA" --prerelease --latest=false --title "Xray core $tag" \
-            --notes "libv2ray.aar built by build-core.sh from patterniha/AndroidLibXrayLite $tag for Android 7+." \
-            || echo "Release core-$tag exists already; not replacing it."
+          test -s out/libv2ray.aar
+          # Keep it for the next runs, unless another run has published it meanwhile.
+          if gh release view "core-$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Release core-$tag exists already; not replacing it."
+          else
+            gh release create "core-$tag" out/libv2ray.aar --repo "$GITHUB_REPOSITORY" \
+              --target "$GITHUB_SHA" --prerelease --latest=false --title "Xray core $tag" \
+              --notes "libv2ray.aar built by build-core.sh from patterniha/AndroidLibXrayLite $tag for Android 7+."
+          fi
 
       - name: Upload the core
         uses: actions/upload-artifact@v4
         with:
           name: libv2ray
           path: out/libv2ray.aar
+          if-no-files-found: error
 
   unit-tests:
     needs: core
