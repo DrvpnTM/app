@@ -94,6 +94,19 @@ jobs:
       - name: Copy libhevtun
         run: cp -r libs android/app/
 
+      - name: Get Aether
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # The Aether programs the main build made for aether-version.txt (the "aether" job in build.yml).
+          commit=$(tr -d '[:space:]' < aether-version.txt)
+          gh release download "aether-${commit:0:12}" --repo "$GITHUB_REPOSITORY" -p libs-aether.tar.gz
+          tar xzf libs-aether.tar.gz
+          for abi in libs-aether/*/; do
+            mkdir -p "android/app/libs/$(basename "$abi")"
+            cp "$abi"*.so "android/app/libs/$(basename "$abi")/"
+          done
+
       - name: Download libv2ray.aar
         env:
           GH_TOKEN: ${{ github.token }}

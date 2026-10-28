@@ -599,4 +599,22 @@
     <string name="free_sub_promo">မြန်နှုန်းမြင့် subscription ဝယ်ယူရန် Dr VPN ၏ တရားဝင် ဝက်ဘ်ဆိုက်သို့ သွားပါ</string>
     <string name="server_lab_cipher_suites">Cipher Suites</string>
     <string name="toast_cipher_suites_need_unsafe">cipherSuites ကို unsafe fingerprint ဖြင့်သာ အသုံးပြုနိုင်သည်။ unsafe ကို ရွေးပါ သို့မဟုတ် cipherSuites ကို ဖျက်ပါ။</string>
+    <string name="menu_item_import_config_manually_aether">ထည့်ရန် [Aether WARP]</string>
+    <string name="aether_title">Aether (WARP)</string>
+    <string name="aether_intro">ပြင်းထန်သော ပိတ်ဆို့မှုများအတွက် ပြုလုပ်ထားသော အခမဲ့ Cloudflare WARP။ အကွက်များကို မပြောင်းဘဲ သိမ်းပါ- Aether က အလုပ်လုပ်သော endpoint ကို ကိုယ်တိုင်ရှာသည်။ ပထမဆုံးချိတ်ဆက်မှုသည် တစ်မိနစ်ခန့် ကြာနိုင်သည်။</string>
+    <string name="aether_protocol">ပရိုတိုကော</string>
+    <string name="aether_transport">MASQUE သယ်ယူပုံ</string>
+    <string name="aether_endpoint">Endpoint (ရွေးချယ်နိုင်)</string>
+    <string name="aether_outer_hop">အပြင် hop (ရွေးချယ်နိုင်)</string>
+    <string name="aether_inner_hop">အတွင်း hop (ရွေးချယ်နိုင်)</string>
+    <string name="aether_endpoint_hint">host:port သို့မဟုတ် Aether ကိုယ်တိုင်ရှာရန် အလွတ်ထားပါ</string>
+    <string name="aether_scan">ရှာဖွေမှု</string>
+    <string name="aether_ip">IP ဗားရှင်း</string>
+    <string name="aether_mode_off">ပိတ်</string>
+    <string name="aether_mode_chain">WARP အတွင်း (၎င်းမှတစ်ဆင့် ထွက်)</string>
+    <string name="aether_mode_reverse">WARP အပြင် (၎င်းမှတစ်ဆင့် WARP သို့)</string>
+    <string name="aether_mode_only">WARP မပါဘဲ သီးသန့်</string>
+    <string name="aether_command">Aether command (အဆင့်မြင့်)</string>
+    <string name="aether_command_hint">အထက်ပါ ဆက်တင်များအစား Aether command line အပြည့်အစုံ အလုပ်လုပ်မည်။ ပုံမှန်အားဖြင့် အလွတ်ထားပါ။</string>
+    <string name="aether_not_supported">ဤဗားရှင်းတွင် ဤဖုန်း၏ processor အမျိုးအစားအတွက် Aether မပါပါ။</string>
 </resources>

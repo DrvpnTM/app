@@ -146,6 +146,11 @@ object CoreServiceManager {
             while (isActive) {
                 delay(WATCHDOG_INTERVAL_MS)
                 if (!isRunning() || isReloading) continue
+                // Aether finds and keeps a working WARP endpoint itself, and its first scan can take a while.
+                if (AetherManager.isAether(currentConfig)) {
+                    failures = 0
+                    continue
+                }
                 if (!MmkvManager.decodeSettingsBool(AppConfig.PREF_DRVPN_AUTO_RECONNECT, true)) {
                     failures = 0
                     continue
@@ -213,6 +218,12 @@ object CoreServiceManager {
         if (dialerAddr.isNotNullEmpty()) {
             CoreNativeManager.reconcileBrowserDialer(dialerAddr)
         }
+        // Aether runs as a program next to Xray; another server ends the one a reload leaves.
+        if (AetherManager.isAether(config)) {
+            AetherManager.start(service, config)
+        } else {
+            AetherManager.stop(service)
+        }
         coreController.startLoop(result.content, tunFd)
 
         if (!isRunning()) {
@@ -268,6 +279,8 @@ object CoreServiceManager {
                 }
             }
         }
+
+        AetherManager.stopInBackground()
 
         // Close existing browser dialer
         CoreNativeManager.reconcileBrowserDialer("")

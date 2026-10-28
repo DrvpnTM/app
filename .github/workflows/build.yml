@@ -3,8 +3,9 @@ name: Build Dr VPN APK
 on:
   workflow_dispatch:
   push:
+    # Every branch is built and tested; only main and v* tags publish a release (see "release").
     branches:
-      - main
+      - '**'
     tags:
       - 'v*'
     # Text and pictures alone (READMEs, articles, docs, notice.json) don't make a new version.
@@ -84,6 +85,70 @@ jobs:
           path: out/libv2ray.aar
           if-no-files-found: error
 
+  # The Aether core and its Psiphon and Tor helpers (compile-aether.sh), for the commit in
+  # aether-version.txt. Built once per commit and kept as an "aether-<commit>" pre-release.
+  aether:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Download the built Aether
+        id: cached
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          commit=$(tr -d '[:space:]' < aether-version.txt)
+          short=${commit:0:12}
+          echo "tag=aether-$short" >> "$GITHUB_OUTPUT"
+          if gh release download "aether-$short" --repo "$GITHUB_REPOSITORY" -p libs-aether.tar.gz; then
+            echo "hit=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Setup Go
+        if: steps.cached.outputs.hit != 'true'
+        uses: actions/setup-go@v5
+        with:
+          # The Go line Psiphon's go.mod asks for (as in PattNG).
+          go-version: '1.26'
+          cache: false
+
+      - name: Setup Rust
+        if: steps.cached.outputs.hit != 'true'
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android
+
+      - name: Setup Android SDK
+        if: steps.cached.outputs.hit != 'true'
+        uses: android-actions/setup-android@v3
+        with:
+          log-accepted-android-sdk-licenses: false
+          packages: 'platform-tools'
+
+      - name: Build Aether
+        if: steps.cached.outputs.hit != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "y" | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --channel=0 --install "ndk;${NDK_VERSION}"
+          export NDK_HOME="$ANDROID_HOME/ndk/${NDK_VERSION}"
+          bash compile-aether.sh
+          tar czf libs-aether.tar.gz libs-aether
+          tag="${{ steps.cached.outputs.tag }}"
+          if ! gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release create "$tag" libs-aether.tar.gz --repo "$GITHUB_REPOSITORY" \
+              --target "$GITHUB_SHA" --prerelease --latest=false --title "Aether $tag" \
+              --notes "Aether core, Psiphon client and lyrebird built by compile-aether.sh from patterniha/Aether $(cat aether-version.txt)."
+          fi
+
+      - name: Upload Aether
+        uses: actions/upload-artifact@v4
+        with:
+          name: libs-aether
+          path: libs-aether.tar.gz
+          if-no-files-found: error
+
   unit-tests:
     needs: core
     runs-on: ubuntu-latest
@@ -125,7 +190,7 @@ jobs:
           path: android/app/build/reports/tests/
 
   build:
-    needs: core
+    needs: [core, aether]
     runs-on: ubuntu-latest
 
     steps:
@@ -164,6 +229,19 @@ jobs:
       - name: Copy libhevtun
         run: cp -r libs android/app/
 
+      - name: Get Aether
+        uses: actions/download-artifact@v4
+        with:
+          name: libs-aether
+
+      - name: Copy Aether
+        run: |
+          tar xzf libs-aether.tar.gz
+          for abi in libs-aether/*/; do
+            mkdir -p "android/app/libs/$(basename "$abi")"
+            cp "$abi"*.so "android/app/libs/$(basename "$abi")/"
+          done
+
       - name: Get libv2ray.aar
         uses: actions/download-artifact@v4
         with:
@@ -200,6 +278,20 @@ jobs:
           echo "sdk.dir=${ANDROID_HOME}" > local.properties
           chmod 755 gradlew
           ./gradlew --no-daemon --build-cache assemblePlaystoreRelease
+
+      - name: Check the Aether programs in the APKs
+        run: |
+          status=0
+          for apk in android/app/build/outputs/apk/playstore/release/*.apk; do
+            entries=$(unzip -Z1 "$apk" | grep '^lib/' || true)
+            for abi in arm64-v8a armeabi-v7a x86_64; do
+              echo "$entries" | grep -q "^lib/$abi/" || continue
+              for lib in libaether.so libpsiphon-tunnel-core.so liblyrebird.so; do
+                echo "$entries" | grep -qx "lib/$abi/$lib" || { echo "::error::$(basename "$apk") lacks lib/$abi/$lib"; status=1; }
+              done
+            done
+          done
+          exit $status
 
       - name: Upload universal APK
         uses: actions/upload-artifact@v4

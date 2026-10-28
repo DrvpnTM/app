@@ -32,6 +32,7 @@ object CoreOutboundBuilder {
             EConfigType.WIREGUARD -> toOutboundWireguard(profileItem)
             EConfigType.HYSTERIA2 -> toOutboundHysteria2(profileItem)
             EConfigType.HTTP -> toOutboundHttp(profileItem)
+            EConfigType.AETHER -> toOutboundAether()
             else -> null
         }
 
@@ -216,6 +217,17 @@ object CoreOutboundBuilder {
             }
         }
 
+        return outboundBean
+    }
+
+    /** Aether runs as a program of its own (AetherManager); Xray reaches it on its local SOCKS port. */
+    private fun toOutboundAether(): OutboundBean? {
+        val outboundBean = createInitOutbound(EConfigType.SOCKS)
+        outboundBean?.settings?.let { settings ->
+            settings.address = AppConfig.LOOPBACK
+            settings.port = AppConfig.PORT_AETHER_SOCKS
+            settings.level = AppConfig.DEFAULT_LEVEL
+        }
         return outboundBean
     }
 

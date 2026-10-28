@@ -687,4 +687,22 @@
     <string name="free_sub_promo">For a high-speed subscription, visit the official Dr VPN website</string>
     <string name="server_lab_cipher_suites">Cipher Suites</string>
     <string name="toast_cipher_suites_need_unsafe">cipherSuites only apply with the unsafe fingerprint. Choose unsafe, or clear cipherSuites.</string>
+    <string name="menu_item_import_config_manually_aether">Add [Aether WARP]</string>
+    <string name="aether_title">Aether (WARP)</string>
+    <string name="aether_intro">Free Cloudflare WARP made for heavy filtering. Leave the fields as they are and save: Aether finds a working endpoint by itself. The first connection can take a minute.</string>
+    <string name="aether_protocol">Protocol</string>
+    <string name="aether_transport">MASQUE transport</string>
+    <string name="aether_endpoint">Endpoint (optional)</string>
+    <string name="aether_outer_hop">Outer hop (optional)</string>
+    <string name="aether_inner_hop">Inner hop (optional)</string>
+    <string name="aether_endpoint_hint">host:port, or empty to let Aether scan</string>
+    <string name="aether_scan">Scan</string>
+    <string name="aether_ip">IP version</string>
+    <string name="aether_mode_off">Off</string>
+    <string name="aether_mode_chain">Inside WARP (exit through it)</string>
+    <string name="aether_mode_reverse">Around WARP (reach WARP through it)</string>
+    <string name="aether_mode_only">Alone, without WARP</string>
+    <string name="aether_command">Aether command (advanced)</string>
+    <string name="aether_command_hint">A whole Aether command line runs in place of the settings above. Leave empty normally.</string>
+    <string name="aether_not_supported">This phone\'s processor type has no Aether in this version.</string>
 </resources>

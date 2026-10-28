@@ -83,4 +83,4 @@ Tap the green **DOWNLOAD** button at the top of this page, or open [Releases](ht
 
 ## 📜 License and credits
 
-Open source under **GPL-3.0** ([LICENSE](LICENSE)); it uses the [Xray-core](https://github.com/XTLS/Xray-core) engine.
+Open source under **GPL-3.0** ([LICENSE](LICENSE)); it uses the [Xray-core](https://github.com/XTLS/Xray-core) engine. The WARP core [Aether](https://github.com/patterniha/Aether) (AGPL-3.0; the exact commit is in `aether-version.txt`) ships with the app.
