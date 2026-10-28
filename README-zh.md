@@ -1,6 +1,58 @@
 🌐 [فارسی](README.md) | [English](README-en.md) | [中文](README-zh.md) | [Русский](README-ru.md) | [မြန်မာ](README-my.md) | [Español](README-es.md)
 
-# Dr VPN
+<div align="center">
+
+<img src="android/app/src/main/res/drawable-nodpi/drvpn_logo.png" width="128" alt="Dr VPN">
+
+<h1>Dr VPN</h1>
+
+<h3>安卓快速、安全的 VPN</h3>
+
+<b>🎁 内置免费服务器</b>
+
+<br><br>
+
+<a href="https://github.com/DrvpnTM/app/releases/latest/download/DrVPN.apk"><img src="docs/icons/download-button.svg" width="340" alt="Download Dr VPN"></a>
+
+<b>👆 点击绿色按钮下载</b>
+
+<br><br>
+
+<h2>📱 简单 4 步</h2>
+
+<table>
+<tr>
+<td align="center" width="25%"><img src="docs/icons/step1.png" width="34" alt="1"><br><img src="docs/icons/install.png" width="84" alt=""><br><b>安装</b></td>
+<td align="center" width="25%"><img src="docs/icons/step2.png" width="34" alt="2"><br><img src="docs/icons/country.png" width="84" alt=""><br><b>选择国家</b></td>
+<td align="center" width="25%"><img src="docs/icons/step3.png" width="34" alt="3"><br><img src="docs/icons/tap.png" width="84" alt=""><br><b>点击大按钮</b></td>
+<td align="center" width="25%"><img src="docs/icons/step4.png" width="34" alt="4"><br><img src="docs/icons/connected.png" width="84" alt=""><br><b>绿色 = 已连接</b></td>
+</tr>
+</table>
+
+<h2>✨ 为什么选择 Dr VPN？</h2>
+
+<table>
+<tr>
+<td align="center" width="20%"><img src="docs/icons/free.png" width="64" alt=""><br><b>免费服务器</b></td>
+<td align="center" width="20%"><img src="docs/icons/fast.png" width="64" alt=""><br><b>高速</b></td>
+<td align="center" width="20%"><img src="docs/icons/shield.png" width="64" alt=""><br><b>安全</b></td>
+<td align="center" width="20%"><img src="docs/icons/tv.png" width="64" alt=""><br><b>安卓电视</b></td>
+<td align="center" width="20%"><img src="docs/icons/website.png" width="64" alt=""><br><b>11 种语言</b></td>
+</tr>
+</table>
+
+<h2>🚀 想要高速订阅？</h2>
+
+<a href="https://drvpn.net/"><img src="docs/icons/buy-button.svg" width="300" alt="drvpn.net"></a>
+&nbsp;
+<a href="https://t.me/drVPN_net"><img src="docs/icons/telegram-button.svg" width="300" alt="Telegram @drVPN_net"></a>
+
+</div>
+
+<!-- end of header -->
+
+
+
 
 **Dr VPN** 是一款简单、开源的 Android VPN 应用，界面类似 Hiddify：一个大的连接按钮、当前订阅卡片和已选节点卡片。
 
@@ -20,9 +72,7 @@
 
 ## 📥 下载
 
-每次更新都会由 GitHub Actions 自动构建：打开 **Actions** → **Build Dr VPN APK** → 最近一次成功的运行 → **Artifacts** → `DrVPN-universal`。
-
-> 当前为测试（debug）版本。
+点击本页顶部的绿色 **DOWNLOAD** 按钮，或打开 [Releases](https://github.com/DrvpnTM/app/releases/latest) 下载 `DrVPN.apk`。
 
 ## 📱 使用方法
 

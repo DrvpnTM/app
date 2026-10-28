@@ -1,6 +1,58 @@
 🌐 [فارسی](README.md) | [English](README-en.md) | [中文](README-zh.md) | [Русский](README-ru.md) | [မြန်မာ](README-my.md) | [Español](README-es.md)
 
-# Dr VPN
+<div align="center">
+
+<img src="android/app/src/main/res/drawable-nodpi/drvpn_logo.png" width="128" alt="Dr VPN">
+
+<h1>Dr VPN</h1>
+
+<h3>Android အတွက် မြန်ဆန်ပြီး လုံခြုံသော VPN</h3>
+
+<b>🎁 အခမဲ့ server ပါဝင်သည်</b>
+
+<br><br>
+
+<a href="https://github.com/DrvpnTM/app/releases/latest/download/DrVPN.apk"><img src="docs/icons/download-button.svg" width="340" alt="Download Dr VPN"></a>
+
+<b>👆 ဒေါင်းလုဒ်ရန် အစိမ်းရောင်ခလုတ်ကို နှိပ်ပါ</b>
+
+<br><br>
+
+<h2>📱 လွယ်ကူသော အဆင့် ၄ ဆင့်</h2>
+
+<table>
+<tr>
+<td align="center" width="25%"><img src="docs/icons/step1.png" width="34" alt="1"><br><img src="docs/icons/install.png" width="84" alt=""><br><b>ထည့်သွင်းပါ</b></td>
+<td align="center" width="25%"><img src="docs/icons/step2.png" width="34" alt="2"><br><img src="docs/icons/country.png" width="84" alt=""><br><b>နိုင်ငံ ရွေးပါ</b></td>
+<td align="center" width="25%"><img src="docs/icons/step3.png" width="34" alt="3"><br><img src="docs/icons/tap.png" width="84" alt=""><br><b>ခလုတ်ကြီးကို နှိပ်ပါ</b></td>
+<td align="center" width="25%"><img src="docs/icons/step4.png" width="34" alt="4"><br><img src="docs/icons/connected.png" width="84" alt=""><br><b>အစိမ်း = ချိတ်ဆက်ပြီး</b></td>
+</tr>
+</table>
+
+<h2>✨ Dr VPN ကို ဘာကြောင့် ရွေးသင့်သလဲ</h2>
+
+<table>
+<tr>
+<td align="center" width="20%"><img src="docs/icons/free.png" width="64" alt=""><br><b>အခမဲ့ server</b></td>
+<td align="center" width="20%"><img src="docs/icons/fast.png" width="64" alt=""><br><b>မြန်ဆန်</b></td>
+<td align="center" width="20%"><img src="docs/icons/shield.png" width="64" alt=""><br><b>လုံခြုံ</b></td>
+<td align="center" width="20%"><img src="docs/icons/tv.png" width="64" alt=""><br><b>Android TV</b></td>
+<td align="center" width="20%"><img src="docs/icons/website.png" width="64" alt=""><br><b>ဘာသာစကား ၁၁ မျိုး</b></td>
+</tr>
+</table>
+
+<h2>🚀 မြန်နှုန်းမြင့် subscription လိုချင်ပါသလား</h2>
+
+<a href="https://drvpn.net/"><img src="docs/icons/buy-button.svg" width="300" alt="drvpn.net"></a>
+&nbsp;
+<a href="https://t.me/drVPN_net"><img src="docs/icons/telegram-button.svg" width="300" alt="Telegram @drVPN_net"></a>
+
+</div>
+
+<!-- end of header -->
+
+
+
 
 **Dr VPN** သည် Android အတွက် ရိုးရှင်းပြီး open-source ဖြစ်သော VPN အက်ပ်ဖြစ်သည်။ Hiddify ပုံစံ ဒီဇိုင်းဖြင့် ချိတ်ဆက်ရန် ခလုတ်ကြီးတစ်ခု၊ အသုံးပြုနေသော subscription ကတ်နှင့် ရွေးထားသော server ကတ် ပါဝင်သည်။
 
@@ -20,9 +72,7 @@
 
 ## 📥 ဒေါင်းလုဒ်
 
-ပြောင်းလဲမှုတိုင်းကို GitHub Actions က အလိုအလျောက် build လုပ်သည်- **Actions** tab → **Build Dr VPN APK** → နောက်ဆုံးအောင်မြင်သော run → **Artifacts** → `DrVPN-universal`။
-
-> လက်ရှိ build သည် စမ်းသပ် (debug) build ဖြစ်သည်။
+ဤစာမျက်နှာ၏ ထိပ်ရှိ အစိမ်းရောင် **DOWNLOAD** ခလုတ်ကို နှိပ်ပါ၊ သို့မဟုတ် [Releases](https://github.com/DrvpnTM/app/releases/latest) ကိုဖွင့်ပြီး `DrVPN.apk` ကို ဒေါင်းလုဒ်လုပ်ပါ။
 
 ## 📱 အသုံးပြုနည်း
 

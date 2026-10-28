@@ -7,6 +7,14 @@ on:
       - main
     tags:
       - 'v*'
+    # Text and pictures alone (READMEs, articles, docs, notice.json) don't make a new version.
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'countries/**'
+      - 'fastlane/**'
+      - 'notice.json'
+      - 'LICENSE'
 
 permissions:
   contents: write
@@ -235,9 +243,23 @@ jobs:
           name: release-apks
           path: apks
 
+      # DrVPN.apk: the universal APK under a name that stays the same, so
+      # releases/latest/download/DrVPN.apk always gives the newest version. The in-app
+      # updater picks APKs by the ABI in their name, so it leaves this one alone.
+      - name: Add DrVPN.apk
+        run: cp apks/*universal*.apk apks/DrVPN.apk
+
+      - name: Checkout release notes
+        uses: actions/checkout@v5
+        with:
+          sparse-checkout: .github/release-body.md
+          sparse-checkout-cone-mode: false
+          path: repo
+
       - name: Publish release
         uses: softprops/action-gh-release@v2
         with:
+          body_path: repo/.github/release-body.md
           files: apks/*.apk
           tag_name: v${{ needs.build.outputs.version }}
           target_commitish: ${{ github.sha }}

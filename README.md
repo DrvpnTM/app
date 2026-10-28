@@ -1,6 +1,58 @@
 🌐 [فارسی](README.md) | [English](README-en.md) | [中文](README-zh.md) | [Русский](README-ru.md) | [မြန်မာ](README-my.md) | [Español](README-es.md)
 
-# Dr VPN (دکتر وی پی ان) — خرید فیلترشکن پرسرعت و مطمئن برای اندروید
+<div align="center" dir="rtl">
+
+<img src="android/app/src/main/res/drawable-nodpi/drvpn_logo.png" width="128" alt="Dr VPN">
+
+<h1>دکتر وی پی ان</h1>
+
+<h3>فیلترشکن سریع و امن برای اندروید</h3>
+
+<b>🎁 همراه با سرور رایگان</b>
+
+<br><br>
+
+<a href="https://github.com/DrvpnTM/app/releases/latest/download/DrVPN.apk"><img src="docs/icons/download-button.svg" width="340" alt="Download Dr VPN"></a>
+
+<b>👆 برای دانلود، روی دکمه سبز بزنید</b>
+
+<br><br>
+
+<h2>📱 خیلی ساده، در ۴ قدم</h2>
+
+<table>
+<tr>
+<td align="center" width="25%"><img src="docs/icons/step1.png" width="34" alt="1"><br><img src="docs/icons/install.png" width="84" alt=""><br><b>نصب کنید</b></td>
+<td align="center" width="25%"><img src="docs/icons/step2.png" width="34" alt="2"><br><img src="docs/icons/country.png" width="84" alt=""><br><b>کشورتان را انتخاب کنید</b></td>
+<td align="center" width="25%"><img src="docs/icons/step3.png" width="34" alt="3"><br><img src="docs/icons/tap.png" width="84" alt=""><br><b>دکمه بزرگ را بزنید</b></td>
+<td align="center" width="25%"><img src="docs/icons/step4.png" width="34" alt="4"><br><img src="docs/icons/connected.png" width="84" alt=""><br><b>سبز شد یعنی وصل هستید</b></td>
+</tr>
+</table>
+
+<h2>✨ چرا دکتر وی پی ان؟</h2>
+
+<table>
+<tr>
+<td align="center" width="20%"><img src="docs/icons/free.png" width="64" alt=""><br><b>سرور رایگان</b></td>
+<td align="center" width="20%"><img src="docs/icons/fast.png" width="64" alt=""><br><b>پرسرعت</b></td>
+<td align="center" width="20%"><img src="docs/icons/shield.png" width="64" alt=""><br><b>امن</b></td>
+<td align="center" width="20%"><img src="docs/icons/tv.png" width="64" alt=""><br><b>تلویزیون اندروید</b></td>
+<td align="center" width="20%"><img src="docs/icons/website.png" width="64" alt=""><br><b>۱۱ زبان</b></td>
+</tr>
+</table>
+
+<h2>🚀 اشتراک پرسرعت می‌خواهید؟</h2>
+
+<a href="https://drvpn.net/"><img src="docs/icons/buy-button.svg" width="300" alt="drvpn.net"></a>
+&nbsp;
+<a href="https://t.me/drVPN_net"><img src="docs/icons/telegram-button.svg" width="300" alt="Telegram @drVPN_net"></a>
+
+</div>
+
+<!-- end of header -->
+
+
+
 
 <div dir="rtl">
 
@@ -46,7 +98,7 @@
 
 ## 📥 دانلود فیلترشکن دکتر وی پی ان
 
-فایل APK با هر تغییر به‌صورت خودکار ساخته می‌شود: تب **Actions** ← **Build Dr VPN APK** ← آخرین اجرای موفق ← بخش **Artifacts** ← فایل `DrVPN-universal`. برای نصب همیشگی، از نسخه‌های منتشرشده در بخش **Releases** استفاده کنید.
+روی دکمه سبز **DOWNLOAD** بالای همین صفحه بزنید، یا از بخش [Releases](https://github.com/DrvpnTM/app/releases/latest) فایل `DrVPN.apk` را دانلود کنید.
 
 ## 📱 آموزش استفاده در ۴ قدم
 
