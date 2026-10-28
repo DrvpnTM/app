@@ -70,17 +70,41 @@ import androidx.compose.material3.LinearProgressIndicator
 import net.drvpn.app.handler.AnnouncementManager
 import androidx.compose.ui.platform.LocalUriHandler
 import net.drvpn.app.R
+import net.drvpn.app.ui.compose.DrVpnFont
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.style.TextDirection
+import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.unit.Velocity
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import net.drvpn.app.util.DeviceUtil
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.unit.coerceIn
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.fillMaxHeight
 import net.drvpn.app.ui.compose.focusHighlight
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 
 private val ConnectedColor = Color(0xFF34C759)
-private val DisconnectedColor = Color(0xFF8E8E93)
 
 /**
  * Hiddify-style home: active profile card, a large connect button, live status (timer + speed)
  * and the selected server card. Switches to two columns in landscape.
  */
 @Composable
-fun MainHomeTab(
+internal fun MainHomeTab(
     profileName: String,
     subscription: SubscriptionItem?,
     announcement: AnnouncementManager.Announcement?,
@@ -96,26 +120,84 @@ fun MainHomeTab(
     isTesting: Boolean,
     onAction: (MainAction) -> Unit,
     onOpenProxies: () -> Unit,
+    serverRows: List<ServerRowUiModel> = emptyList(),
     modifier: Modifier = Modifier,
 ) {
-    BoxWithConstraints(modifier = modifier.fillMaxSize()) {
+    // Pulling Home up (or tapping the handle / server card) opens the server picker sheet.
+    var showPicker by rememberSaveable { mutableStateOf(false) }
+    val selectedRow = serverRows.firstOrNull { it.guid == selectedGuid }
+    val openPicker: () -> Unit = { if (serverRows.isNotEmpty()) showPicker = true else onOpenProxies() }
+    val latestOpen by rememberUpdatedState(openPicker)
+    val pullUp = remember {
+        object : NestedScrollConnection {
+            private var pulled = 0f
+            override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
+                if (source == NestedScrollSource.UserInput && available.y < 0f) {
+                    pulled -= available.y
+                    if (pulled > 140f) {
+                        pulled = 0f
+                        latestOpen()
+                    }
+                }
+                return Offset.Zero
+            }
+
+            override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
+                pulled = 0f
+                return Velocity.Zero
+            }
+        }
+    }
+    if (showPicker) {
+        ServerPickerSheet(
+            rows = serverRows,
+            selectedGuid = selectedGuid,
+            onSelect = { onAction(MainAction.SelectServer(it)) },
+            onSelectFastest = { onAction(MainAction.SelectFastest) },
+            testing = isTesting,
+            onDismiss = { showPicker = false }
+        )
+    }
+    // On a TV the remote starts on the connect button instead of the first control on screen.
+    val isTv = DeviceUtil.isTv(LocalContext.current)
+    val connectFocus = remember { FocusRequester() }
+    var initialFocusDone by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(isTv) {
+        if (isTv && !initialFocusDone) {
+            runCatching { connectFocus.requestFocus() }
+            initialFocusDone = true
+        }
+    }
+    Column(modifier.fillMaxSize()) {
+    BoxWithConstraints(
+        Modifier
+            .weight(1f)
+            .fillMaxWidth()
+            .nestedScroll(pullUp)
+    ) {
         val landscape = maxWidth > maxHeight
+        val availableHeight = maxHeight
         val connectBlock: @Composable () -> Unit = {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                StatusPill(isRunning)
+                Spacer(Modifier.height(if (landscape) 8.dp else 14.dp))
                 ConnectButton(
                     isRunning = isRunning,
                     onToggle = { onAction(MainAction.ToggleService) },
-                    size = if (landscape) 170.dp else 220.dp,
+                    focusRequester = connectFocus,
+                    // In landscape (phones on their side, TVs) the button shrinks with the height so the
+                    // status, timer and speed below it stay visible.
+                    size = if (landscape) (availableHeight * 0.42f).coerceIn(110.dp, 200.dp) else 220.dp,
                 )
-                Spacer(Modifier.height(16.dp))
-                Text(
-                    text = stringResource(if (isRunning) R.string.home_connected else R.string.home_tap_to_connect),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = if (isRunning) ConnectedColor else MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+                Spacer(Modifier.height(12.dp))
+                if (!isRunning) {
+                    Text(
+                        text = stringResource(R.string.home_tap_to_connect),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
                 if (isRunning) {
-                    Spacer(Modifier.height(6.dp))
                     ConnectionTimer(connectedSince)
                     Spacer(Modifier.height(12.dp))
                     SpeedRow(up = speedUp, down = speedDown, totalUp = totalUp, totalDown = totalDown)
@@ -143,7 +225,20 @@ fun MainHomeTab(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(24.dp),
             ) {
-                Box(Modifier.weight(1f), contentAlignment = Alignment.Center) { connectBlock() }
+                val columnHeight = availableHeight - 24.dp
+                Column(
+                    Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    Box(
+                        Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = columnHeight),
+                        contentAlignment = Alignment.Center
+                    ) { connectBlock() }
+                }
                 Column(
                     Modifier
                         .weight(1f)
@@ -159,13 +254,12 @@ fun MainHomeTab(
                         onUpdate = { onAction(MainAction.UpdateSubscriptions) },
                     )
                     Spacer(Modifier.height(12.dp))
-                    ServerCard(
-                    serverName = selectedServerName,
-                    onClick = onOpenProxies,
-                    onShowQr = selectedGuid?.let { guid -> { onAction(MainAction.ShareQRCode(guid)) } }
-                )
-                    Spacer(Modifier.height(10.dp))
-                    FastestButton(busy = isTesting, onClick = { onAction(MainAction.SelectFastest) })
+                    LocationCard(
+                        row = selectedRow,
+                        fallbackName = selectedServerName,
+                        onClick = openPicker,
+                        onShowQr = selectedGuid?.let { guid -> { onAction(MainAction.ShareQRCode(guid)) } }
+                    )
                 }
             }
         } else {
@@ -185,18 +279,50 @@ fun MainHomeTab(
                     subscription = subscription,
                     onUpdate = { onAction(MainAction.UpdateSubscriptions) },
                 )
-                Spacer(Modifier.height(36.dp))
+                Spacer(Modifier.height(20.dp))
                 connectBlock()
-                Spacer(Modifier.height(32.dp))
-                ServerCard(
-                    serverName = selectedServerName,
-                    onClick = onOpenProxies,
+                Spacer(Modifier.height(20.dp))
+                LocationCard(
+                    row = selectedRow,
+                    fallbackName = selectedServerName,
+                    onClick = openPicker,
                     onShowQr = selectedGuid?.let { guid -> { onAction(MainAction.ShareQRCode(guid)) } }
                 )
-                Spacer(Modifier.height(10.dp))
-                FastestButton(busy = isTesting, onClick = { onAction(MainAction.SelectFastest) })
             }
         }
+    }
+    PullUpHandle(onOpen = openPicker)
+    }
+}
+
+@Composable
+private fun PullUpHandle(onOpen: () -> Unit) {
+    val latest by rememberUpdatedState(onOpen)
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .focusHighlight(RoundedCornerShape(16.dp))
+            .clickable(role = Role.Button, onClick = onOpen)
+            .pointerInput(Unit) {
+                detectVerticalDragGestures { _, dragAmount -> if (dragAmount < -6f) latest() }
+            }
+            .padding(top = 6.dp, bottom = 10.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(
+            Modifier
+                .width(40.dp)
+                .height(5.dp)
+                .clip(RoundedCornerShape(50))
+                .background(MaterialTheme.colorScheme.outlineVariant)
+        )
+        Spacer(Modifier.height(6.dp))
+        Text(
+            stringResource(R.string.server_picker_title),
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.primary
+        )
     }
 }
 
@@ -215,8 +341,10 @@ private fun ConnectionTimer(since: Long?) {
     val text = String.format(Locale.US, "%02d:%02d:%02d", total / 3600, (total % 3600) / 60, total % 60)
     Text(
         text = text,
-        style = MaterialTheme.typography.headlineSmall,
-        fontFamily = FontFamily.Monospace,
+        fontSize = 30.sp,
+        fontWeight = FontWeight.ExtraBold,
+        fontFamily = DrVpnFont,
+        style = MaterialTheme.typography.headlineMedium.copy(fontFeatureSettings = "tnum", textDirection = TextDirection.Ltr),
         color = MaterialTheme.colorScheme.onSurface,
     )
 }
@@ -225,28 +353,49 @@ private fun ConnectionTimer(since: Long?) {
 private fun SpeedRow(up: Long, down: Long, totalUp: Long, totalDown: Long) {
     Row(
         modifier = Modifier
-            .clip(RoundedCornerShape(14.dp))
+            .widthIn(max = 360.dp)
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(18.dp))
             .background(MaterialTheme.colorScheme.cell)
-            .padding(horizontal = 18.dp, vertical = 10.dp),
-        horizontalArrangement = Arrangement.spacedBy(22.dp),
+            .height(IntrinsicSize.Min)
+            .padding(vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        SpeedItem(arrow = "↓", label = stringResource(R.string.home_download), value = down.toSpeedString(), total = totalDown.toTrafficString(), color = IosBlue)
-        SpeedItem(arrow = "↑", label = stringResource(R.string.home_upload), value = up.toSpeedString(), total = totalUp.toTrafficString(), color = IosGreen)
+        SpeedItem(arrow = "↓", label = stringResource(R.string.home_download), value = down.toSpeedString(), total = totalDown.toTrafficString(), color = IosBlue, modifier = Modifier.weight(1f))
+        Box(
+            Modifier
+                .fillMaxHeight()
+                .width(1.dp)
+                .background(MaterialTheme.colorScheme.outlineVariant)
+        )
+        SpeedItem(arrow = "↑", label = stringResource(R.string.home_upload), value = up.toSpeedString(), total = totalUp.toTrafficString(), color = IosGreen, modifier = Modifier.weight(1f))
     }
 }
 
 @Composable
-private fun SpeedItem(arrow: String, label: String, value: String, total: String, color: Color) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text("$arrow $label", style = MaterialTheme.typography.labelMedium, color = color, fontWeight = FontWeight.SemiBold)
-        Text(value, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
-        Text(total, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+private fun SpeedItem(arrow: String, label: String, value: String, total: String, color: Color, modifier: Modifier = Modifier) {
+    Column(modifier, horizontalAlignment = Alignment.CenterHorizontally) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                Modifier
+                    .size(20.dp)
+                    .clip(CircleShape)
+                    .background(color.copy(alpha = 0.15f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(arrow, style = MaterialTheme.typography.labelMedium, color = color, fontWeight = FontWeight.Bold)
+            }
+            Spacer(Modifier.width(6.dp))
+            Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        Spacer(Modifier.height(4.dp))
+        Text(value, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, maxLines = 1)
+        Text(total, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
     }
 }
 
 @Composable
-private fun FastestButton(busy: Boolean, onClick: () -> Unit) {
+internal fun FastestButton(busy: Boolean, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -267,49 +416,67 @@ private fun FastestButton(busy: Boolean, onClick: () -> Unit) {
     }
 }
 
+/**
+ * Compact subscription card: icon, name, usage and days left on one line, a slim usage bar, and a
+ * clear "Update" pill (a spinning-arrow icon alone was not obvious to users).
+ */
 @Composable
 private fun ProfileCard(profileName: String, subscription: SubscriptionItem?, onUpdate: () -> Unit) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+    val primary = MaterialTheme.colorScheme.primary
+    val shape = RoundedCornerShape(18.dp)
+    val sub = subscription?.takeIf { it.usedBytes > 0 || it.totalBytes > 0 || it.expireAt > 0 }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(MaterialTheme.colorScheme.cell)
+            .padding(start = 12.dp, end = 10.dp, top = 10.dp, bottom = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Column {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 20.dp, end = 8.dp, top = 12.dp, bottom = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
+        Box(
+            Modifier
+                .size(38.dp)
+                .clip(RoundedCornerShape(11.dp))
+                .background(primary.copy(alpha = 0.12f)),
+            contentAlignment = Alignment.Center
         ) {
             Icon(
                 painter = painterResource(R.drawable.ic_subscriptions_24dp),
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
+                tint = primary,
+                modifier = Modifier.size(20.dp)
             )
-            Spacer(Modifier.width(12.dp))
+        }
+        Spacer(Modifier.width(12.dp))
+        Column(Modifier.weight(1f)) {
             Text(
                 text = profileName.ifBlank { stringResource(R.string.app_name) },
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f),
             )
-            IconButton(onClick = onUpdate, modifier = Modifier.focusHighlight(CircleShape)) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_refresh_24dp),
-                    contentDescription = stringResource(R.string.title_sub_update),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
+            if (sub != null) SubscriptionUsage(sub)
         }
-        if (subscription != null && (subscription.usedBytes > 0 || subscription.totalBytes > 0 || subscription.expireAt > 0)) {
-            SubscriptionUsage(subscription)
-        }
-        }
+        Spacer(Modifier.width(10.dp))
+        val pill = RoundedCornerShape(50)
+        Text(
+            text = stringResource(R.string.home_sub_update),
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.SemiBold,
+            color = primary,
+            maxLines = 1,
+            modifier = Modifier
+                .focusHighlight(pill)
+                .clip(pill)
+                .background(primary.copy(alpha = 0.12f))
+                .clickable(role = Role.Button, onClick = onUpdate)
+                .padding(horizontal = 14.dp, vertical = 7.dp)
+        )
     }
 }
 
-/** Used/total bar and days left, from the panel's subscription-userinfo header. */
+/** "136 MB of 33 GB · 177 days left" and a slim usage bar, from the subscription-userinfo header. */
 @Composable
 private fun SubscriptionUsage(sub: SubscriptionItem) {
     val total = sub.totalBytes
@@ -325,51 +492,79 @@ private fun SubscriptionUsage(sub: SubscriptionItem) {
     } else {
         stringResource(R.string.home_sub_usage_unlimited, used.toTrafficString())
     }
+    val expired = sub.expireAt in 1 until System.currentTimeMillis()
     val expiryText = when {
         sub.expireAt <= 0 -> null
-        sub.expireAt < System.currentTimeMillis() -> stringResource(R.string.home_sub_expired)
-        else -> {
-            val days = ((sub.expireAt - System.currentTimeMillis()) / 86_400_000L).toInt()
-            stringResource(R.string.home_sub_days_left, days)
-        }
+        expired -> stringResource(R.string.home_sub_expired)
+        else -> stringResource(R.string.home_sub_days_left, ((sub.expireAt - System.currentTimeMillis()) / 86_400_000L).toInt())
     }
-    Column(Modifier.padding(start = 20.dp, end = 20.dp, bottom = 14.dp)) {
-        if (total > 0) {
-            LinearProgressIndicator(
-                progress = { fraction },
-                color = barColor,
-                trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(6.dp)
-                    .clip(RoundedCornerShape(3.dp)),
-            )
-            Spacer(Modifier.height(6.dp))
-        }
-        Row(Modifier.fillMaxWidth()) {
-            Text(usageText, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.weight(1f))
-            if (expiryText != null) {
-                Text(
-                    expiryText,
-                    style = MaterialTheme.typography.bodySmall,
-                    fontWeight = FontWeight.SemiBold,
-                    color = if (sub.expireAt < System.currentTimeMillis()) IosRed else MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-        }
+    Text(
+        text = listOfNotNull(usageText, expiryText).joinToString("  ·  "),
+        style = MaterialTheme.typography.bodySmall,
+        color = if (expired) IosRed else MaterialTheme.colorScheme.onSurfaceVariant,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+        modifier = Modifier.padding(top = 1.dp)
+    )
+    if (total > 0) {
+        LinearProgressIndicator(
+            progress = { fraction },
+            color = barColor,
+            trackColor = MaterialTheme.colorScheme.surfaceVariant,
+            drawStopIndicator = {},
+            gapSize = 0.dp,
+            modifier = Modifier
+                .padding(top = 6.dp)
+                .fillMaxWidth()
+                .height(4.dp)
+                .clip(RoundedCornerShape(2.dp)),
+        )
+    }
+}
+
+/** Small capsule above the connect button: coloured dot + connection state. */
+@Composable
+private fun StatusPill(isRunning: Boolean) {
+    val color = if (isRunning) ConnectedColor else MaterialTheme.colorScheme.onSurfaceVariant
+    Row(
+        modifier = Modifier
+            .clip(RoundedCornerShape(50))
+            .background(color.copy(alpha = 0.12f))
+            .padding(horizontal = 14.dp, vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            Modifier
+                .size(8.dp)
+                .clip(CircleShape)
+                .background(color)
+        )
+        Spacer(Modifier.width(8.dp))
+        Text(
+            text = stringResource(if (isRunning) R.string.home_connected else R.string.connection_not_connected),
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.SemiBold,
+            color = color,
+        )
     }
 }
 
 @Composable
-private fun ConnectButton(isRunning: Boolean, onToggle: () -> Unit, size: Dp = 220.dp) {
-    val color by animateColorAsState(
-        targetValue = if (isRunning) ConnectedColor else DisconnectedColor,
-        label = "connectColor",
+private fun ConnectButton(isRunning: Boolean, onToggle: () -> Unit, size: Dp = 220.dp, focusRequester: FocusRequester? = null) {
+    // Off: brand blue (an invitation to tap, not a "disabled" grey). On: green.
+    val top by animateColorAsState(
+        targetValue = if (isRunning) Color(0xFF4ADE80) else Color(0xFF60A5FA),
+        label = "connectTop",
     )
+    val bottom by animateColorAsState(
+        targetValue = if (isRunning) Color(0xFF16A34A) else Color(0xFF2563EB),
+        label = "connectBottom",
+    )
+    val color = bottom
     val pulse = rememberInfiniteTransition(label = "connectPulse")
     val haloScale by pulse.animateFloat(
         initialValue = 1f,
-        targetValue = if (isRunning) 1.12f else 1.04f,
+        targetValue = if (isRunning) 1.12f else 1.05f,
         animationSpec = infiniteRepeatable(tween(durationMillis = 1400), RepeatMode.Reverse),
         label = "haloScale",
     )
@@ -392,15 +587,23 @@ private fun ConnectButton(isRunning: Boolean, onToggle: () -> Unit, size: Dp = 2
                 .size(size * 0.91f)
                 .scale(haloScale)
                 .clip(CircleShape)
-                .background(color.copy(alpha = 0.15f)),
+                .background(color.copy(alpha = 0.12f)),
+        )
+        Box(
+            modifier = Modifier
+                .size(size * 0.80f)
+                .clip(CircleShape)
+                .background(color.copy(alpha = 0.18f)),
         )
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
-                .size(size * 0.73f)
+                .size(size * 0.68f)
+                .shadow(elevation = 16.dp, shape = CircleShape, ambientColor = color, spotColor = color)
+                .then(if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier)
                 .focusHighlight(CircleShape)
                 .clip(CircleShape)
-                .background(color)
+                .background(Brush.verticalGradient(listOf(top, bottom)))
                 .clickable(onClick = onToggle),
         ) {
             Icon(
@@ -413,58 +616,65 @@ private fun ConnectButton(isRunning: Boolean, onToggle: () -> Unit, size: Dp = 2
     }
 }
 
+/**
+ * The selected server as design B draws it: round flag, country, protocol and signal bars on a
+ * white card; tapping it opens the server picker.
+ */
 @Composable
-private fun ServerCard(serverName: String, onClick: () -> Unit, onShowQr: (() -> Unit)? = null) {
-    val title = stringResource(R.string.home_current_server)
-    val name = serverName.ifBlank { stringResource(R.string.home_no_server) }
-    Card(
+private fun LocationCard(
+    row: ServerRowUiModel?,
+    fallbackName: String,
+    onClick: () -> Unit,
+    onShowQr: (() -> Unit)?,
+) {
+    val shape = RoundedCornerShape(20.dp)
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .focusHighlight(RoundedCornerShape(20.dp))
-            .semantics(mergeDescendants = true) {},
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
-        onClick = onClick,
+            .shadow(10.dp, shape, ambientColor = Color(0x140F172A), spotColor = Color(0x140F172A))
+            .clip(shape)
+            .background(MaterialTheme.colorScheme.surface)
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, shape)
+            .focusHighlight(shape)
+            .clickable(role = Role.Button, onClick = onClick)
+            .padding(start = 14.dp, end = 6.dp, top = 12.dp, bottom = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_proxies_24dp),
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
+        if (row != null) {
+            FlagCircle(row.flag, row.country.length == 2, size = 42.dp)
+        } else {
+            FlagCircle("", false, size = 42.dp)
+        }
+        Spacer(Modifier.width(12.dp))
+        Column(Modifier.weight(1f)) {
+            Text(
+                text = row?.let { serverRowTitle(it.country) } ?: fallbackName.ifBlank { stringResource(R.string.home_no_server) },
+                style = MaterialTheme.typography.titleSmall,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
-            Column(modifier = Modifier.weight(1f)) {
+            if (row != null) {
                 Text(
-                    text = title,
-                    style = MaterialTheme.typography.labelMedium,
+                    text = row.typeDescription.replace(" / ", " · "),
+                    style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Text(
-                    text = name,
-                    style = MaterialTheme.typography.titleMedium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
             }
-            if (onShowQr != null && serverName.isNotBlank()) {
-                IconButton(onClick = onShowQr, modifier = Modifier.focusHighlight(CircleShape)) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_qu_scan_24dp),
-                        contentDescription = stringResource(R.string.qr_transfer_title),
-                        tint = MaterialTheme.colorScheme.primary,
-                    )
-                }
+        }
+        if (row != null && row.testDelayMillis != 0L) {
+            SignalBars(row.testDelayMillis, Modifier.padding(horizontal = 6.dp))
+        }
+        if (onShowQr != null && row != null) {
+            IconButton(onClick = onShowQr, modifier = Modifier.focusHighlight(CircleShape)) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_qr_code_24dp),
+                    contentDescription = stringResource(R.string.qr_transfer_title),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(20.dp)
+                )
             }
-            Icon(
-                painter = painterResource(R.drawable.ic_chevron_right_24dp),
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
         }
     }
 }

@@ -160,6 +160,7 @@ class MainActivity : HelperBaseComponentActivity() {
             MainDestination.Advanced -> Intent(this, AdvancedScanActivity::class.java)
             MainDestination.AppLogView -> Intent(this, AppLogActivity::class.java)
             MainDestination.Usage -> Intent(this, UsageActivity::class.java)
+            MainDestination.NetworkCheck -> Intent(this, net.drvpn.app.ui.check.NetworkCheckActivity::class.java)
             MainDestination.KillSwitch -> {
                 showKillSwitchDialog()
                 return
@@ -180,15 +181,21 @@ class MainActivity : HelperBaseComponentActivity() {
      * stops all traffic whenever the tunnel is down, so the real IP never leaks.
      */
     private fun showKillSwitchDialog() {
+        val vpnSettings = Intent(android.provider.Settings.ACTION_VPN_SETTINGS)
         androidx.appcompat.app.AlertDialog.Builder(this)
             .setTitle(R.string.kill_switch_title)
             .setMessage(R.string.kill_switch_message)
             .setPositiveButton(R.string.kill_switch_open) { _, _ ->
                 try {
-                    startActivity(Intent(android.provider.Settings.ACTION_VPN_SETTINGS))
+                    startActivity(vpnSettings)
                 } catch (e: Exception) {
-                    LogUtil.e(AppConfig.TAG, "Cannot open VPN settings", e)
-                    toastError(R.string.toast_failure)
+                    // Many TVs ship without the VPN settings screen, so Always-on cannot be turned on there.
+                    LogUtil.w(AppConfig.TAG, "No VPN settings screen: ${e.javaClass.simpleName}")
+                    androidx.appcompat.app.AlertDialog.Builder(this)
+                        .setTitle(R.string.kill_switch_title)
+                        .setMessage(R.string.kill_switch_unavailable)
+                        .setPositiveButton(R.string.action_close, null)
+                        .show()
                 }
             }
             .setNegativeButton(R.string.action_cancel, null)

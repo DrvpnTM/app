@@ -156,9 +156,16 @@ object AppConfig {
     const val IP_API_URL = "https://api.ip.sb/geoip"
 
     /** DNS server addresses. */
-    const val DNS_PROXY = "https://cloudflare-dns.com/dns-query"
-    const val DNS_DIRECT = "223.5.5.5"
-    const val DNS_VPN = "1.1.1.1"
+    // Dr VPN defaults: Google Public DNS (DoH on its IP, so no bootstrap lookup is needed).
+    const val DNS_PROXY = "https://8.8.8.8/dns-query"
+    const val DNS_DIRECT = "8.8.8.8"
+    const val DNS_VPN = "8.8.8.8,8.8.4.4"
+    /** Earlier built-in defaults; settings still holding exactly these are moved to the new ones. */
+    val LEGACY_DNS_DEFAULTS = mapOf(
+        PREF_REMOTE_DNS to "https://cloudflare-dns.com/dns-query",
+        PREF_DOMESTIC_DNS to "223.5.5.5",
+        PREF_VPN_DNS to "1.1.1.1",
+    )
     const val GEOSITE_PRIVATE = "geosite:private"
     const val GEOSITE_CN = "geosite:cn"
     const val GEOIP_PRIVATE = "geoip:private"
@@ -176,7 +183,7 @@ object AppConfig {
     const val WIREGUARD_LOCAL_ADDRESS_V4 = "172.16.0.2/32"
     const val WIREGUARD_LOCAL_ADDRESS_V6 = "2606:4700:110:8f81:d551:a0:532e:a2b3/128"
     const val WIREGUARD_LOCAL_MTU = "1420"
-    const val WIREGUARD_LOCAL_REMOTE_DNS = "1.1.1.1,1.0.0.1,2606:4700:4700::1111,2606:4700:4700::1001"
+    const val WIREGUARD_LOCAL_REMOTE_DNS = "8.8.8.8,8.8.4.4,2001:4860:4860::8888,2001:4860:4860::8844"
     const val LOOPBACK = "127.0.0.1"
 
     /** Shared defaults for settings shown in the UI and consumed by config generation. */
@@ -255,7 +262,7 @@ object AppConfig {
     const val ROOT_V6_CHAIN = "CORE6_FILTER"       // ip6tables filter/OUTPUT chain: blackhole native IPv6 when it isn't tunneled
     const val ROOT_V6_FWD_CHAIN = "CORE6_FWD" // ip6tables FORWARD chain: route or reject tethered clients' native IPv6
     const val ROOT_V6_PRE_CHAIN = "CORE6_PRE" // ip6tables mangle/PREROUTING chain: mark forwarded clients' IPv6 into the tun
-    const val ROOT_LAN_DNS = "1.1.1.1"          // fallback resolver for tethered clients when no plain-IPv4 DNS is configured
+    const val ROOT_LAN_DNS = "8.8.8.8"          // fallback resolver for tethered clients when no plain-IPv4 DNS is configured
     const val ROOT_OOM_SCORE = "-1000"          // oom_score_adj that makes the LMK never kill us
 
     /** hev-sock5-tunnel read-write-timeout value */
