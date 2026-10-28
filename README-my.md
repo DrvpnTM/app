@@ -83,4 +83,4 @@
 
 ## 📜 လိုင်စင်နှင့် ကျေးဇူးတင်လွှာ
 
-**GPL-3.0** ဖြင့် open-source ဖြစ်သည် ([LICENSE](LICENSE))။ [Xray-core](https://github.com/XTLS/Xray-core) engine ကို အသုံးပြုသည်။
+**GPL-3.0** ဖြင့် open-source ဖြစ်သည် ([LICENSE](LICENSE))။ [Xray-core](https://github.com/XTLS/Xray-core) engine ကို အသုံးပြုသည်။ WARP core [Aether](https://github.com/patterniha/Aether) (AGPL-3.0၊ commit အတိအကျကို `aether-version.txt` တွင်ကြည့်ပါ) ပါဝင်သည်။

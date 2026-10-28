@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import net.drvpn.app.AppConfig
 import net.drvpn.app.R
 import net.drvpn.app.dto.ConnectionTestResult
+import net.drvpn.app.enums.EConfigType
 import net.drvpn.app.dto.GroupMapItem
 import net.drvpn.app.dto.LocateTarget
 import net.drvpn.app.dto.RealPingResult
@@ -550,7 +551,9 @@ class MainViewModel(
         val pending = pingPendingGuids
         val rows = allRows.filter { row ->
             ui.showServersWithoutPing || row.testDelayMillis > 0L ||
-                (row.testDelayMillis == 0L && row.guid in pending)
+                (row.testDelayMillis == 0L && row.guid in pending) ||
+                // Aether only answers a ping while it runs, so its servers always stay listed.
+                row.profile.configType == EConfigType.AETHER
         }
         // Fastest first. Not while a test runs: rows would jump under the user's finger / TV focus.
         return if (ui.isTesting) rows else rows.sortedWith(serverPingOrder)

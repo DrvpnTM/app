@@ -56,6 +56,7 @@ private val manualProtocols = listOf(
     ImportMenuAction.Shadowsocks to IosGray,
     ImportMenuAction.Hysteria2 to IosOrange,
     ImportMenuAction.WireGuard to IosPink,
+    ImportMenuAction.Aether to IosBlue,
     ImportMenuAction.Socks to IosTeal,
     ImportMenuAction.Http to IosGreen,
 )

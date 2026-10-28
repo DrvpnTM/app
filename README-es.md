@@ -84,4 +84,4 @@ Toca el botón verde **DOWNLOAD** arriba de esta página, o abre [Releases](http
 
 ## 📜 Licencia y créditos
 
-Código abierto bajo **GPL-3.0** ([LICENSE](LICENSE)); usa el motor [Xray-core](https://github.com/XTLS/Xray-core).
+Código abierto bajo **GPL-3.0** ([LICENSE](LICENSE)); usa el motor [Xray-core](https://github.com/XTLS/Xray-core). Incluye el núcleo WARP [Aether](https://github.com/patterniha/Aether) (AGPL-3.0; el commit exacto está en `aether-version.txt`).

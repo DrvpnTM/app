@@ -185,6 +185,13 @@ object AppConfig {
     /** Ports and addresses for various services. */
     const val PORT_LOCAL_DNS = "10853"
     const val PORT_SOCKS = "10808"
+
+    /** Aether: the SOCKS port the core listens on (the Xray outbound dials it), as in PattNG. */
+    const val PORT_AETHER_SOCKS = 10819
+
+    /** Aether: Xray's SOCKS inbound the core sends its own traffic through (--upstream), out of the VPN. */
+    const val PORT_AETHER_UPSTREAM = 10822
+    const val TAG_AETHER_UPSTREAM = "aether-upstream"
     const val WIREGUARD_LOCAL_ADDRESS_V4 = "172.16.0.2/32"
     const val WIREGUARD_LOCAL_ADDRESS_V6 = "2606:4700:110:8f81:d551:a0:532e:a2b3/128"
     const val WIREGUARD_LOCAL_MTU = "1420"
@@ -241,6 +248,7 @@ object AppConfig {
     const val TUIC = "tuic://"
     const val HYSTERIA = "hysteria://"
     const val HYSTERIA2 = "hysteria2://"
+    const val AETHER = "aether://"
     const val HY2 = "hy2://"
     const val V2RAYNFMTS = "v2rayn://"
 

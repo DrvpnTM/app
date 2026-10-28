@@ -69,3 +69,7 @@ Thumbs.db
 .DS_Store
 DRVPN_KEYSTORE_BASE64.txt
 drvpn-release.jks
+
+# Aether native build (compile-aether.sh)
+libs-aether/
+build-aether-src/

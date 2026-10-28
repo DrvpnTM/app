@@ -687,4 +687,22 @@
     <string name="free_sub_promo">برای خرید اشتراک پرسرعت به سایت رسمی دکتر وی پی ان مراجعه کنید</string>
     <string name="server_lab_cipher_suites">مجموعه رمزنگاری (Cipher Suites)</string>
     <string name="toast_cipher_suites_need_unsafe">cipherSuites فقط با fingerprint از نوع unsafe اعمال می‌شود. unsafe را انتخاب کنید یا cipherSuites را خالی کنید.</string>
+    <string name="menu_item_import_config_manually_aether">افزودن [Aether WARP]</string>
+    <string name="aether_title">Aether (WARP)</string>
+    <string name="aether_intro">وارپ رایگان کلودفلر، ساخته‌شده برای فیلترینگ شدید. فیلدها را همان‌طور بگذارید و ذخیره کنید؛ Aether خودش یک آی‌پی سالم پیدا می‌کند. اولین اتصال ممکن است یک دقیقه طول بکشد.</string>
+    <string name="aether_protocol">پروتکل</string>
+    <string name="aether_transport">نوع انتقال MASQUE</string>
+    <string name="aether_endpoint">آدرس سرور (اختیاری)</string>
+    <string name="aether_outer_hop">هاپ بیرونی (اختیاری)</string>
+    <string name="aether_inner_hop">هاپ درونی (اختیاری)</string>
+    <string name="aether_endpoint_hint">به شکل host:port، یا خالی تا Aether خودش اسکن کند</string>
+    <string name="aether_scan">اسکن</string>
+    <string name="aether_ip">نسخه IP</string>
+    <string name="aether_mode_off">خاموش</string>
+    <string name="aether_mode_chain">داخل وارپ (خروج از طریق آن)</string>
+    <string name="aether_mode_reverse">دور وارپ (رسیدن به وارپ از طریق آن)</string>
+    <string name="aether_mode_only">به‌تنهایی، بدون وارپ</string>
+    <string name="aether_command">فرمان Aether (پیشرفته)</string>
+    <string name="aether_command_hint">یک خط فرمان کامل Aether به جای تنظیمات بالا اجرا می‌شود. معمولاً خالی بگذارید.</string>
+    <string name="aether_not_supported">نوع پردازنده این گوشی در این نسخه Aether ندارد.</string>
 </resources>

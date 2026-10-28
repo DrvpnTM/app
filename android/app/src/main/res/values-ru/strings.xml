@@ -691,4 +691,22 @@
     <string name="free_sub_promo">Чтобы купить скоростную подписку, посетите официальный сайт Dr VPN</string>
     <string name="server_lab_cipher_suites">Наборы шифров (Cipher Suites)</string>
     <string name="toast_cipher_suites_need_unsafe">cipherSuites применяются только с отпечатком unsafe. Выберите unsafe или очистите cipherSuites.</string>
+    <string name="menu_item_import_config_manually_aether">Добавить [Aether WARP]</string>
+    <string name="aether_title">Aether (WARP)</string>
+    <string name="aether_intro">Бесплатный Cloudflare WARP для жёсткой блокировки. Оставьте поля как есть и сохраните: Aether сам найдёт рабочую точку. Первое подключение может занять минуту.</string>
+    <string name="aether_protocol">Протокол</string>
+    <string name="aether_transport">Транспорт MASQUE</string>
+    <string name="aether_endpoint">Точка подключения (необязательно)</string>
+    <string name="aether_outer_hop">Внешний узел (необязательно)</string>
+    <string name="aether_inner_hop">Внутренний узел (необязательно)</string>
+    <string name="aether_endpoint_hint">host:port, или пусто, чтобы Aether искал сам</string>
+    <string name="aether_scan">Поиск</string>
+    <string name="aether_ip">Версия IP</string>
+    <string name="aether_mode_off">Выкл.</string>
+    <string name="aether_mode_chain">Внутри WARP (выход через него)</string>
+    <string name="aether_mode_reverse">Вокруг WARP (WARP через него)</string>
+    <string name="aether_mode_only">Отдельно, без WARP</string>
+    <string name="aether_command">Команда Aether (для опытных)</string>
+    <string name="aether_command_hint">Вместо настроек выше запускается целая командная строка Aether. Обычно оставьте пустым.</string>
+    <string name="aether_not_supported">Для процессора этого телефона в этой версии нет Aether.</string>
 </resources>
