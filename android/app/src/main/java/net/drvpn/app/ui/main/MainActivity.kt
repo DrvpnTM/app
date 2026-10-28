@@ -111,6 +111,11 @@ class MainActivity : HelperBaseComponentActivity() {
         checkAndRequestPermission(PermissionType.POST_NOTIFICATIONS) {}
     }
 
+    override fun onResume() {
+        super.onResume()
+        mainViewModel.onScreenResumed()
+    }
+
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         if (intent.getBooleanExtra(AppUpdater.EXTRA_FROM_UPDATE, false)) {

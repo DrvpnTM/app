@@ -147,6 +147,17 @@ class MainViewModel(
 
     private var updateJob: Job? = null
 
+    /** Settings was opened to allow installing the update; it continues on its own when the user comes back. */
+    private var awaitingInstallPermission = false
+
+    /** Called when the home screen shows again (e.g. back from Settings). */
+    fun onScreenResumed() {
+        if (awaitingInstallPermission && uiState.value.update != null && AppUpdater.canInstall(app)) {
+            awaitingInstallPermission = false
+            startUpdate()
+        }
+    }
+
     /** Downloads the update (or reuses the downloaded file) and opens Android's installer. */
     private fun startUpdate() {
         val update = uiState.value.update ?: return
@@ -154,7 +165,8 @@ class MainViewModel(
         val version = update.latestVersion ?: return
         if (updateJob?.isActive == true) return
         if (!AppUpdater.canInstall(app)) {
-            // Android asks once whether this app may install updates; the user comes back and taps again.
+            // Android asks once whether this app may install updates; the update goes on when the user comes back.
+            awaitingInstallPermission = true
             AppUpdater.openInstallPermission(app)
             return
         }

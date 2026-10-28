@@ -626,4 +626,5 @@
     <string name="update_download_link">ဒေါင်းလုဒ် လင့်ခ်</string>
     <string name="update_try_again">ထပ်ကြိုးစားရန်</string>
     <string name="update_later">နောက်မှ</string>
+    <string name="group_my_servers">ကျွန်ုပ်၏ server များ</string>
 </resources>
