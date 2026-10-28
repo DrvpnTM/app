@@ -39,6 +39,7 @@ import net.drvpn.app.ui.server.ProfileEditorResult
 import net.drvpn.app.ui.server.ServerCustomConfigActivity
 import net.drvpn.app.ui.server.ServerGroupActivity
 import net.drvpn.app.ui.server.ServerHttpActivity
+import net.drvpn.app.ui.server.ServerAetherActivity
 import net.drvpn.app.ui.server.ServerHysteria2Activity
 import net.drvpn.app.ui.server.ServerProxyChainActivity
 import net.drvpn.app.ui.server.ServerShadowsocksActivity
@@ -249,6 +250,7 @@ class MainActivity : HelperBaseComponentActivity() {
             EConfigType.TROJAN.value -> Intent(this, ServerTrojanActivity::class.java)
             EConfigType.WIREGUARD.value -> Intent(this, ServerWireguardActivity::class.java)
             EConfigType.HYSTERIA2.value -> Intent(this, ServerHysteria2Activity::class.java)
+            EConfigType.AETHER.value -> Intent(this, ServerAetherActivity::class.java)
             else -> Intent(this, ServerHttpActivity::class.java).apply {
                 putExtra("createConfigType", createConfigType)
             }
@@ -301,6 +303,7 @@ class MainActivity : HelperBaseComponentActivity() {
             EConfigType.TROJAN -> ServerTrojanActivity::class.java
             EConfigType.WIREGUARD -> ServerWireguardActivity::class.java
             EConfigType.HYSTERIA2 -> ServerHysteria2Activity::class.java
+            EConfigType.AETHER -> ServerAetherActivity::class.java
             else -> ServerHttpActivity::class.java
         }
         val intent = Intent(this, activityClass).apply {

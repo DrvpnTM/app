@@ -42,7 +42,11 @@ object CoreConfigManager {
             if (configContext.isCustom) {
                 return buildV2rayCustomConfig(configContext)
             }
-            return toConfigResult(configContext, buildUnifiedConfig(configContext))
+            val v2rayConfig = buildUnifiedConfig(configContext)
+            if (configContext.resolvedOutbounds.first().profile.configType == EConfigType.AETHER) {
+                addAetherUpstream(v2rayConfig)
+            }
+            return toConfigResult(configContext, v2rayConfig)
         } catch (e: Exception) {
             LogUtil.e(AppConfig.TAG, "Failed to get V2ray config", e)
             return ConfigResult(
@@ -51,6 +55,30 @@ object CoreConfigManager {
                 errorMessage = "Failed to get V2ray config: ${e.message ?: e.javaClass.simpleName}"
             )
         }
+    }
+
+    /**
+     * Aether sends its own traffic (to WARP, Tor, Psiphon) through a SOCKS inbound of Xray, which
+     * goes out directly: Xray's sockets leave the VPN even with "block connections without VPN" on.
+     * The rule comes first so that no user rule sends it back into the tunnel.
+     */
+    private fun addAetherUpstream(v2rayConfig: V2rayConfig) {
+        v2rayConfig.inbounds.add(
+            V2rayConfig.InboundBean(
+                tag = AppConfig.TAG_AETHER_UPSTREAM,
+                port = AppConfig.PORT_AETHER_UPSTREAM,
+                protocol = "socks",
+                listen = AppConfig.LOOPBACK,
+                settings = V2rayConfig.InboundBean.InSettingsBean(auth = "noauth", udp = true),
+            )
+        )
+        v2rayConfig.routing.rules.add(
+            0,
+            V2rayConfig.RoutingBean.RulesBean(
+                inboundTag = listOf(AppConfig.TAG_AETHER_UPSTREAM),
+                outboundTag = AppConfig.TAG_DIRECT,
+            )
+        )
     }
 
     /**

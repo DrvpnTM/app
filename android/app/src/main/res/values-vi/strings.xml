@@ -685,4 +685,22 @@
     <string name="free_sub_promo">Để mua gói tốc độ cao, hãy truy cập trang web chính thức của Dr VPN</string>
     <string name="server_lab_cipher_suites">Bộ mã hóa (Cipher Suites)</string>
     <string name="toast_cipher_suites_need_unsafe">cipherSuites chỉ áp dụng với fingerprint unsafe. Hãy chọn unsafe hoặc xóa cipherSuites.</string>
+    <string name="menu_item_import_config_manually_aether">Thêm [Aether WARP]</string>
+    <string name="aether_title">Aether (WARP)</string>
+    <string name="aether_intro">Cloudflare WARP miễn phí, làm cho mạng bị chặn nặng. Giữ nguyên các ô và lưu: Aether tự tìm điểm kết nối hoạt động. Lần kết nối đầu có thể mất một phút.</string>
+    <string name="aether_protocol">Giao thức</string>
+    <string name="aether_transport">Truyền tải MASQUE</string>
+    <string name="aether_endpoint">Điểm kết nối (tùy chọn)</string>
+    <string name="aether_outer_hop">Chặng ngoài (tùy chọn)</string>
+    <string name="aether_inner_hop">Chặng trong (tùy chọn)</string>
+    <string name="aether_endpoint_hint">host:port, hoặc để trống để Aether tự quét</string>
+    <string name="aether_scan">Quét</string>
+    <string name="aether_ip">Phiên bản IP</string>
+    <string name="aether_mode_off">Tắt</string>
+    <string name="aether_mode_chain">Bên trong WARP (đi ra qua nó)</string>
+    <string name="aether_mode_reverse">Bao quanh WARP (tới WARP qua nó)</string>
+    <string name="aether_mode_only">Riêng, không có WARP</string>
+    <string name="aether_command">Lệnh Aether (nâng cao)</string>
+    <string name="aether_command_hint">Một dòng lệnh Aether đầy đủ chạy thay cho các cài đặt ở trên. Thường để trống.</string>
+    <string name="aether_not_supported">Loại bộ xử lý của điện thoại này không có Aether trong phiên bản này.</string>
 </resources>

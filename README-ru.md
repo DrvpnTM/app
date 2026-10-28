@@ -83,4 +83,4 @@
 
 ## 📜 Лицензия и благодарности
 
-Открытый код под лицензией **GPL-3.0** ([LICENSE](LICENSE)); использует движок [Xray-core](https://github.com/XTLS/Xray-core).
+Открытый код под лицензией **GPL-3.0** ([LICENSE](LICENSE)); использует движок [Xray-core](https://github.com/XTLS/Xray-core). В приложение входит ядро WARP [Aether](https://github.com/patterniha/Aether) (AGPL-3.0; точный коммит в `aether-version.txt`).

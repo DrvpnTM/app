@@ -13,6 +13,7 @@ import net.drvpn.app.dto.entities.SubscriptionItem
 import net.drvpn.app.enums.EConfigType
 import net.drvpn.app.extension.isNotNullEmpty
 import net.drvpn.app.fmt.CustomFmt
+import net.drvpn.app.fmt.AetherFmt
 import net.drvpn.app.fmt.Hysteria2Fmt
 import net.drvpn.app.fmt.ShadowsocksFmt
 import net.drvpn.app.fmt.SocksFmt
@@ -47,6 +48,7 @@ object AngConfigManager {
             EConfigType.VLESS.protocolScheme to VlessFmt::parse,
             EConfigType.WIREGUARD.protocolScheme to WireguardFmt::parse,
             EConfigType.HYSTERIA2.protocolScheme to Hysteria2Fmt::parse,
+            EConfigType.AETHER.protocolScheme to AetherFmt::parse,
             AppConfig.HY2 to Hysteria2Fmt::parse,
         )
     }
@@ -163,6 +165,7 @@ object AngConfigManager {
                 EConfigType.TROJAN -> TrojanFmt.toUri(config)
                 EConfigType.WIREGUARD -> WireguardFmt.toUri(config)
                 EConfigType.HYSTERIA2 -> Hysteria2Fmt.toUri(config)
+                EConfigType.AETHER -> AetherFmt.toUri(config)
                 else -> {}
             }
         } catch (e: Exception) {

@@ -83,4 +83,4 @@
 
 ## 📜 许可与致谢
 
-本项目以 **GPL-3.0** 开源（[LICENSE](LICENSE)），使用 [Xray-core](https://github.com/XTLS/Xray-core) 内核。
+本项目以 **GPL-3.0** 开源（[LICENSE](LICENSE)），使用 [Xray-core](https://github.com/XTLS/Xray-core) 内核。 应用附带 WARP 内核 [Aether](https://github.com/patterniha/Aether)（AGPL-3.0，具体提交见 `aether-version.txt`）。

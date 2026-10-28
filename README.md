@@ -129,7 +129,7 @@ cd android && ./gradlew assemblePlaystoreRelease
 
 ## 📜 مجوز
 
-کد این برنامه متن‌باز و تحت مجوز **GPL-3.0** است ([LICENSE](LICENSE)) و از هسته [Xray-core](https://github.com/XTLS/Xray-core) استفاده می‌کند.
+کد این برنامه متن‌باز و تحت مجوز **GPL-3.0** است ([LICENSE](LICENSE)) و از هسته [Xray-core](https://github.com/XTLS/Xray-core) استفاده می‌کند. هسته‌ی وارپ [Aether](https://github.com/patterniha/Aether) (مجوز AGPL-3.0، نسخه‌ی مشخص در `aether-version.txt`) هم همراه برنامه است.
 
 ---
 

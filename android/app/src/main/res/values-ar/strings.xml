@@ -695,4 +695,22 @@
     <string name="free_sub_promo">لشراء اشتراك عالي السرعة، تفضل بزيارة الموقع الرسمي لـ Dr VPN</string>
     <string name="server_lab_cipher_suites">مجموعات التشفير (Cipher Suites)</string>
     <string name="toast_cipher_suites_need_unsafe">لا تُطبَّق cipherSuites إلا مع البصمة unsafe. اختر unsafe أو امسح cipherSuites.</string>
+    <string name="menu_item_import_config_manually_aether">إضافة [Aether WARP]</string>
+    <string name="aether_title">Aether (WARP)</string>
+    <string name="aether_intro">WARP المجاني من Cloudflare مصمم للحجب الشديد. اترك الحقول كما هي واحفظ: يجد Aether نقطة اتصال تعمل بنفسه. قد يستغرق الاتصال الأول دقيقة.</string>
+    <string name="aether_protocol">البروتوكول</string>
+    <string name="aether_transport">نقل MASQUE</string>
+    <string name="aether_endpoint">نقطة الاتصال (اختياري)</string>
+    <string name="aether_outer_hop">القفزة الخارجية (اختياري)</string>
+    <string name="aether_inner_hop">القفزة الداخلية (اختياري)</string>
+    <string name="aether_endpoint_hint">host:port، أو فارغ ليبحث Aether بنفسه</string>
+    <string name="aether_scan">الفحص</string>
+    <string name="aether_ip">إصدار IP</string>
+    <string name="aether_mode_off">إيقاف</string>
+    <string name="aether_mode_chain">داخل WARP (الخروج عبره)</string>
+    <string name="aether_mode_reverse">حول WARP (الوصول إلى WARP عبره)</string>
+    <string name="aether_mode_only">وحده، بدون WARP</string>
+    <string name="aether_command">أمر Aether (متقدم)</string>
+    <string name="aether_command_hint">يُشغَّل سطر أوامر Aether كامل بدل الإعدادات أعلاه. اتركه فارغًا عادةً.</string>
+    <string name="aether_not_supported">نوع معالج هذا الهاتف لا يتضمن Aether في هذا الإصدار.</string>
 </resources>

@@ -685,4 +685,22 @@
     <string name="free_sub_promo">如需購買高速訂閱，請造訪 Dr VPN 官方網站</string>
     <string name="server_lab_cipher_suites">加密套件 (Cipher Suites)</string>
     <string name="toast_cipher_suites_need_unsafe">cipherSuites 僅在 unsafe 指紋下生效。請選擇 unsafe，或清空 cipherSuites。</string>
+    <string name="menu_item_import_config_manually_aether">新增 [Aether WARP]</string>
+    <string name="aether_title">Aether (WARP)</string>
+    <string name="aether_intro">為嚴重封鎖而設計的免費 Cloudflare WARP。保持預設並儲存即可：Aether 會自己找到可用的節點。首次連線可能需要一分鐘。</string>
+    <string name="aether_protocol">協定</string>
+    <string name="aether_transport">MASQUE 傳輸</string>
+    <string name="aether_endpoint">節點（選填）</string>
+    <string name="aether_outer_hop">外層跳點（選填）</string>
+    <string name="aether_inner_hop">內層跳點（選填）</string>
+    <string name="aether_endpoint_hint">host:port，留空則由 Aether 自行掃描</string>
+    <string name="aether_scan">掃描</string>
+    <string name="aether_ip">IP 版本</string>
+    <string name="aether_mode_off">關閉</string>
+    <string name="aether_mode_chain">在 WARP 內（經其出口）</string>
+    <string name="aether_mode_reverse">在 WARP 外（經其連線 WARP）</string>
+    <string name="aether_mode_only">單獨使用，不用 WARP</string>
+    <string name="aether_command">Aether 指令（進階）</string>
+    <string name="aether_command_hint">執行完整的 Aether 指令列以取代上面的設定。通常留空。</string>
+    <string name="aether_not_supported">此版本沒有適用於此手機處理器類型的 Aether。</string>
 </resources>

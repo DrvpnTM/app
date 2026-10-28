@@ -687,4 +687,22 @@
     <string name="free_sub_promo">উচ্চ-গতির সাবস্ক্রিপশন কিনতে Dr VPN-এর অফিসিয়াল ওয়েবসাইটে যান</string>
     <string name="server_lab_cipher_suites">সাইফার স্যুট (Cipher Suites)</string>
     <string name="toast_cipher_suites_need_unsafe">cipherSuites শুধু unsafe ফিঙ্গারপ্রিন্টের সাথে কাজ করে। unsafe বেছে নিন, অথবা cipherSuites খালি করুন।</string>
+    <string name="menu_item_import_config_manually_aether">[Aether WARP] যোগ করুন</string>
+    <string name="aether_title">Aether (WARP)</string>
+    <string name="aether_intro">কঠোর ফিল্টারিংয়ের জন্য তৈরি বিনামূল্যের Cloudflare WARP। ঘরগুলো যেমন আছে রেখে সেভ করুন: Aether নিজেই কাজ করা এন্ডপয়েন্ট খুঁজে নেয়। প্রথম সংযোগে এক মিনিট লাগতে পারে।</string>
+    <string name="aether_protocol">প্রোটোকল</string>
+    <string name="aether_transport">MASQUE ট্রান্সপোর্ট</string>
+    <string name="aether_endpoint">এন্ডপয়েন্ট (ঐচ্ছিক)</string>
+    <string name="aether_outer_hop">বাইরের হপ (ঐচ্ছিক)</string>
+    <string name="aether_inner_hop">ভেতরের হপ (ঐচ্ছিক)</string>
+    <string name="aether_endpoint_hint">host:port, অথবা খালি রাখুন যাতে Aether নিজে স্ক্যান করে</string>
+    <string name="aether_scan">স্ক্যান</string>
+    <string name="aether_ip">IP সংস্করণ</string>
+    <string name="aether_mode_off">বন্ধ</string>
+    <string name="aether_mode_chain">WARP-এর ভেতরে (এর মাধ্যমে বের হওয়া)</string>
+    <string name="aether_mode_reverse">WARP-এর চারপাশে (এর মাধ্যমে WARP-এ পৌঁছানো)</string>
+    <string name="aether_mode_only">একা, WARP ছাড়া</string>
+    <string name="aether_command">Aether কমান্ড (উন্নত)</string>
+    <string name="aether_command_hint">উপরের সেটিংসের বদলে পুরো একটি Aether কমান্ড লাইন চলে। সাধারণত খালি রাখুন।</string>
+    <string name="aether_not_supported">এই সংস্করণে এই ফোনের প্রসেসরের জন্য Aether নেই।</string>
 </resources>

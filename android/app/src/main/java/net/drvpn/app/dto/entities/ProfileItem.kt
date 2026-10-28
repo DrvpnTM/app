@@ -43,6 +43,18 @@ data class ProfileItem(
     var fingerPrint: String? = null,
     /** TLS cipher suites joined by ':'; the core applies them only with the "unsafe" fingerprint. */
     var cipherSuites: String? = null,
+
+    // Aether (EConfigType.AETHER); server/serverPort hold the endpoint, blank to let Aether scan.
+    var aetherProtocol: String? = null,
+    var aetherTransport: String? = null,
+    var aetherScanMode: String? = null,
+    var aetherIpVersion: String? = null,
+    var aetherWiwOuter: String? = null,
+    var aetherWiwInner: String? = null,
+    var aetherTor: String? = null,
+    var aetherPsiphon: String? = null,
+    /** A whole Aether command line that runs in place of the settings above (advanced). */
+    var aetherCommand: String? = null,
     var insecure: Boolean? = null,
     var echConfigList: String? = null,
     var verifyPeerCertByName: String? = null,
