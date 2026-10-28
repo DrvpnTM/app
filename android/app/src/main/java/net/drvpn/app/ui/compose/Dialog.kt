@@ -49,6 +49,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.ui.text.font.FontWeight
 import net.drvpn.app.R
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.ui.text.style.TextOverflow
@@ -198,14 +199,21 @@ fun QRCodeDialog(
     if (bitmap == null) return
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = title?.let { { Text(it, maxLines = 2, overflow = TextOverflow.Ellipsis) } },
+        title = title?.let { { Text(it, maxLines = 1, overflow = TextOverflow.Ellipsis) } },
         text = {
-            Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+            // Keep the code small enough for landscape screens (TVs) so the hint stays visible.
+            val maxQr = (LocalConfiguration.current.screenHeightDp * 0.45f).coerceIn(160f, 320f).dp
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 Image(
                     bitmap = bitmap.asImageBitmap(),
                     contentDescription = stringResource(R.string.acc_qr_code),
                     modifier = Modifier
-                        .widthIn(max = 320.dp)
+                        .widthIn(max = maxQr)
                         .fillMaxWidth()
                         .aspectRatio(1f)
                         .background(Color.White)
@@ -230,6 +238,16 @@ fun QRCodeDialog(
 }
 
 /**
+ * The sheet's drag handle is a focus target of its own; on a TV remote it would take the first
+ * focus instead of the first option, and there is nothing to drag. Hidden on TVs.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun sheetDragHandle(): (@Composable () -> Unit)? =
+    if (net.drvpn.app.util.DeviceUtil.isTv(androidx.compose.ui.platform.LocalContext.current)) null
+    else ({ androidx.compose.material3.BottomSheetDefaults.DragHandle() })
+
+/**
  * When showRadio is true, displays RadioButton (single selection mode);
  * otherwise, plain clickable list mode.
  * The selectedOption parameter is used to highlight the selected item only when showRadio is true.
@@ -251,6 +269,7 @@ fun <T> SelectListDialog(
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         containerColor = MaterialTheme.colorScheme.background,
         shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+        dragHandle = sheetDragHandle(),
     ) {
         Column(
             Modifier

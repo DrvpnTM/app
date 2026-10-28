@@ -33,6 +33,8 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.NavigationBarItemDefaults
@@ -44,6 +46,8 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.asPaddingValues
 import net.drvpn.app.R
+import net.drvpn.app.ui.compose.cell
+import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.RoundedCornerShape
 import net.drvpn.app.ui.compose.focusHighlight
 import net.drvpn.app.dto.entities.ProfileItem
@@ -247,6 +251,10 @@ fun MainScreen(
             val layoutDirection = LocalLayoutDirection.current
 
             if (selectedTab == MainTab.Home) {
+                val homeGroupId = uiState.selectedGroupId
+                val homeGroupState by remember(homeGroupId) {
+                    mainViewModel.serverGroupState(homeGroupId)
+                }.collectAsStateWithLifecycle()
                 MainHomeTab(
                     profileName = profileName,
                     subscription = uiState.subscription,
@@ -263,6 +271,7 @@ fun MainScreen(
                     isTesting = uiState.isTesting,
                     onAction = onAction,
                     onOpenProxies = { selectedTab = MainTab.Proxies },
+                    serverRows = homeGroupState.rows.ifEmpty { homeGroupState.allRows },
                     modifier = Modifier.padding(innerPadding)
                 )
             } else if (groups.isNotEmpty()) {
@@ -270,6 +279,7 @@ fun MainScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(innerPadding)
+                        .background(MaterialTheme.colorScheme.surface)
                 ) {
                     PingFilterBar(
                         showServersWithoutPing = uiState.showServersWithoutPing,
@@ -277,21 +287,20 @@ fun MainScreen(
                         onShowChange = { onAction(MainAction.SetShowServersWithoutPing(it)) },
                         onTestAll = { onAction(MainAction.TestRealAllServers) }
                     )
-                    if (groups.size > 1) {
-                        GroupTabBar(
-                            groups = groups,
-                            selectedTabIndex = pagerState.currentPage.coerceIn(0, groups.lastIndex),
-                            mainViewModel = mainViewModel,
-                            onTabClick = { targetIndex ->
-                                scope.launch {
-                                    pagerState.navigateToPageOptimized(
-                                        targetPage = targetIndex,
-                                        animateAdjacentPage = true
-                                    )
-                                }
+                    // Subscription switcher: one chip per subscription profile.
+                    GroupTabBar(
+                        groups = groups,
+                        selectedTabIndex = pagerState.currentPage.coerceIn(0, groups.lastIndex),
+                        mainViewModel = mainViewModel,
+                        onTabClick = { targetIndex ->
+                            scope.launch {
+                                pagerState.navigateToPageOptimized(
+                                    targetPage = targetIndex,
+                                    animateAdjacentPage = true
+                                )
                             }
-                        )
-                    }
+                        }
+                    )
 
                     HorizontalPager(
                         state = pagerState,

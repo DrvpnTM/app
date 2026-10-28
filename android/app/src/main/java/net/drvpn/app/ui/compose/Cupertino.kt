@@ -38,6 +38,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import net.drvpn.app.R
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.Font
 
 /*
  * Dr VPN "Cupertino" design language: the look of iOS / SwiftUI (grouped inset lists,
@@ -55,43 +58,44 @@ val IosTeal = Color(0xFF30B0C7)
 val IosPink = Color(0xFFFF2D55)
 val IosGray = Color(0xFF8E8E93)
 
+/** Dr VPN light palette ("B"): white pages, soft slate cards, one confident blue. */
 internal val IosLight = lightColorScheme(
-    primary = IosBlue,
+    primary = Color(0xFF2563EB),
     onPrimary = Color.White,
-    primaryContainer = Color(0xFFDCEBFF),
-    onPrimaryContainer = Color(0xFF002A5C),
-    secondary = IosBlue,
+    primaryContainer = Color(0xFFDBEAFE),
+    onPrimaryContainer = Color(0xFF1E3A8A),
+    secondary = Color(0xFF2563EB),
     onSecondary = Color.White,
-    secondaryContainer = Color(0xFFDCEBFF),
-    onSecondaryContainer = Color(0xFF002A5C),
-    tertiary = IosGreen,
+    secondaryContainer = Color(0xFFDBEAFE),
+    onSecondaryContainer = Color(0xFF1E3A8A),
+    tertiary = Color(0xFF22C55E),
     onTertiary = Color.White,
-    error = IosRed,
+    error = Color(0xFFEF4444),
     onError = Color.White,
-    errorContainer = Color(0xFFFFE1DF),
-    onErrorContainer = Color(0xFF5C0600),
-    background = Color(0xFFF2F2F7),
-    onBackground = Color.Black,
-    surface = Color(0xFFF2F2F7),
-    onSurface = Color.Black,
-    surfaceVariant = Color(0xFFE5E5EA),
-    onSurfaceVariant = Color(0xFF8A8A8E),
-    outline = Color(0xFFC6C6C8),
-    outlineVariant = Color(0xFFD1D1D6),
-    inverseSurface = Color(0xFF1C1C1E),
+    errorContainer = Color(0xFFFEE2E2),
+    onErrorContainer = Color(0xFF7F1D1D),
+    background = Color.White,
+    onBackground = Color(0xFF0F172A),
+    surface = Color.White,
+    onSurface = Color(0xFF0F172A),
+    surfaceVariant = Color(0xFFEEF2F7),
+    onSurfaceVariant = Color(0xFF64748B),
+    outline = Color(0xFFCBD5E1),
+    outlineVariant = Color(0xFFE2E8F0),
+    inverseSurface = Color(0xFF0F172A),
     inverseOnSurface = Color.White,
-    inversePrimary = IosBlueDark,
+    inversePrimary = Color(0xFF93C5FD),
     scrim = Color.Black,
     surfaceTint = Color.Transparent,
-    surfaceContainerLowest = Color.White,
-    surfaceContainerLow = Color.White,
-    surfaceContainer = Color.White,
-    surfaceContainerHigh = Color.White,
-    surfaceContainerHighest = Color(0xFFE5E5EA),
+    surfaceContainerLowest = Color(0xFFF5F7FB),
+    surfaceContainerLow = Color(0xFFF5F7FB),
+    surfaceContainer = Color(0xFFF5F7FB),
+    surfaceContainerHigh = Color(0xFFF5F7FB),
+    surfaceContainerHighest = Color(0xFFEEF2F7),
 )
 
 internal val IosDark = darkColorScheme(
-    primary = IosBlueDark,
+    primary = Color(0xFF3B82F6),
     onPrimary = Color.White,
     primaryContainer = Color(0xFF0A3A70),
     onPrimaryContainer = Color(0xFFD6E8FF),
@@ -128,21 +132,38 @@ internal val IosDark = darkColorScheme(
 /** Background of a grouped-list cell (white on light, #1C1C1E on dark). */
 val ColorScheme.cell: Color get() = surfaceContainerLowest
 
-/** iOS type ramp (SF metrics) mapped onto Material roles. */
+/** Vazirmatn (SIL OFL) for Persian and Latin alike, bundled so every phone and TV looks the same. */
+val DrVpnFont = FontFamily(
+    Font(R.font.vazirmatn_regular, FontWeight.Normal),
+    Font(R.font.vazirmatn_medium, FontWeight.Medium),
+    Font(R.font.vazirmatn_bold, FontWeight.SemiBold),
+    Font(R.font.vazirmatn_bold, FontWeight.Bold),
+    Font(R.font.vazirmatn_extrabold, FontWeight.ExtraBold),
+)
+
+/** Type ramp on Vazirmatn (sizes kept from the iOS ramp). */
 internal val IosTypography = Typography().let { base ->
-    base.copy(
-        displaySmall = base.displaySmall.copy(fontSize = 34.sp, lineHeight = 41.sp, fontWeight = FontWeight.Bold),
-        headlineMedium = base.headlineMedium.copy(fontSize = 28.sp, lineHeight = 34.sp, fontWeight = FontWeight.Bold),
-        headlineSmall = base.headlineSmall.copy(fontSize = 22.sp, lineHeight = 28.sp, fontWeight = FontWeight.Bold),
-        titleLarge = base.titleLarge.copy(fontSize = 20.sp, lineHeight = 25.sp, fontWeight = FontWeight.SemiBold),
-        titleMedium = base.titleMedium.copy(fontSize = 17.sp, lineHeight = 22.sp, fontWeight = FontWeight.SemiBold),
-        titleSmall = base.titleSmall.copy(fontSize = 15.sp, lineHeight = 20.sp, fontWeight = FontWeight.SemiBold),
-        bodyLarge = base.bodyLarge.copy(fontSize = 17.sp, lineHeight = 22.sp, letterSpacing = (-0.2).sp),
-        bodyMedium = base.bodyMedium.copy(fontSize = 15.sp, lineHeight = 20.sp, letterSpacing = (-0.1).sp),
-        bodySmall = base.bodySmall.copy(fontSize = 13.sp, lineHeight = 18.sp),
-        labelLarge = base.labelLarge.copy(fontSize = 17.sp, fontWeight = FontWeight.Normal),
-        labelMedium = base.labelMedium.copy(fontSize = 13.sp),
-        labelSmall = base.labelSmall.copy(fontSize = 11.sp, fontWeight = FontWeight.Medium),
+    val t = base.copy(
+        displaySmall = base.displaySmall.copy(fontSize = 34.sp, lineHeight = 44.sp, fontWeight = FontWeight.ExtraBold),
+        headlineMedium = base.headlineMedium.copy(fontSize = 28.sp, lineHeight = 38.sp, fontWeight = FontWeight.ExtraBold),
+        headlineSmall = base.headlineSmall.copy(fontSize = 22.sp, lineHeight = 30.sp, fontWeight = FontWeight.Bold),
+        titleLarge = base.titleLarge.copy(fontSize = 20.sp, lineHeight = 28.sp, fontWeight = FontWeight.Bold),
+        titleMedium = base.titleMedium.copy(fontSize = 17.sp, lineHeight = 24.sp, fontWeight = FontWeight.Bold),
+        titleSmall = base.titleSmall.copy(fontSize = 15.sp, lineHeight = 22.sp, fontWeight = FontWeight.Bold),
+        bodyLarge = base.bodyLarge.copy(fontSize = 16.sp, lineHeight = 24.sp, letterSpacing = 0.sp),
+        bodyMedium = base.bodyMedium.copy(fontSize = 15.sp, lineHeight = 22.sp, letterSpacing = 0.sp),
+        bodySmall = base.bodySmall.copy(fontSize = 13.sp, lineHeight = 19.sp, letterSpacing = 0.sp),
+        labelLarge = base.labelLarge.copy(fontSize = 15.sp, fontWeight = FontWeight.Medium, letterSpacing = 0.sp),
+        labelMedium = base.labelMedium.copy(fontSize = 13.sp, letterSpacing = 0.sp),
+        labelSmall = base.labelSmall.copy(fontSize = 11.sp, fontWeight = FontWeight.Medium, letterSpacing = 0.sp),
+    )
+    fun TextStyle.v() = copy(fontFamily = DrVpnFont)
+    t.copy(
+        displayLarge = t.displayLarge.v(), displayMedium = t.displayMedium.v(), displaySmall = t.displaySmall.v(),
+        headlineLarge = t.headlineLarge.v(), headlineMedium = t.headlineMedium.v(), headlineSmall = t.headlineSmall.v(),
+        titleLarge = t.titleLarge.v(), titleMedium = t.titleMedium.v(), titleSmall = t.titleSmall.v(),
+        bodyLarge = t.bodyLarge.v(), bodyMedium = t.bodyMedium.v(), bodySmall = t.bodySmall.v(),
+        labelLarge = t.labelLarge.v(), labelMedium = t.labelMedium.v(), labelSmall = t.labelSmall.v(),
     )
 }
 
