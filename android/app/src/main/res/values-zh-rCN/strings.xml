@@ -682,4 +682,7 @@
     <string name="check_dns_note">通过 bash.ws 检测；运营商信息从 api.ip.sb 读取一次。</string>
     <string name="check_dns_start">开始检测</string>
     <string name="check_dns_own_isp">您的运营商：%1$s</string>
+    <string name="free_sub_promo">如需购买高速订阅，请访问 Dr VPN 官方网站</string>
+    <string name="server_lab_cipher_suites">加密套件 (Cipher Suites)</string>
+    <string name="toast_cipher_suites_need_unsafe">cipherSuites 仅在 unsafe 指纹下生效。请选择 unsafe，或清空 cipherSuites。</string>
 </resources>

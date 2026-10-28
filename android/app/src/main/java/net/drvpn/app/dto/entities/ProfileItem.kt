@@ -41,6 +41,8 @@ data class ProfileItem(
     var sni: String? = null,
     var alpn: String? = null,
     var fingerPrint: String? = null,
+    /** TLS cipher suites joined by ':'; the core applies them only with the "unsafe" fingerprint. */
+    var cipherSuites: String? = null,
     var insecure: Boolean? = null,
     var echConfigList: String? = null,
     var verifyPeerCertByName: String? = null,

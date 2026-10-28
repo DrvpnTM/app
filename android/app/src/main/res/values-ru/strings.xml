@@ -688,4 +688,7 @@
     <string name="check_dns_note">Проверка через bash.ws; провайдер определяется один раз через api.ip.sb.</string>
     <string name="check_dns_start">Начать проверку</string>
     <string name="check_dns_own_isp">Ваш провайдер: %1$s</string>
+    <string name="free_sub_promo">Чтобы купить скоростную подписку, посетите официальный сайт Dr VPN</string>
+    <string name="server_lab_cipher_suites">Наборы шифров (Cipher Suites)</string>
+    <string name="toast_cipher_suites_need_unsafe">cipherSuites применяются только с отпечатком unsafe. Выберите unsafe или очистите cipherSuites.</string>
 </resources>

@@ -55,6 +55,7 @@ class ServerUiState(
     sni: String = "",
     allowInsecure: Boolean = false,
     fingerPrint: String = "",
+    cipherSuites: String = "",
     alpn: String = "",
     publicKeyReality: String = "",
     shortId: String = "",
@@ -104,6 +105,7 @@ class ServerUiState(
     var sni by mutableStateOf(sni)
     var allowInsecure by mutableStateOf(allowInsecure)
     var fingerPrint by mutableStateOf(fingerPrint)
+    var cipherSuites by mutableStateOf(cipherSuites)
     var alpn by mutableStateOf(alpn)
     var publicKeyReality by mutableStateOf(publicKeyReality)
     var shortId by mutableStateOf(shortId)
@@ -178,6 +180,7 @@ class ServerUiState(
             sni = sni,
             insecure = allowInsecure,
             fingerPrint = fingerPrint,
+            cipherSuites = cipherSuites,
             alpn = alpn,
             shortId = shortId,
             spiderX = spiderX,
@@ -232,6 +235,7 @@ class ServerUiState(
                 sni = initialConfig.sni ?: "",
                 allowInsecure = initialConfig.insecure == true,
                 fingerPrint = initialConfig.fingerPrint ?: "",
+                cipherSuites = initialConfig.cipherSuites ?: "",
                 alpn = initialConfig.alpn ?: "",
                 publicKeyReality = initialConfig.publicKey ?: "",
                 shortId = initialConfig.shortId ?: "",

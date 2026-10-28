@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.annotation.StringRes
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -88,7 +89,8 @@ class SubSettingActivity : BaseComponentActivity() {
             onShareClipboard = { url ->
                 Utils.setClipboard(this, url)
                 toast(getString(R.string.toast_success))
-            }
+            },
+            onOpenWebsite = { Utils.openUri(this, AppConfig.APP_URL) }
         )
     }
 
@@ -112,7 +114,8 @@ fun SubSettingScreen(
     onEditSub: (String) -> Unit,
     onRemoveSub: (String) -> Unit,
     onShareQRCode: (String) -> Unit,
-    onShareClipboard: (String) -> Unit
+    onShareClipboard: (String) -> Unit,
+    onOpenWebsite: () -> Unit = {},
 ) {
     val subscriptions by viewModel.subsFlow.collectAsStateWithLifecycle()
     var showUpdateDialog by remember { mutableStateOf(false) }
@@ -157,6 +160,7 @@ fun SubSettingScreen(
                 items = subscriptions,
                 key = { _, item -> item.guid }
             ) { _, subCache ->
+                val isFree = MmkvManager.isFreeSubscription(subCache.guid)
                 ReorderableItem(reorderableState, key = subCache.guid) { isDragging ->
                     ReorderableListItem(
                         scope = this,
@@ -175,7 +179,15 @@ fun SubSettingScreen(
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
                                 )
-                                if (subCache.subscription.url.isNotEmpty()) {
+                                if (isFree) {
+                                    Spacer(modifier = Modifier.height(2.dp))
+                                    Text(
+                                        text = stringResource(R.string.free_sub_promo),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.clickable { onOpenWebsite() }
+                                    )
+                                } else if (subCache.subscription.url.isNotEmpty()) {
                                     Spacer(modifier = Modifier.height(2.dp))
                                     Text(
                                         text = subCache.subscription.url,
@@ -208,22 +220,26 @@ fun SubSettingScreen(
                                             )
                                         }
                                     }
-                                    IconButton(onClick = { onEditSub(subCache.guid) }) {
-                                        Icon(
-                                            painter = painterResource(R.drawable.ic_edit_24dp),
-                                            contentDescription = stringResource(R.string.acc_edit)
-                                        )
-                                    }
-                                    IconButton(onClick = {
-                                        if (confirmRemove) removeTarget = SubscriptionDeleteTarget(subCache.guid, subCache.subscription.remarks)
-                                        else onRemoveSub(subCache.guid)
-                                    }) {
-                                        Icon(
-                                            painter = painterResource(R.drawable.ic_delete_24dp),
-                                            contentDescription = stringResource(R.string.acc_delete)
-                                        )
+                                    // The built-in free subscription can't be edited, deleted or turned off.
+                                    if (!isFree) {
+                                        IconButton(onClick = { onEditSub(subCache.guid) }) {
+                                            Icon(
+                                                painter = painterResource(R.drawable.ic_edit_24dp),
+                                                contentDescription = stringResource(R.string.acc_edit)
+                                            )
+                                        }
+                                        IconButton(onClick = {
+                                            if (confirmRemove) removeTarget = SubscriptionDeleteTarget(subCache.guid, subCache.subscription.remarks)
+                                            else onRemoveSub(subCache.guid)
+                                        }) {
+                                            Icon(
+                                                painter = painterResource(R.drawable.ic_delete_24dp),
+                                                contentDescription = stringResource(R.string.acc_delete)
+                                            )
+                                        }
                                     }
                                 }
+                                if (!isFree) {
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Switch(
                                     checked = subCache.subscription.enabled,
@@ -235,6 +251,7 @@ fun SubSettingScreen(
                                     modifier = Modifier.scale(0.7f),
                                     colors = iosSwitchColors()
                                 )
+                                }
                             }
                         }
                     }

@@ -69,6 +69,7 @@ import net.drvpn.app.ui.compose.IosOrange
 import androidx.compose.material3.LinearProgressIndicator
 import net.drvpn.app.handler.AnnouncementManager
 import androidx.compose.ui.platform.LocalUriHandler
+import net.drvpn.app.AppConfig
 import net.drvpn.app.R
 import net.drvpn.app.ui.compose.DrVpnFont
 import androidx.compose.ui.unit.sp
@@ -109,6 +110,7 @@ internal fun MainHomeTab(
     subscription: SubscriptionItem?,
     announcement: AnnouncementManager.Announcement?,
     selectedServerName: String,
+    onFreeServer: Boolean,
     selectedGuid: String?,
     isRunning: Boolean,
     statusText: String,
@@ -260,6 +262,10 @@ internal fun MainHomeTab(
                         onClick = openPicker,
                         onShowQr = selectedGuid?.let { guid -> { onAction(MainAction.ShareQRCode(guid)) } }
                     )
+                    if (onFreeServer) {
+                        Spacer(Modifier.height(12.dp))
+                        FreeServerPromo()
+                    }
                 }
             }
         } else {
@@ -288,6 +294,10 @@ internal fun MainHomeTab(
                     onClick = openPicker,
                     onShowQr = selectedGuid?.let { guid -> { onAction(MainAction.ShareQRCode(guid)) } }
                 )
+                if (onFreeServer) {
+                    Spacer(Modifier.height(12.dp))
+                    FreeServerPromo()
+                }
             }
         }
     }
@@ -676,6 +686,31 @@ private fun LocationCard(
                 )
             }
         }
+    }
+}
+
+/** Shown while a free server is selected: points to drvpn.net for a high-speed subscription. */
+@Composable
+private fun FreeServerPromo() {
+    val uriHandler = LocalUriHandler.current
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .focusHighlight(RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
+            .clickable { runCatching { uriHandler.openUri(AppConfig.APP_URL) } }
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text("🚀", style = MaterialTheme.typography.titleMedium)
+        Spacer(Modifier.width(10.dp))
+        Text(
+            text = stringResource(R.string.free_sub_promo),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.weight(1f),
+        )
     }
 }
 

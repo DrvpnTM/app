@@ -2,6 +2,7 @@ package net.drvpn.app.handler
 
 import android.util.Log
 import com.tencent.mmkv.MMKV
+import net.drvpn.app.AppConfig
 import net.drvpn.app.dto.entities.SubscriptionItem
 import net.drvpn.app.util.JsonUtil
 import org.junit.Assert.assertEquals
@@ -30,6 +31,7 @@ class SubscriptionIndexTest {
                 true
             }
             whenever(storage.allKeys()).thenAnswer { values.keys.toTypedArray() }
+            whenever(storage.containsKey(any())).thenAnswer { values.containsKey(it.getArgument<String>(0)) }
         }
     }
 
@@ -51,8 +53,8 @@ class SubscriptionIndexTest {
 
         val rows = MmkvManager.decodeSubscriptions()
 
-        assertEquals(listOf("b", "a"), rows.map { it.guid })
-        assertEquals(listOf("Beta", "Alpha"), rows.map { it.subscription.remarks })
+        assertEquals(listOf(FREE, "b", "a"), rows.map { it.guid })
+        assertEquals(listOf(AppConfig.FREE_SUBSCRIPTION_NAME, "Beta", "Alpha"), rows.map { it.subscription.remarks })
     }
 
     @Test
@@ -62,7 +64,7 @@ class SubscriptionIndexTest {
             subValues[id] = JsonUtil.toJson(SubscriptionItem(remarks = name))
         }
 
-        assertEquals(listOf("a", "b", "c", "d"), MmkvManager.decodeSubscriptions().map { it.guid })
+        assertEquals(listOf(FREE, "a", "b", "c", "d"), MmkvManager.decodeSubscriptions().map { it.guid })
     }
 
     @Test
@@ -94,7 +96,45 @@ class SubscriptionIndexTest {
         }
     }
 
+    @Test
+    fun freeSubscriptionIsAddedOnceAtTheTop() {
+        mainValues["SUB_IDS"] = """["a"]"""
+        subValues["a"] = JsonUtil.toJson(SubscriptionItem(remarks = "Alpha"))
+
+        MmkvManager.decodeSubscriptions()
+        val rows = MmkvManager.decodeSubscriptions()
+
+        assertEquals(listOf(FREE, "a"), rows.map { it.guid })
+        assertEquals(AppConfig.FREE_SUBSCRIPTION_URL, rows.first().subscription.url)
+    }
+
+    @Test
+    fun freeSubscriptionNameAndLinkCannotBeChanged() {
+        MmkvManager.encodeSubscription(
+            FREE,
+            SubscriptionItem(remarks = "Mine", url = "https://example.com/sub", enabled = false, lastUpdated = 42),
+        )
+
+        val saved = MmkvManager.decodeSubscription(FREE)!!
+        assertEquals(AppConfig.FREE_SUBSCRIPTION_NAME, saved.remarks)
+        assertEquals(AppConfig.FREE_SUBSCRIPTION_URL, saved.url)
+        assertEquals(true, saved.enabled)
+        // Update state is kept, so refreshing the free list still works.
+        assertEquals(42L, saved.lastUpdated)
+    }
+
+    @Test
+    fun freeSubscriptionCannotBeRemoved() {
+        MmkvManager.ensureFreeSubscription()
+
+        MmkvManager.removeSubscription(FREE)
+
+        verify(subs, never()).remove(FREE)
+        assertEquals(listOf(FREE), MmkvManager.decodeSubsList())
+    }
+
     companion object {
+        private const val FREE = AppConfig.FREE_SUBSCRIPTION_ID
         private val main: MMKV = mock()
         private val subs: MMKV = mock()
         private val settings: MMKV = mock()

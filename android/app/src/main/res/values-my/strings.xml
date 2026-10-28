@@ -596,4 +596,7 @@
     <string name="check_dns_note">bash.ws ဖြင့် စစ်ဆေးသည်၊ ဝန်ဆောင်မှုပေးသူကို api.ip.sb မှ တစ်ကြိမ် ဖတ်သည်။</string>
     <string name="check_dns_start">စစ်ဆေးမှု စတင်ရန်</string>
     <string name="check_dns_own_isp">သင့်ဝန်ဆောင်မှုပေးသူ: %1$s</string>
+    <string name="free_sub_promo">မြန်နှုန်းမြင့် subscription ဝယ်ယူရန် Dr VPN ၏ တရားဝင် ဝက်ဘ်ဆိုက်သို့ သွားပါ</string>
+    <string name="server_lab_cipher_suites">Cipher Suites</string>
+    <string name="toast_cipher_suites_need_unsafe">cipherSuites ကို unsafe fingerprint ဖြင့်သာ အသုံးပြုနိုင်သည်။ unsafe ကို ရွေးပါ သို့မဟုတ် cipherSuites ကို ဖျက်ပါ။</string>
 </resources>

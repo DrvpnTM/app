@@ -260,6 +260,7 @@ fun MainScreen(
                     subscription = uiState.subscription,
                     announcement = uiState.announcement,
                     selectedServerName = uiState.selectedServerName,
+                    onFreeServer = uiState.onFreeServer,
                     selectedGuid = uiState.selectedGuid,
                     isRunning = isRunning,
                     statusText = displayText,

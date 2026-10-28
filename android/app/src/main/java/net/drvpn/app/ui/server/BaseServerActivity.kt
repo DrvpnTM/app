@@ -53,6 +53,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+/** The fingerprint with which the core builds the TLS ClientHello with Go's crypto/tls; cipherSuites need it. */
+private const val UNSAFE_FINGERPRINT = "unsafe"
+
 abstract class BaseServerActivity : BaseComponentActivity() {
 
     protected abstract val serverConfigType: EConfigType
@@ -291,6 +294,12 @@ abstract class BaseServerActivity : BaseComponentActivity() {
                     options.alpnOptions,
                     { state.alpn = it }
                 )
+                // Applied by the core only with the "unsafe" fingerprint (Go's crypto/tls instead of uTLS).
+                FormTextField(
+                    stringResource(R.string.server_lab_cipher_suites),
+                    state.cipherSuites,
+                    { state.cipherSuites = it }
+                )
                 FormTextField(
                     stringResource(R.string.server_lab_ech_config_list),
                     state.echConfigList,
@@ -405,6 +414,14 @@ abstract class BaseServerActivity : BaseComponentActivity() {
             config.security.isNullOrBlank()
         ) {
             toast(R.string.server_lab_stream_security)
+            return false
+        }
+        if (
+            config.security == TLS &&
+            !config.cipherSuites.isNullOrBlank() &&
+            !config.fingerPrint.equals(UNSAFE_FINGERPRINT, ignoreCase = true)
+        ) {
+            toast(R.string.toast_cipher_suites_need_unsafe)
             return false
         }
         if (!config.xhttpExtra.isNullOrBlank() && JsonUtil.parseString(config.xhttpExtra) == null) {

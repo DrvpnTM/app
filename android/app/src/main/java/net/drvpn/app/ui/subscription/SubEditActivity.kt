@@ -53,7 +53,6 @@ class SubEditActivity : BaseComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         suggestions = SettingsManager.getProfileRemarks(
             excludeConfigTypes = setOf(
                 EConfigType.CUSTOM,
@@ -62,6 +61,8 @@ class SubEditActivity : BaseComponentActivity() {
             )
         )
         subItem = MmkvManager.decodeSubscription(editSubId) ?: SubscriptionItem()
+        // The built-in free subscription can't be edited.
+        if (MmkvManager.isFreeSubscription(editSubId)) finish()
     }
 
     @Composable
@@ -77,6 +78,7 @@ class SubEditActivity : BaseComponentActivity() {
     }
 
     private fun saveServer(subItem: SubscriptionItem): Boolean {
+        if (MmkvManager.isFreeSubscription(editSubId)) return false
         if (TextUtils.isEmpty(subItem.remarks)) {
             return false
         }

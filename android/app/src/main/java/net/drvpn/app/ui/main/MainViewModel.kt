@@ -175,23 +175,24 @@ class MainViewModel(
                 .map { it.selectedGuid to it.groups }
                 .distinctUntilChanged()
                 .collect { (guid, _) ->
-                    val name = if (guid.isNullOrEmpty()) {
-                        ""
+                    val profile = if (guid.isNullOrEmpty()) {
+                        null
                     } else {
                         withContext(ioDispatcher) {
-                            runCatching {
-                                dataSource.decodeServerConfig(guid)?.let { profile ->
-                                    val country = serverCountry(profile)
-                                    val flag = serverFlag(profile)
-                                    val name = serverDisplayName(country, appLocale())
-                                    if (flag.isEmpty()) name else "$flag $name"
-                                }.orEmpty()
-                            }
+                            runCatching { dataSource.decodeServerConfig(guid) }
                                 .onFailure { LogUtil.e(AppConfig.TAG, "Failed to resolve selected server name", it) }
-                                .getOrDefault("")
+                                .getOrNull()
                         }
                     }
-                    _uiState.update { if (it.selectedGuid == guid) it.copy(selectedServerName = name) else it }
+                    val name = profile?.let {
+                        val flag = serverFlag(it)
+                        val display = serverDisplayName(serverCountry(it), appLocale())
+                        if (flag.isEmpty()) display else "$flag $display"
+                    }.orEmpty()
+                    val onFree = profile?.subscriptionId == AppConfig.FREE_SUBSCRIPTION_ID
+                    _uiState.update {
+                        if (it.selectedGuid == guid) it.copy(selectedServerName = name, onFreeServer = onFree) else it
+                    }
                 }
         }
     }

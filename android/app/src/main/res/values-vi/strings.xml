@@ -682,4 +682,7 @@
     <string name="check_dns_note">Kiểm tra bằng bash.ws; nhà mạng được đọc một lần từ api.ip.sb.</string>
     <string name="check_dns_start">Bắt đầu kiểm tra</string>
     <string name="check_dns_own_isp">Nhà mạng: %1$s</string>
+    <string name="free_sub_promo">Để mua gói tốc độ cao, hãy truy cập trang web chính thức của Dr VPN</string>
+    <string name="server_lab_cipher_suites">Bộ mã hóa (Cipher Suites)</string>
+    <string name="toast_cipher_suites_need_unsafe">cipherSuites chỉ áp dụng với fingerprint unsafe. Hãy chọn unsafe hoặc xóa cipherSuites.</string>
 </resources>
