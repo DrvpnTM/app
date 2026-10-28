@@ -69,6 +69,7 @@
 - Los servidores se prueban (ping) automáticamente; solo se muestran los que funcionan (marca una casilla para ver todos)
 - Una bandera del país junto a cada servidor
 - Proxy por aplicación, reglas de enrutamiento, modo oscuro y varios temas
+- **Aether (WARP gratis)**: Cloudflare WARP para filtrado intenso, con Tor y Psiphon; encuentra solo un punto que funcione
 - Modo avanzado (internet nacional): escáner de IP limpia
 
 ## 📥 Descarga

@@ -43,6 +43,12 @@ data class MainUiState(
     /** Owner announcement from notice.json, shown as a card on the home tab until dismissed. */
     val announcement: net.drvpn.app.handler.AnnouncementManager.Announcement? = null,
     val shareQRCodeBitmap: android.graphics.Bitmap? = null,
+    /** A newer version to offer in the update dialog, or null. */
+    val update: net.drvpn.app.dto.CheckUpdateResult? = null,
+    /** While the update downloads: 0..100, or -1 while its size is unknown; null otherwise. */
+    val updateProgress: Int? = null,
+    /** The update could not be downloaded in the app; the dialog offers the download page instead. */
+    val updateFailed: Boolean = false,
     val shareQRCodeName: String = "",
 )
 
@@ -83,6 +89,9 @@ sealed interface MainAction {
     data class ShareClipboard(val guid: String) : MainAction
     data class ShareFullContent(val guid: String) : MainAction
     data object DismissQRCodeDialog : MainAction
+    data object StartUpdate : MainAction
+    data object CheckUpdate : MainAction
+    data object UpdateLater : MainAction
 
     data class ImportBatchConfig(val configText: String) : MainAction
 

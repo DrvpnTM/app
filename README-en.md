@@ -69,6 +69,7 @@
 - Servers are pinged automatically; only working servers are shown (tick a box to show all)
 - A country flag next to every server
 - Per-app proxy, routing rules, dark mode
+- **Aether (free WARP)**: Cloudflare WARP built for heavy filtering, with Tor and Psiphon; finds a working endpoint by itself
 
 ## 📥 Download
 

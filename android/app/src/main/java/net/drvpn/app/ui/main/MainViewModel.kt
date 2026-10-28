@@ -21,6 +21,7 @@ import net.drvpn.app.extension.matchesPattern
 import net.drvpn.app.extension.moveItem
 import net.drvpn.app.core.LauncherManager
 import net.drvpn.app.handler.AnnouncementManager
+import net.drvpn.app.handler.AppUpdater
 import net.drvpn.app.handler.AppLog
 import net.drvpn.app.handler.MmkvManager
 import net.drvpn.app.handler.ServerCountryManager
@@ -133,6 +134,46 @@ class MainViewModel(
         watchAutoPing()
         setupGroupTab()
         loadAnnouncement()
+        checkForUpdate()
+    }
+
+    // ---------- App update (Dr VPN) ----------
+    private fun checkForUpdate() {
+        viewModelScope.launch(ioDispatcher) {
+            val update = AppUpdater.checkOnOpen() ?: return@launch
+            _uiState.update { it.copy(update = update, updateProgress = null, updateFailed = false) }
+        }
+    }
+
+    private var updateJob: Job? = null
+
+    /** Downloads the update (or reuses the downloaded file) and opens Android's installer. */
+    private fun startUpdate() {
+        val update = uiState.value.update ?: return
+        val url = update.downloadUrl ?: return
+        val version = update.latestVersion ?: return
+        if (updateJob?.isActive == true) return
+        if (!AppUpdater.canInstall(app)) {
+            // Android asks once whether this app may install updates; the user comes back and taps again.
+            AppUpdater.openInstallPermission(app)
+            return
+        }
+        updateJob = viewModelScope.launch {
+            _uiState.update { it.copy(updateProgress = 0, updateFailed = false) }
+            val apk = AppUpdater.download(app, url, version) { percent ->
+                _uiState.update { it.copy(updateProgress = percent) }
+            }
+            if (apk == null) {
+                _uiState.update { it.copy(updateProgress = null, updateFailed = true) }
+            } else {
+                _uiState.update { it.copy(updateProgress = null) }
+                runCatching { AppUpdater.install(app, apk) }
+                    .onFailure {
+                        LogUtil.e(AppConfig.TAG, "Failed to open the installer", it)
+                        _uiState.update { s -> s.copy(updateFailed = true) }
+                    }
+            }
+        }
     }
 
     private fun loadAnnouncement() {
@@ -187,7 +228,8 @@ class MainViewModel(
                     }
                     val name = profile?.let {
                         val flag = serverFlag(it)
-                        val display = serverDisplayName(serverCountry(it), appLocale())
+                        val display = if (it.configType == EConfigType.AETHER) it.remarks
+                        else serverDisplayName(serverCountry(it), appLocale())
                         if (flag.isEmpty()) display else "$flag $display"
                     }.orEmpty()
                     val onFree = profile?.subscriptionId == AppConfig.FREE_SUBSCRIPTION_ID
@@ -403,6 +445,13 @@ class MainViewModel(
             is MainAction.Search -> filterConfig(action.query)
             is MainAction.SetShowServersWithoutPing -> setShowServersWithoutPing(action.show)
             MainAction.SelectFastest -> selectFastest()
+            MainAction.StartUpdate -> startUpdate()
+            MainAction.CheckUpdate -> checkForUpdate()
+            MainAction.UpdateLater -> {
+                updateJob?.cancel()
+                AppUpdater.later(uiState.value.update?.latestVersion)
+                _uiState.update { it.copy(update = null, updateProgress = null, updateFailed = false) }
+            }
             is MainAction.DismissAnnouncement -> {
                 AnnouncementManager.dismiss(action.id)
                 _uiState.update { it.copy(announcement = null) }
@@ -1085,6 +1134,10 @@ class MainViewModel(
         if (pendingSelectFastest) {
             pendingSelectFastest = false
             fastestServerGuid()?.let { selectAndApply(it) } ?: toastError(R.string.home_fastest_none)
+        }
+        // A new user has no server yet: take the fastest one the first ping found, so the big button works at once.
+        else if (uiState.value.selectedGuid.isNullOrEmpty() || dataSource.decodeServerConfig(uiState.value.selectedGuid.orEmpty()) == null) {
+            fastestServerGuid()?.let { selectAndApply(it, announce = false) }
         }
         viewModelScope.launch(ioDispatcher) {
             cacheMutex.withLock { groupDataCache.clear() }

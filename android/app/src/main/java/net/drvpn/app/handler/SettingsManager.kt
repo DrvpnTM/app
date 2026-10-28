@@ -40,10 +40,11 @@ object SettingsManager {
     fun initApp(context: Context) {
         ensureDefaultSettings()
         //ensureDefaultSubscription()
-        MmkvManager.ensureFreeSubscription()
         initRoutingRulesets(context)
         migrateServerListToSubscriptions()
         migrateHysteria2PinSHA256()
+        // After the migrations, which may add the "Default" group at the top.
+        MmkvManager.ensureFreeSubscription(first = true)
     }
 
     /**

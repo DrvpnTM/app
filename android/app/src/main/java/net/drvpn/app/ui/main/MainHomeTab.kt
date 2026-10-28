@@ -658,7 +658,7 @@ private fun LocationCard(
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
             Text(
-                text = row?.let { serverRowTitle(it.country) } ?: fallbackName.ifBlank { stringResource(R.string.home_no_server) },
+                text = row?.let { serverRowTitle(it) } ?: fallbackName.ifBlank { stringResource(R.string.home_no_server) },
                 style = MaterialTheme.typography.titleSmall,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,

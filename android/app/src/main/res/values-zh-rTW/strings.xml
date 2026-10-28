@@ -703,4 +703,13 @@
     <string name="aether_command">Aether 指令（進階）</string>
     <string name="aether_command_hint">執行完整的 Aether 指令列以取代上面的設定。通常留空。</string>
     <string name="aether_not_supported">此版本沒有適用於此手機處理器類型的 Aether。</string>
+    <string name="update_channel_name">應用程式更新</string>
+    <string name="update_title">Dr VPN %1$s 來了</string>
+    <string name="update_notification_text">點按以更新到新版本</string>
+    <string name="update_message">更好的新版本已就緒。立即更新，只需片刻。</string>
+    <string name="update_downloading">正在下載新版本…</string>
+    <string name="update_failed">下載失敗。請重試，或透過連結下載。</string>
+    <string name="update_download_link">下載連結</string>
+    <string name="update_try_again">重試</string>
+    <string name="update_later">稍後</string>
 </resources>
