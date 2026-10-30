@@ -1,185 +1,261 @@
 #!/usr/bin/env python3
-"""Builds the Dr VPN website from the README, article and privacy pages.
+"""Builds the Dr VPN website (MkDocs Material) from the README, article and privacy pages.
 
 Run from the repository root:  python3 site/build.py
-Needs a GitHub token in GH_TOKEN or GITHUB_TOKEN: the Markdown is turned into HTML by GitHub
-itself, so the site looks just like the repository page. The result goes to _site/.
+Needs:  pip install mkdocs-material mkdocs-static-i18n
+The result goes to _site/. The site address comes from SITE_URL (default: drvpntm.github.io).
 
-Search Console: put Google's verification file (google....html) in site/, or set the
-GOOGLE_SITE_VERIFICATION environment variable to the code from the "HTML tag" method.
+Search Console: set GOOGLE_SITE_VERIFICATION to the code from the "HTML tag" method, or put
+Google's verification file (google....html) in site/static/.
 """
-import datetime
-import html
-import json
 import os
 import re
 import shutil
-import urllib.request
+import subprocess
 
-BASE = os.environ.get("SITE_URL", "https://drvpntm.github.io/app/")
+SITE_URL = os.environ.get("SITE_URL", "https://drvpntm.github.io/")
 REPO = "DrvpnTM/app"
 BLOB = f"https://github.com/{REPO}/blob/main/"
-OUT = "_site"
-VERIFY = os.environ.get("GOOGLE_SITE_VERIFICATION", "").strip()
+DOWNLOAD = f"https://github.com/{REPO}/releases/latest/download/DrVPN.apk"
+WORK = "_mkdocs"
+DOCS = f"{WORK}/docs"
+END = "<!-- end of header -->"
 
-# source file -> (page, language, right-to-left)
-PAGES = {
-    "README.md": ("", "fa", True),
-    "README-en.md": ("en.html", "en", False),
-    "README-zh.md": ("zh.html", "zh", False),
-    "README-ru.md": ("ru.html", "ru", False),
-    "README-my.md": ("my.html", "my", False),
-    "README-es.md": ("es.html", "es", False),
-    "ARTICLE-fa.md": ("article-fa.html", "fa", True),
-    "ARTICLE-en.md": ("article-en.html", "en", False),
-    "ARTICLE-zh.md": ("article-zh.html", "zh", False),
-    "ARTICLE-ru.md": ("article-ru.html", "ru", False),
-    "ARTICLE-my.md": ("article-my.html", "my", False),
-    "ARTICLE-es.md": ("article-es.html", "es", False),
-    "PRIVACY.md": ("privacy.html", "fa", True),
+# Words for the home page come from the README header script, so both stay the same.
+_src = open("docs/make-readme-headers.py", encoding="utf-8").read().split("\nSTEP_ICONS")[0]
+_ns = {}
+exec(_src, _ns)
+T = _ns["T"]
+
+LANGS = [  # code, name, README, article
+    ("fa", "فارسی", "README.md", "ARTICLE-fa.md"),
+    ("en", "English", "README-en.md", "ARTICLE-en.md"),
+    ("zh", "中文", "README-zh.md", "ARTICLE-zh.md"),
+    ("ru", "Русский", "README-ru.md", "ARTICLE-ru.md"),
+    ("my", "မြန်မာ", "README-my.md", "ARTICLE-my.md"),
+    ("es", "Español", "README-es.md", "ARTICLE-es.md"),
+]
+WORDS = {  # home, article, privacy, download, buy, more
+    "fa": ("خانه", "راهنمای خرید", "حریم خصوصی", "دانلود برای اندروید", "خرید اشتراک", "درباره دکتر وی پی ان"),
+    "en": ("Home", "Buying guide", "Privacy", "Download for Android", "Buy a subscription", "About Dr VPN"),
+    "zh": ("首页", "购买指南", "隐私", "下载安卓版", "购买订阅", "关于 Dr VPN"),
+    "ru": ("Главная", "Как купить", "Конфиденциальность", "Скачать для Android", "Купить подписку", "О Dr VPN"),
+    "my": ("ပင်မ", "ဝယ်ယူနည်း", "Privacy", "Android အတွက် ဒေါင်းလုဒ်", "Subscription ဝယ်ရန်", "Dr VPN အကြောင်း"),
+    "es": ("Inicio", "Guía de compra", "Privacidad", "Descargar para Android", "Comprar suscripción", "Sobre Dr VPN"),
 }
-HOME_GROUP = [f for f in PAGES if f.startswith("README")]
-ARTICLE_GROUP = [f for f in PAGES if f.startswith("ARTICLE")]
-FOOTER = {
-    "fa": ("مقاله", "حریم خصوصی", "کد منبع"),
-    "en": ("Article", "Privacy", "Source code"),
-    "zh": ("文章", "隐私", "源代码"),
-    "ru": ("Статья", "Конфиденциальность", "Исходный код"),
-    "my": ("ဆောင်းပါး", "Privacy", "Source code"),
-    "es": ("Artículo", "Privacidad", "Código fuente"),
-}
+STEP_ICONS = ["install", "country", "tap", "connected"]
+FEAT_ICONS = ["free", "fast", "shield", "tv", "website"]
 
 
-def render(text):
-    token = os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN")
-    req = urllib.request.Request(
-        "https://api.github.com/markdown",
-        data=json.dumps({"text": text, "mode": "gfm", "context": REPO}).encode(),
-        headers={"Accept": "application/vnd.github+json",
-                 **({"Authorization": f"Bearer {token}"} if token else {})},
-    )
-    with urllib.request.urlopen(req) as r:
-        return r.read().decode()
+def clean(text, lang):
+    """Markdown from the repository, ready for the site."""
+    text = text.split(END, 1)[1] if END in text else text
+    text = re.sub(r'^\s*<div dir="rtl">\s*$|^\s*</div>\s*$', "", text, flags=re.M)
+    text = re.sub(r"^🌐 \[.*$", "", text, flags=re.M)  # language bar
+
+    def link(m):
+        label, url = m.group(1), m.group(2)
+        if re.match(r"^(https?:|mailto:|#)", url):
+            return m.group(0)
+        if url.startswith(("README", "ARTICLE", "PRIVACY")):
+            url = {"R": "index.md", "A": "article.md", "P": "privacy.md"}[url[0]]
+        else:
+            url = BLOB + url
+        return f"[{label}]({url})"
+
+    text = re.sub(r"\[([^\]]*)\]\(([^)\s]+)\)", link, text)
+    # The download section points at "the green button at the top of this page" — that's the hero now.
+    return text.strip() + "\n"
 
 
-def fix_link(m):
-    attr, url = m.group(1), m.group(2)
-    if re.match(r"^(https?:|mailto:|#|//)", url):
-        return m.group(0)
-    path, _, frag = url.partition("#")
-    if path in PAGES:
-        page = PAGES[path][0] or "./"
-    elif path.startswith(("docs/icons/", "android/app/src/main/res/drawable-nodpi/")):
-        page = path  # copied next to the pages
-    else:
-        page = BLOB + path
-    return f'{attr}="{page}{"#" + frag if frag else ""}"'
+def home(lang, readme):
+    t = T[readme]
+    w = WORDS[lang]
+    steps = "\n".join(
+        f'<div class="dr-step"><img src="{SITE_URL}assets/icons/step{n + 1}.png" alt="{n + 1}" width="30">'
+        f'<img src="{SITE_URL}assets/icons/{i}.png" alt="" width="72"><b>{s}</b></div>'
+        for n, (i, s) in enumerate(zip(STEP_ICONS, t["steps"])))
+    feats = "\n".join(
+        f'<div class="dr-feat"><img src="{SITE_URL}assets/icons/{i}.png" alt="" width="56"><b>{s}</b></div>'
+        for i, s in zip(FEAT_ICONS, t["feats"]))
+    body = clean(open(readme, encoding="utf-8").read(), lang)
+    title = re.sub(r"^\W+\s*", "", t["tagline"])
+    return f"""---
+title: {t["name"]} — {title}
+description: {t["tagline"]}. {t["free"].lstrip("🎁 ")}.
+hide:
+  - navigation
+  - toc
+---
+
+<div class="dr-hero" markdown>
+<div class="dr-hero-text" markdown>
+
+# {t["name"]}
+
+<p class="dr-tagline">{t["tagline"]}</p>
+<p class="dr-free">{t["free"]}</p>
+
+[:material-android: {w[3]}]({DOWNLOAD}){{ .md-button .md-button--primary }}
+[:material-cart: {w[4]}](https://drvpn.net/){{ .md-button }}
+[:fontawesome-brands-telegram: Telegram](https://t.me/drVPN_net){{ .md-button }}
+
+<div class="dr-badges">
+<img src="https://img.shields.io/github/downloads/{REPO}/total?label=Downloads&color=0057d9" alt="Downloads">
+<img src="https://img.shields.io/github/v/release/{REPO}?label=Version&color=0057d9" alt="Version">
+<img src="https://img.shields.io/github/stars/{REPO}?label=Stars&color=0057d9" alt="Stars">
+</div>
+</div>
+<div class="dr-hero-logo"><img src="{SITE_URL}assets/logo.png" alt="Dr VPN" width="220"></div>
+</div>
+
+## {t["steps_title"]}
+
+<div class="dr-steps">
+{steps}
+</div>
+
+## {t["feat_title"]}
+
+<div class="dr-feats">
+{feats}
+</div>
+
+<div class="dr-buy" markdown>
+
+## {t["buy_title"]}
+
+[:material-web: drvpn.net](https://drvpn.net/){{ .md-button .md-button--primary }}
+[:fontawesome-brands-telegram: @drVPN_net](https://t.me/drVPN_net){{ .md-button }}
+
+</div>
+
+---
+
+{body}"""
 
 
-def plain(s):
-    s = re.sub(r"<[^>]+>", " ", s)
-    return re.sub(r"\s+", " ", html.unescape(s)).strip()
+def page(lang, src, desc):
+    text = clean(open(src, encoding="utf-8").read(), lang)
+    return f"---\ndescription: {desc}\n---\n\n{text}"
 
 
-def describe(body):
-    """The first real paragraph, for the search result snippet."""
-    for p in re.findall(r"<p[^>]*>(.*?)</p>", body, re.S):
-        t = plain(p)
-        if len(t) > 60:
-            return t if len(t) <= 160 else t[:157].rsplit(" ", 1)[0] + "…"
-    return "Dr VPN — fast, safe, open-source VPN for Android."
-
-
-def title_of(src, body):
-    if src.startswith("README"):
-        h3 = re.search(r"<h3[^>]*>(.*?)</h3>", body, re.S)
-        return f"Dr VPN — {plain(h3.group(1))}" if h3 else "Dr VPN"
-    h1 = re.search(r"<h1[^>]*>(.*?)</h1>", body, re.S)
-    return plain(h1.group(1)) if h1 else "Dr VPN"
-
-
-def alternates(group):
-    links = [f'<link rel="alternate" hreflang="{PAGES[f][1]}" href="{BASE}{PAGES[f][0]}">' for f in group]
-    links.append(f'<link rel="alternate" hreflang="x-default" href="{BASE}{PAGES[group[1]][0]}">')
-    return "\n".join(links)
-
-
-def page(src):
-    out, lang, rtl = PAGES[src]
-    with open(src, encoding="utf-8") as f:
-        body = render(f.read())
-    body = re.sub(r'\b(href|src)="([^"]*)"', fix_link, body)
-    title, desc = title_of(src, body), describe(body)
-    url = BASE + out
-    group = HOME_GROUP if src in HOME_GROUP else ARTICLE_GROUP if src in ARTICLE_GROUP else None
-    art, priv, code = FOOTER[lang]
-    art_page = PAGES[f"ARTICLE-{lang}.md"][0]
-    ld = {"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "Dr VPN",
-          "operatingSystem": "Android", "applicationCategory": "UtilitiesApplication",
-          "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
-          "downloadUrl": f"https://github.com/{REPO}/releases/latest/download/DrVPN.apk",
-          "url": url, "description": desc}
-    return f"""<!doctype html>
-<html lang="{lang}" dir="{"rtl" if rtl else "ltr"}">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{html.escape(title)}</title>
-<meta name="description" content="{html.escape(desc)}">
-{f'<meta name="google-site-verification" content="{html.escape(VERIFY)}">' if VERIFY else ""}
-<link rel="canonical" href="{url}">
-{alternates(group) if group else ""}
-<meta property="og:type" content="website">
-<meta property="og:title" content="{html.escape(title)}">
-<meta property="og:description" content="{html.escape(desc)}">
-<meta property="og:url" content="{url}">
-<meta property="og:image" content="{BASE}logo.png">
-<meta name="twitter:card" content="summary">
-<meta name="theme-color" content="#0f9d58">
-<link rel="icon" href="logo.png">
-<link rel="stylesheet" href="style.css">
-{'<script type="application/ld+json">' + json.dumps(ld, ensure_ascii=False) + '</script>' if src in HOME_GROUP else ""}
-</head>
-<body>
-<main class="markdown-body">
-{body}
-</main>
-<footer>
-<a href="{art_page}">{art}</a> · <a href="privacy.html">{priv}</a> ·
-<a href="https://github.com/{REPO}">{code}</a> · <a href="https://drvpn.net/">drvpn.net</a> ·
-<a href="https://t.me/drVPN_net">Telegram</a>
-</footer>
-</body>
-</html>
+def config():
+    langs = "\n".join(f"""        - locale: {code}
+          name: {name}
+          build: true{'''
+          default: true''' if code == "fa" else ""}
+          site_name: {T[readme]["name"]}
+          nav_translations:
+            Home: {WORDS[code][0]}
+            Article: {WORDS[code][1]}
+            Privacy: {WORDS[code][2]}""" for code, name, readme, _ in LANGS)
+    verify = os.environ.get("GOOGLE_SITE_VERIFICATION", "").strip()
+    return f"""site_name: Dr VPN
+site_url: {SITE_URL}
+site_description: Dr VPN — fast, safe, open-source VPN for Android with a free server built in.
+repo_url: https://github.com/{REPO}
+repo_name: {REPO}
+edit_uri: ""
+copyright: Dr VPN · open source (GPL-3.0)
+docs_dir: docs
+theme:
+  name: material
+  custom_dir: overrides
+  language: fa
+  logo: assets/logo.png
+  favicon: assets/logo.png
+  icon:
+    repo: fontawesome/brands/github
+  font:
+    text: Vazirmatn
+    code: Roboto Mono
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/weather-night
+        name: Dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/weather-sunny
+        name: Light mode
+  features:
+    - navigation.tabs
+    - navigation.top
+    - navigation.footer
+    - search.highlight
+    - toc.follow
+    - content.code.copy
+extra_css:
+  - assets/style.css
+extra:
+  google_site_verification: "{verify}"
+  social:
+    - icon: fontawesome/brands/telegram
+      link: https://t.me/drVPN_net
+    - icon: fontawesome/brands/github
+      link: https://github.com/{REPO}
+    - icon: material/web
+      link: https://drvpn.net/
+markdown_extensions:
+  - attr_list
+  - md_in_html
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - toc:
+      permalink: true
+plugins:
+  - search
+  - i18n:
+      docs_structure: folder
+      reconfigure_material: true
+      reconfigure_search: true
+      languages:
+{langs}
+nav:
+  - Home: index.md
+  - Article: article.md
+  - Privacy: privacy.md
 """
 
 
 def main():
-    shutil.rmtree(OUT, ignore_errors=True)
-    os.makedirs(OUT)
-    shutil.copytree("docs/icons", f"{OUT}/docs/icons")
-    logo_dir = "android/app/src/main/res/drawable-nodpi"
-    os.makedirs(f"{OUT}/{logo_dir}")
-    shutil.copy(f"{logo_dir}/drvpn_logo.png", f"{OUT}/{logo_dir}/")
-    shutil.copy(f"{logo_dir}/drvpn_logo.png", f"{OUT}/logo.png")
-    for name in os.listdir("site"):
-        if name.endswith((".css", ".html", ".txt")):
-            shutil.copy(f"site/{name}", OUT)
+    shutil.rmtree(WORK, ignore_errors=True)
+    shutil.rmtree("_site", ignore_errors=True)
+    os.makedirs(f"{DOCS}/assets")
+    shutil.copytree("docs/icons", f"{DOCS}/assets/icons")
+    shutil.copy("android/app/src/main/res/drawable-nodpi/drvpn_logo.png", f"{DOCS}/assets/logo.png")
+    shutil.copy("site/style.css", f"{DOCS}/assets/style.css")
+    shutil.copytree("site/overrides", f"{WORK}/overrides")
+    if os.path.isdir("site/static"):
+        shutil.copytree("site/static", DOCS, dirs_exist_ok=True)
+    with open(f"{DOCS}/robots.txt", "w") as f:
+        f.write(f"User-agent: *\nAllow: /\n\nSitemap: {SITE_URL}sitemap.xml\n")
 
-    for src, (out, _, _) in PAGES.items():
-        with open(f"{OUT}/{out or 'index.html'}", "w", encoding="utf-8") as f:
-            f.write(page(src))
-        print("built", out or "index.html")
+    for code, _, readme, article in LANGS:
+        os.makedirs(f"{DOCS}/{code}")
+        t = T[readme]
+        with open(f"{DOCS}/{code}/index.md", "w", encoding="utf-8") as f:
+            f.write(home(code, readme))
+        with open(f"{DOCS}/{code}/article.md", "w", encoding="utf-8") as f:
+            f.write(page(code, article, t["tagline"]))
+        with open(f"{DOCS}/{code}/privacy.md", "w", encoding="utf-8") as f:
+            f.write(page(code, "PRIVACY.md", "Dr VPN privacy policy"))
+    with open(f"{WORK}/mkdocs.yml", "w", encoding="utf-8") as f:
+        f.write(config())
 
-    today = datetime.date.today().isoformat()
-    urls = "".join(f"<url><loc>{BASE}{out}</loc><lastmod>{today}</lastmod></url>\n"
-                   for out, _, _ in PAGES.values())
-    with open(f"{OUT}/sitemap.xml", "w") as f:
-        f.write('<?xml version="1.0" encoding="UTF-8"?>\n'
-                f'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n{urls}</urlset>\n')
-    with open(f"{OUT}/robots.txt", "w") as f:
-        f.write(f"User-agent: *\nAllow: /\n\nSitemap: {BASE}sitemap.xml\n")
-    open(f"{OUT}/.nojekyll", "w").close()
+    subprocess.run(["mkdocs", "build", "--strict", "-f", f"{WORK}/mkdocs.yml", "-d", "../_site"], check=True)
+    open("_site/.nojekyll", "w").close()
 
 
 if __name__ == "__main__":

@@ -1,50 +1,52 @@
+/* Dr VPN colors (from the app logo) on top of MkDocs Material. */
 :root {
-  --bg: #ffffff;
-  --text: #1f2328;
-  --muted: #59636e;
-  --line: #d1d9e0;
-  --code: #f6f8fa;
-  --link: #0969da;
+  --md-primary-fg-color: #0057d9;
+  --md-primary-fg-color--light: #3d9bff;
+  --md-primary-fg-color--dark: #0040c1;
+  --md-accent-fg-color: #2e8cff;
+  --dr-card: #f4f8ff;
+  --dr-line: #dbe6fb;
 }
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0d1117;
-    --text: #e6edf3;
-    --muted: #9198a1;
-    --line: #3d444d;
-    --code: #151b23;
-    --link: #4493f8;
-  }
+[data-md-color-scheme="slate"] {
+  --md-primary-fg-color: #0b2a5c;
+  --md-default-bg-color: #0b1220;
+  --md-accent-fg-color: #3d9bff;
+  --md-typeset-a-color: #6cb2ff;
+  --dr-card: #121c30;
+  --dr-line: #1f2d47;
 }
-* { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; }
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--text);
-  font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Vazirmatn, Tahoma, "Noto Sans", Helvetica, Arial, sans-serif;
+
+/* Hero */
+.dr-hero { display: flex; align-items: center; gap: 2rem; padding: 1.5rem 0 1rem; }
+.dr-hero-text { flex: 1; min-width: 0; }
+.md-typeset .dr-hero h1 { font-size: 2.6rem; font-weight: 800; margin: 0 0 .3rem; color: var(--md-typeset-color); }
+.md-typeset .dr-tagline { font-size: 1.25rem; margin: 0 0 .4rem; opacity: .85; }
+.md-typeset .dr-free { font-weight: 700; margin: 0 0 1.2rem; }
+.dr-hero-logo img { border-radius: 22%; box-shadow: 0 20px 50px rgba(0, 64, 193, .35); display: block; }
+.md-typeset .dr-hero .md-button { margin: 0 0 .5rem .4rem; border-radius: .6rem; }
+.dr-badges { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .8rem; }
+
+/* Steps and features as cards */
+.dr-steps, .dr-feats { display: grid; gap: .8rem; margin: 1rem 0 1.5rem; }
+.dr-steps { grid-template-columns: repeat(4, 1fr); }
+.dr-feats { grid-template-columns: repeat(5, 1fr); }
+.dr-step, .dr-feat {
+  display: flex; flex-direction: column; align-items: center; gap: .5rem; text-align: center;
+  background: var(--dr-card); border: 1px solid var(--dr-line); border-radius: .9rem; padding: 1rem .6rem;
+  transition: transform .15s ease, box-shadow .15s ease;
 }
-.markdown-body { max-width: 900px; margin: 0 auto; padding: 24px 16px 8px; overflow-wrap: break-word; }
-a { color: var(--link); text-decoration: none; }
-a:hover { text-decoration: underline; }
-img { max-width: 100%; height: auto; }
-h1, h2, h3 { line-height: 1.3; margin: 1.4em 0 .6em; }
-h1, h2 { padding-bottom: .3em; border-bottom: 1px solid var(--line); }
-[align="center"] h1, [align="center"] h2 { border-bottom: 0; }
-hr { border: 0; border-top: 1px solid var(--line); margin: 24px 0; }
-code { background: var(--code); padding: .15em .4em; border-radius: 6px; font-size: 90%; }
-pre { background: var(--code); padding: 16px; border-radius: 8px; overflow-x: auto; direction: ltr; text-align: left; }
-pre code { background: none; padding: 0; }
-table { border-collapse: collapse; margin: 0 auto 16px; width: 100%; max-width: 760px; }
-td, th { border: 1px solid var(--line); padding: 8px; vertical-align: top; }
-sub { color: var(--muted); font-size: 80%; }
-/* Headings get a hidden anchor link from GitHub; keep it out of the way. */
-.anchor, .markdown-heading .anchor { display: none; }
-.markdown-heading h1, .markdown-heading h2, .markdown-heading h3 { display: block; }
-footer { max-width: 900px; margin: 24px auto 40px; padding: 16px; border-top: 1px solid var(--line);
-  color: var(--muted); font-size: 14px; text-align: center; }
-@media (max-width: 560px) {
-  td { padding: 4px; font-size: 13px; }
-  td img[width="84"] { width: 56px; }
-  td img[width="64"] { width: 44px; }
+.dr-step:hover, .dr-feat:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0, 64, 193, .15); }
+
+.dr-buy { text-align: center; background: var(--dr-card); border: 1px solid var(--dr-line);
+  border-radius: 1rem; padding: .5rem 1rem 1.2rem; margin: 1.5rem 0; }
+.md-typeset .dr-buy h2 { margin-top: .8rem; }
+
+@media (max-width: 760px) {
+  .dr-hero { flex-direction: column-reverse; text-align: center; gap: 1rem; }
+  .dr-hero-logo img { width: 140px; }
+  .dr-badges { justify-content: center; }
+  .md-typeset .dr-hero h1 { font-size: 2rem; }
+  .dr-steps { grid-template-columns: repeat(2, 1fr); }
+  .dr-feats { grid-template-columns: repeat(3, 1fr); }
 }
+@media (max-width: 420px) { .dr-feats { grid-template-columns: repeat(2, 1fr); } }
