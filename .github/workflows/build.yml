@@ -12,6 +12,8 @@ on:
     paths-ignore:
       - '**.md'
       - 'docs/**'
+      - 'site/**'
+      - '.github/workflows/pages.yml'
       - 'countries/**'
       - 'fastlane/**'
       - 'notice.json'

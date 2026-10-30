@@ -73,3 +73,4 @@ drvpn-release.jks
 # Aether native build (compile-aether.sh)
 libs-aether/
 build-aether-src/
+_site/
