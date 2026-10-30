@@ -4,6 +4,7 @@
 Run from the repository root:  python3 site/build.py
 Needs:  pip install mkdocs-material mkdocs-static-i18n
 The result goes to _site/. The site address comes from SITE_URL (default: drvpntm.github.io).
+The DrvpnTM.github.io repository runs this script to publish https://drvpntm.github.io/.
 
 Search Console: set GOOGLE_SITE_VERIFICATION to the code from the "HTML tag" method, or put
 Google's verification file (google....html) in site/static/.
@@ -43,8 +44,20 @@ WORDS = {  # home, article, privacy, download, buy, more
     "my": ("ပင်မ", "ဝယ်ယူနည်း", "Privacy", "Android အတွက် ဒေါင်းလုဒ်", "Subscription ဝယ်ရန်", "Dr VPN အကြောင်း"),
     "es": ("Inicio", "Guía de compra", "Privacidad", "Descargar para Android", "Comprar suscripción", "Sobre Dr VPN"),
 }
-STEP_ICONS = ["install", "country", "tap", "connected"]
-FEAT_ICONS = ["free", "fast", "shield", "tv", "website"]
+STEP_ICONS = ["cellphone-arrow-down", "earth", "gesture-tap", "check-circle"]
+FEAT_ICONS = ["gift-outline", "lightning-bolt", "shield-check", "television", "translate"]
+
+
+def icon(name):
+    """A Material Design icon as inline SVG (the same icon set the theme uses)."""
+    import material
+    path = os.path.join(os.path.dirname(material.__file__), "templates/.icons/material", name + ".svg")
+    return open(path, encoding="utf-8").read().strip()
+
+
+def plain_title(s):
+    """Section titles without the leading emoji."""
+    return re.sub(r"^[^\w]+", "", s).strip()
 
 
 def clean(text, lang):
@@ -72,11 +85,11 @@ def home(lang, readme):
     t = T[readme]
     w = WORDS[lang]
     steps = "\n".join(
-        f'<div class="dr-step"><img src="{SITE_URL}assets/icons/step{n + 1}.png" alt="{n + 1}" width="30">'
-        f'<img src="{SITE_URL}assets/icons/{i}.png" alt="" width="72"><b>{s}</b></div>'
+        f'<div class="dr-step"><span class="dr-num">{n + 1}</span>'
+        f'<span class="dr-ico">{icon(i)}</span><b>{s}</b></div>'
         for n, (i, s) in enumerate(zip(STEP_ICONS, t["steps"])))
     feats = "\n".join(
-        f'<div class="dr-feat"><img src="{SITE_URL}assets/icons/{i}.png" alt="" width="56"><b>{s}</b></div>'
+        f'<div class="dr-feat"><span class="dr-ico">{icon(i)}</span><b>{s}</b></div>'
         for i, s in zip(FEAT_ICONS, t["feats"]))
     body = clean(open(readme, encoding="utf-8").read(), lang)
     title = re.sub(r"^\W+\s*", "", t["tagline"])
@@ -94,7 +107,7 @@ hide:
 # {t["name"]}
 
 <p class="dr-tagline">{t["tagline"]}</p>
-<p class="dr-free">{t["free"]}</p>
+<p class="dr-free">{icon("gift-outline")} {plain_title(t["free"])}</p>
 
 [:material-android: {w[3]}]({DOWNLOAD}){{ .md-button .md-button--primary }}
 [:material-cart: {w[4]}](https://drvpn.net/){{ .md-button }}
@@ -109,13 +122,13 @@ hide:
 <div class="dr-hero-logo"><img src="{SITE_URL}assets/logo.png" alt="Dr VPN" width="220"></div>
 </div>
 
-## {t["steps_title"]}
+## {plain_title(t["steps_title"])}
 
 <div class="dr-steps">
 {steps}
 </div>
 
-## {t["feat_title"]}
+## {plain_title(t["feat_title"])}
 
 <div class="dr-feats">
 {feats}
@@ -123,7 +136,7 @@ hide:
 
 <div class="dr-buy" markdown>
 
-## {t["buy_title"]}
+## {plain_title(t["buy_title"])}
 
 [:material-web: drvpn.net](https://drvpn.net/){{ .md-button .md-button--primary }}
 [:fontawesome-brands-telegram: @drVPN_net](https://t.me/drVPN_net){{ .md-button }}
