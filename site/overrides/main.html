@@ -1,28 +1,46 @@
 {% extends "base.html" %}
 
+{#- The search title is exactly the page's title (no " - Dr VPN" added twice). -#}
+{% block htmltitle %}
+  {% if page and page.meta and page.meta.title %}
+    <title>{{ page.meta.title }}</title>
+  {% else %}
+    {{ super() }}
+  {% endif %}
+{% endblock %}
+
 {% block extrahead %}
   {% if config.extra.google_site_verification %}
     <meta name="google-site-verification" content="{{ config.extra.google_site_verification }}">
   {% endif %}
-  {% if config.extra.alternate %}
-    {% for alt in config.extra.alternate %}
-      <link rel="alternate" hreflang="{{ alt.lang }}" href="{{ config.site_url | trim('/') }}{{ alt.link }}">
-    {% endfor %}
-    <link rel="alternate" hreflang="x-default" href="{{ config.site_url }}en/">
-  {% endif %}
   {% if page %}
-  <meta property="og:type" content="website">
-  <meta property="og:title" content="{{ page.meta.title or page.title }} - {{ config.site_name }}">
-  <meta property="og:description" content="{{ page.meta.description or config.site_description }}">
-  <meta property="og:image" content="{{ config.site_url }}assets/logo.png">
-  <meta name="twitter:card" content="summary">
-  {% endif %}
-  {% if page and (page.is_homepage or page.file.src_uri.endswith("index.md")) %}
-  <script type="application/ld+json">
-  {"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "Dr VPN",
-   "operatingSystem": "Android", "applicationCategory": "UtilitiesApplication",
-   "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
-   "downloadUrl": "https://github.com/DrvpnTM/app/releases/latest/download/DrVPN.apk"}
-  </script>
+    {#- The same page in the other languages, for Google (hreflang). -#}
+    {% for alt in config.extra.alternate or [] %}
+      {% set path = alt.link[1:] if alt.link.startswith("/") else alt.link %}
+      <link rel="alternate" hreflang="{{ alt.lang }}" href="{{ config.site_url }}{{ path }}">
+      {% if alt.lang == "en" %}
+        <link rel="alternate" hreflang="x-default" href="{{ config.site_url }}{{ path }}">
+      {% endif %}
+    {% endfor %}
+    {% set title = page.meta.title or page.title %}
+    {% set description = page.meta.description or config.site_description %}
+    <meta name="robots" content="index, follow, max-image-preview:large">
+    <meta property="og:type" content="{{ 'article' if page.meta.schema and 'Article' in (page.meta.schema | tojson) else 'website' }}">
+    <meta property="og:site_name" content="Dr VPN">
+    <meta property="og:title" content="{{ title }}">
+    <meta property="og:description" content="{{ description }}">
+    <meta property="og:url" content="{{ page.canonical_url }}">
+    <meta property="og:locale" content="{{ page.meta.og_locale or 'fa_IR' }}">
+    <meta property="og:image" content="{{ config.site_url }}assets/og.png">
+    <meta property="og:image:width" content="640">
+    <meta property="og:image:height" content="360">
+    <meta property="og:image:alt" content="Dr VPN">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ title }}">
+    <meta name="twitter:description" content="{{ description }}">
+    <meta name="twitter:image" content="{{ config.site_url }}assets/og.png">
+    {% if page.meta.schema %}
+      <script type="application/ld+json">{{ page.meta.schema | tojson }}</script>
+    {% endif %}
   {% endif %}
 {% endblock %}

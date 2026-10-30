@@ -111,3 +111,15 @@
 }
 [data-md-color-scheme="slate"] .md-typeset .dr-buy .md-button { color: #6cb2ff; border-color: #2b4a7a; }
 [data-md-color-scheme="slate"] .md-typeset .dr-buy .md-button--primary { color: #fff; background: #0057d9; border-color: #0057d9; }
+
+/* FAQ: cards in the site's blue instead of the default green */
+.md-typeset details.question {
+  border: 1px solid var(--dr-line); border-radius: .9rem; box-shadow: var(--dr-shadow);
+  background: var(--dr-card); font-size: .8rem; margin: .7rem 0;
+}
+.md-typeset details.question[open] { border-color: var(--md-accent-fg-color); }
+.md-typeset .question > summary { background: transparent; border-radius: .9rem; font-weight: 600; }
+.md-typeset details.question:focus-within { box-shadow: 0 0 0 .2rem rgba(0, 87, 217, .12); }
+.md-typeset .question > summary::before { background-color: var(--md-primary-fg-color--dark); }
+[data-md-color-scheme="slate"] .md-typeset .question > summary::before { background-color: #6cb2ff; }
+.md-typeset .question > summary::after { color: var(--md-default-fg-color--light); }

@@ -9,10 +9,15 @@ The DrvpnTM.github.io repository runs this script to publish https://drvpntm.git
 Search Console: set GOOGLE_SITE_VERIFICATION to the code from the "HTML tag" method, or put
 Google's verification file (google....html) in site/static/.
 """
+import json
 import os
 import re
 import shutil
 import subprocess
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import seo  # noqa: E402  (titles, descriptions and FAQ per language)
 
 SITE_URL = os.environ.get("SITE_URL", "https://drvpntm.github.io/")
 REPO = "DrvpnTM/app"
@@ -83,6 +88,87 @@ def clean(text, lang):
     return text.strip() + "\n"
 
 
+def url_of(lang, kind):
+    return SITE_URL + ("" if lang == "fa" else f"{lang}/") + ("" if kind == "home" else f"{kind}/")
+
+
+def git_date(path, first=False):
+    """Day the file was first or last changed in git ("" in a shallow checkout without it)."""
+    args = ["git", "log", "--format=%cs", "--follow", "--", path] if first else ["git", "log", "-1", "--format=%cs", "--", path]
+    try:
+        out = subprocess.run(args, capture_output=True, text=True).stdout.split()
+    except OSError:
+        return ""
+    return (out[-1] if first else out[0]) if out else ""
+
+
+def unmark(md):
+    """Markdown answer to plain text, for structured data."""
+    md = re.sub(r"\[([^\]]*)\]\([^)]*\)", r"\1", md)
+    return md.replace("`", "").replace("**", "")
+
+
+ORG = {"@type": "Organization", "@id": f"{SITE_URL}#org", "name": "Dr VPN", "url": SITE_URL,
+       "logo": f"{SITE_URL}assets/logo.png",
+       "sameAs": ["https://drvpn.net/", "https://t.me/drVPN_net", f"https://github.com/{REPO}"]}
+
+
+def breadcrumb(lang, kind):
+    home_name = WORDS[lang][0]
+    name = WORDS[lang][1 if kind == "article" else 2]
+    return {"@type": "BreadcrumbList", "itemListElement": [
+        {"@type": "ListItem", "position": 1, "name": home_name, "item": url_of(lang, "home")},
+        {"@type": "ListItem", "position": 2, "name": name, "item": url_of(lang, kind)}]}
+
+
+def schema(lang, kind, src):
+    title, desc = seo.PAGES[lang][kind]
+    url = url_of(lang, kind)
+    graph = [ORG, {"@type": "WebSite", "@id": f"{SITE_URL}#website", "url": SITE_URL, "name": "Dr VPN",
+                   "inLanguage": [c for c, *_ in LANGS], "publisher": {"@id": f"{SITE_URL}#org"}}]
+    if kind == "home":
+        graph.append({"@type": "SoftwareApplication", "name": "Dr VPN", "url": url, "description": desc,
+                      "operatingSystem": "Android", "applicationCategory": "UtilitiesApplication",
+                      "inLanguage": lang, "image": f"{SITE_URL}assets/logo.png",
+                      "downloadUrl": DOWNLOAD, "license": "https://www.gnu.org/licenses/gpl-3.0.html",
+                      "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
+                      "publisher": {"@id": f"{SITE_URL}#org"}})
+        graph.append({"@type": "FAQPage", "url": url, "inLanguage": lang, "mainEntity": [
+            {"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": unmark(a)}}
+            for q, a in seo.FAQ[lang][1]]})
+    else:
+        page_type = "Article" if kind == "article" else "WebPage"
+        item = {"@type": page_type, "url": url, "name": title, "description": desc, "inLanguage": lang,
+                "image": f"{SITE_URL}assets/og.png", "publisher": {"@id": f"{SITE_URL}#org"},
+                "isPartOf": {"@id": f"{SITE_URL}#website"}}
+        if kind == "article":
+            item.update({"headline": title, "author": {"@id": f"{SITE_URL}#org"}, "mainEntityOfPage": url})
+            published, modified = git_date(src, first=True), git_date(src)
+            if published:
+                item["datePublished"] = published
+            if modified:
+                item["dateModified"] = modified
+        graph += [item, breadcrumb(lang, kind)]
+    return {"@context": "https://schema.org", "@graph": graph}
+
+
+def front(lang, kind, src, extra=""):
+    """Page header: search title and description, page language and structured data."""
+    title, desc = seo.PAGES[lang][kind]
+    return (f"---\ntitle: {json.dumps(title, ensure_ascii=False)}\n"
+            f"description: {json.dumps(desc, ensure_ascii=False)}\n"
+            f"og_locale: {seo.OG_LOCALE[lang]}\n"
+            f"schema: {json.dumps(schema(lang, kind, src), ensure_ascii=False)}\n{extra}---\n\n")
+
+
+def faq(lang):
+    heading, items = seo.FAQ[lang]
+    out = [f"## {heading}", ""]
+    for q, a in items:
+        out += [f'??? question "{q}"', f"    {a}", ""]
+    return "\n".join(out)
+
+
 def home(lang, readme):
     t = T[readme]
     w = WORDS[lang]
@@ -94,15 +180,7 @@ def home(lang, readme):
         f'<div class="dr-feat"><span class="dr-ico">{icon(i)}</span><b>{s}</b></div>'
         for i, s in zip(FEAT_ICONS, t["feats"]))
     body = clean(open(readme, encoding="utf-8").read(), lang)
-    title = re.sub(r"^\W+\s*", "", t["tagline"])
-    return f"""---
-title: {t["name"]} — {title}
-description: {t["tagline"]}. {t["free"].lstrip("🎁 ")}.
-hide:
-  - navigation
-  - toc
----
-
+    return front(lang, "home", readme, "hide:\n  - navigation\n  - toc\n") + f"""
 <div class="dr-hero" markdown>
 <div class="dr-hero-text" markdown>
 
@@ -121,7 +199,7 @@ hide:
 <img src="https://img.shields.io/github/stars/{REPO}?label=Stars&color=0057d9" alt="Stars">
 </div>
 </div>
-<div class="dr-hero-logo"><img src="{SITE_URL}assets/logo.png" alt="Dr VPN" width="220"></div>
+<div class="dr-hero-logo"><img src="{SITE_URL}assets/logo.png" alt="Dr VPN" width="220" height="220" fetchpriority="high"></div>
 </div>
 
 ## {plain_title(t["steps_title"])}
@@ -145,14 +223,15 @@ hide:
 
 </div>
 
+{faq(lang)}
+
 ---
 
 {body}"""
 
 
-def page(lang, src, desc):
-    text = clean(open(src, encoding="utf-8").read(), lang)
-    return f"---\ndescription: {desc}\n---\n\n{text}"
+def page(lang, kind, src):
+    return front(lang, kind, src) + clean(open(src, encoding="utf-8").read(), lang)
 
 
 def config():
@@ -251,6 +330,7 @@ def main():
     shutil.copytree("docs/icons", f"{DOCS}/assets/icons")
     shutil.copy("android/app/src/main/res/drawable-nodpi/drvpn_logo.png", f"{DOCS}/assets/logo.png")
     shutil.copy("site/style.css", f"{DOCS}/assets/style.css")
+    shutil.copy("branding/banner-640x360.png", f"{DOCS}/assets/og.png")  # link preview picture
     shutil.copytree("site/overrides", f"{WORK}/overrides")
     if os.path.isdir("site/static"):
         shutil.copytree("site/static", DOCS, dirs_exist_ok=True)
@@ -259,13 +339,12 @@ def main():
 
     for code, _, readme, article in LANGS:
         os.makedirs(f"{DOCS}/{code}")
-        t = T[readme]
         with open(f"{DOCS}/{code}/index.md", "w", encoding="utf-8") as f:
             f.write(home(code, readme))
         with open(f"{DOCS}/{code}/article.md", "w", encoding="utf-8") as f:
-            f.write(page(code, article, t["tagline"]))
+            f.write(page(code, "article", article))
         with open(f"{DOCS}/{code}/privacy.md", "w", encoding="utf-8") as f:
-            f.write(page(code, "PRIVACY.md", "Dr VPN privacy policy"))
+            f.write(page(code, "privacy", "PRIVACY.md"))
     with open(f"{WORK}/mkdocs.yml", "w", encoding="utf-8") as f:
         f.write(config())
 
