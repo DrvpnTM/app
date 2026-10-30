@@ -21,6 +21,8 @@ DOWNLOAD = f"https://github.com/{REPO}/releases/latest/download/DrVPN.apk"
 WORK = "_mkdocs"
 DOCS = f"{WORK}/docs"
 END = "<!-- end of header -->"
+# Google Search Console ownership code ("HTML tag" method) for drvpntm.github.io.
+GOOGLE_VERIFY = "jajuLc6MwKie2pm-BVkKVAiidkz5fjjtiTY2NzfSrrs"
 
 # Words for the home page come from the README header script, so both stay the same.
 _src = open("docs/make-readme-headers.py", encoding="utf-8").read().split("\nSTEP_ICONS")[0]
@@ -163,7 +165,7 @@ def config():
             Home: {WORDS[code][0]}
             Article: {WORDS[code][1]}
             Privacy: {WORDS[code][2]}""" for code, name, readme, _ in LANGS)
-    verify = os.environ.get("GOOGLE_SITE_VERIFICATION", "").strip()
+    verify = os.environ.get("GOOGLE_SITE_VERIFICATION", "").strip() or GOOGLE_VERIFY
     return f"""site_name: Dr VPN
 site_url: {SITE_URL}
 site_description: Dr VPN — fast, safe, open-source VPN for Android with a free server built in.
