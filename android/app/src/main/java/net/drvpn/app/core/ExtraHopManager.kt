@@ -72,14 +72,17 @@ object ExtraHopManager {
     @Volatile
     var emergencyKind: ExtraHopKind? = null
 
-    /** What emergency tries, in order: fastest to start first, Tor last. Dr Tunnel only when it has a config. */
+    /**
+     * What emergency tries, in order: the ones that connect fastest first, Tor last. Dr Tunnel
+     * only when it has a config.
+     */
     fun emergencyCandidates(): List<ExtraHopKind> = buildList {
         add(ExtraHopKind.SHIELD)
-        add(ExtraHopKind.PSIPHON)
+        add(ExtraHopKind.LANTERN)
         if (parseWireGuard(MmkvManager.decodeSettingsString(AppConfig.PREF_EXTRA_HOP_WIREGUARD).orEmpty()) != null) {
             add(ExtraHopKind.TUNNEL)
         }
-        add(ExtraHopKind.LANTERN)
+        add(ExtraHopKind.PSIPHON)
         add(ExtraHopKind.TOR)
     }
 
@@ -114,6 +117,12 @@ object ExtraHopManager {
         }.also {
             if (it == null) LogUtil.w(AppConfig.TAG, "Extra hop: ${kind.value} is not usable, connecting without it")
         }
+    }
+
+    /** "<kind>|<mode>" of [hop] as it runs, for the Home screen (AppConfig.PREF_EXTRA_HOP_ACTIVE). */
+    fun activeLabel(hop: ProfileItem): String {
+        val mode = if (LanternManager.isHop(hop)) ExtraHopMode.BEFORE else mode()
+        return "${effectiveKind().value}|${mode.value}"
     }
 
     /** A fresh Aether profile that runs only Psiphon or only Tor (no WARP). */

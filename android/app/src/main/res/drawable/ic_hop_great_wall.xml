@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Extra hop icon (Great Wall: a brick wall). Drawn white; the app tints it and puts it on the hop's color. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M3,4h8v4H3zM13,4h8v4h-8zM3,10h4v4H3zM9,10h6v4H9zM17,10h4v4h-4zM3,16h8v4H3zM13,16h8v4h-8z" />
+</vector>

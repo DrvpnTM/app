@@ -51,7 +51,9 @@ func main() {
 		Locale:           *locale,
 		LogLevel:         *logLevel,
 		TelemetryConsent: false,
-		EnvOverrides:     map[string]string{"RADIANCE_SOCKS_ADDRESS": *socks},
+		// On Android sing-box must not watch the network itself (netlink is banned for apps).
+		PlatformInterface: platformFor(),
+		EnvOverrides:      map[string]string{"RADIANCE_SOCKS_ADDRESS": *socks},
 	})
 	if err != nil {
 		log.Fatalf("start: %v", err)
@@ -98,4 +100,13 @@ func loadDeviceID(dataDir string) (string, error) {
 	}
 	id := hex.EncodeToString(raw)
 	return id, os.WriteFile(path, []byte(id), 0o600)
+}
+
+// platformFor returns the network answers the app passed (Android), or nil to let sing-box look
+// for itself (Linux, for testing on a computer).
+func platformFor() vpn.PlatformInterface {
+	if *ifaceName == "" {
+		return nil
+	}
+	return platform{}
 }

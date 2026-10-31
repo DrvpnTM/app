@@ -14,6 +14,9 @@
 
 <a href="https://github.com/DrvpnTM/app/releases/latest/download/DrVPN.apk"><img src="docs/icons/download-button.svg" width="340" alt="Download Dr VPN"></a>
 
+<a href="https://github.com/DrvpnTM/app/releases"><img src="https://img.shields.io/github/downloads/DrvpnTM/app/total?label=downloads&color=2ea44f&style=for-the-badge" alt="downloads"></a>
+<a href="https://github.com/DrvpnTM/app/releases/latest"><img src="https://img.shields.io/badge/VirusTotal-scanned-394EFF?style=for-the-badge&logo=virustotal&logoColor=white" alt="VirusTotal"></a>
+
 <b>👆 ဒေါင်းလုဒ်ရန် အစိမ်းရောင်ခလုတ်ကို နှိပ်ပါ</b>
 
 <br><br>

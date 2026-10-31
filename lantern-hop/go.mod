@@ -2,7 +2,10 @@ module github.com/drvpntm/app/lantern-hop
 
 go 1.26.10
 
-require github.com/getlantern/radiance v0.0.0-20261031145118-334712cb074a
+require (
+	github.com/getlantern/radiance v0.0.0-20261031145118-334712cb074a
+	github.com/sagernet/sing-box v1.13.19
+)
 
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect
@@ -215,7 +218,6 @@ require (
 	github.com/sagernet/nftables v0.3.0-mod.2 // indirect
 	github.com/sagernet/quic-go v0.59.0-sing-box-mod.4 // indirect
 	github.com/sagernet/sing v0.8.13 // indirect
-	github.com/sagernet/sing-box v1.13.19 // indirect
 	github.com/sagernet/sing-mux v0.3.5 // indirect
 	github.com/sagernet/sing-quic v0.6.4-0.20260803041914-d83826c306d7 // indirect
 	github.com/sagernet/sing-shadowsocks v0.2.8 // indirect

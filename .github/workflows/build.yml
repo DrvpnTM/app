@@ -419,10 +419,54 @@ jobs:
           sparse-checkout-cone-mode: false
           path: repo
 
+      # VirusTotal scan of DrVPN.apk, shown in the release notes with its result. Needs the
+      # VT_API_KEY secret (a free virustotal.com account); without it the release has no scan line.
+      - name: Scan with VirusTotal
+        env:
+          VT_API_KEY: ${{ secrets.VT_API_KEY }}
+        run: |
+          cp repo/.github/release-body.md body.md
+          sha=$(sha256sum apks/DrVPN.apk | cut -d' ' -f1)
+          link="https://www.virustotal.com/gui/file/$sha"
+          if [ -z "$VT_API_KEY" ]; then
+            echo "No VT_API_KEY secret: no virus scan line."
+            exit 0
+          fi
+          # Files over 32 MB go to a one-time upload URL.
+          url=$(curl -sf -H "x-apikey: $VT_API_KEY" https://www.virustotal.com/api/v3/files/upload_url | jq -r .data) || url=""
+          [ -n "$url" ] || { echo "::warning::VirusTotal: no upload URL"; exit 0; }
+          analysis=$(curl -sf -H "x-apikey: $VT_API_KEY" -F "file=@apks/DrVPN.apk" "$url" | jq -r .data.id) || analysis=""
+          [ -n "$analysis" ] || { echo "::warning::VirusTotal: upload failed"; exit 0; }
+          result=""
+          for i in $(seq 1 40); do
+            sleep 30
+            r=$(curl -sf -H "x-apikey: $VT_API_KEY" "https://www.virustotal.com/api/v3/analyses/$analysis") || continue
+            if [ "$(jq -r .data.attributes.status <<<"$r")" = "completed" ]; then
+              bad=$(jq '.data.attributes.stats.malicious + .data.attributes.stats.suspicious' <<<"$r")
+              total=$(jq '[.data.attributes.stats[]] | add' <<<"$r")
+              result="$bad/$total"
+              break
+            fi
+          done
+          {
+            echo
+            echo '<div align="center">'
+            echo
+            if [ -n "$result" ]; then
+              echo "🛡️ **[VirusTotal: $result]($link)** — اسکن ویروس / virus scan"
+            else
+              echo "🛡️ **[VirusTotal]($link)** — اسکن ویروس / virus scan"
+            fi
+            echo
+            echo "<code>SHA-256: $sha</code>"
+            echo
+            echo '</div>'
+          } >> body.md
+
       - name: Publish release
         uses: softprops/action-gh-release@v2
         with:
-          body_path: repo/.github/release-body.md
+          body_path: body.md
           files: apks/*.apk
           tag_name: v${{ needs.build.outputs.version }}
           target_commitish: ${{ github.sha }}

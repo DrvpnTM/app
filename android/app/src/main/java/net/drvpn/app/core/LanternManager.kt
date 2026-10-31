@@ -1,6 +1,9 @@
 package net.drvpn.app.core
 
 import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.os.Build
 import net.drvpn.app.AppConfig
 import net.drvpn.app.dto.entities.ProfileItem
 import net.drvpn.app.enums.EConfigType
@@ -8,6 +11,7 @@ import net.drvpn.app.util.LogUtil
 import java.io.File
 import java.io.IOException
 import java.net.InetSocketAddress
+import java.net.NetworkInterface
 import java.net.Socket
 
 /**
@@ -56,7 +60,7 @@ object LanternManager {
             "-socks", "${AppConfig.LOOPBACK}:${AppConfig.PORT_LANTERN_SOCKS}",
             "-data", workDir.absolutePath,
             "-log-level", "info",
-        )
+        ) + networkArguments(context)
         LogUtil.i(AppConfig.TAG, "Lantern: starting")
         val builder = ProcessBuilder(args).directory(workDir).redirectErrorStream(true)
         builder.environment().apply {
@@ -74,6 +78,37 @@ object LanternManager {
             }
             LogUtil.i(AppConfig.TAG, "Lantern: core ended")
         }, "lantern-output").apply { isDaemon = true }.start()
+    }
+
+    /**
+     * The network the core goes out on, for its "-iface" flags: on Android an app may not ask the
+     * kernel itself (netlink), as Lantern's own app answers it from Java too. The first network
+     * with internet that isn't a VPN; the app is outside its own VPN, so that is the one it uses.
+     */
+    private fun networkArguments(context: Context): List<String> {
+        return try {
+            val cm = context.getSystemService(ConnectivityManager::class.java) ?: return emptyList()
+            val network = (listOfNotNull(cm.activeNetwork) + cm.allNetworks.toList()).firstOrNull { n ->
+                val caps = cm.getNetworkCapabilities(n) ?: return@firstOrNull false
+                caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
+                        !caps.hasTransport(NetworkCapabilities.TRANSPORT_VPN)
+            } ?: return emptyList()
+            val link = cm.getLinkProperties(network) ?: return emptyList()
+            val name = link.interfaceName ?: return emptyList()
+            val index = NetworkInterface.getByName(name)?.index ?: return emptyList()
+            val caps = cm.getNetworkCapabilities(network)
+            val type = when {
+                caps?.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) == true -> "cellular"
+                caps?.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) == true -> "ethernet"
+                else -> "wifi"
+            }
+            val addrs = link.linkAddresses.joinToString(",") { "${it.address.hostAddress?.substringBefore('%')}/${it.prefixLength}" }
+            val mtu = (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) link.mtu else 0).takeIf { it > 0 } ?: 1500
+            listOf("-iface", name, "-iface-index", index.toString(), "-iface-mtu", mtu.toString(), "-iface-addrs", addrs, "-iface-type", type)
+        } catch (e: Exception) {
+            LogUtil.w(AppConfig.TAG, "Lantern: cannot read the network", e)
+            emptyList()
+        }
     }
 
     @Synchronized

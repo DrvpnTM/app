@@ -19,7 +19,11 @@ import net.drvpn.app.extension.delay
 import net.drvpn.app.extension.isComplexType
 import net.drvpn.app.extension.matchesPattern
 import net.drvpn.app.extension.moveItem
+import net.drvpn.app.core.ExtraHopKind
+import net.drvpn.app.core.ExtraHopManager
+import net.drvpn.app.core.ExtraHopMode
 import net.drvpn.app.core.LauncherManager
+import net.drvpn.app.handler.SpeedtestManager
 import net.drvpn.app.handler.AnnouncementManager
 import net.drvpn.app.handler.AppUpdater
 import net.drvpn.app.handler.AppLog
@@ -293,7 +297,7 @@ class MainViewModel(
                         (event.message?.takeIf { it.isNotBlank() }?.let { " ($it)" } ?: ""))
                 updateRunningState(false)
                 markDisconnected()
-                retryOnAnotherServer()
+                if (!retryOnAnotherServer()) offerRescue()
             }
 
             MainServiceEvent.StateStopSuccess -> {
@@ -457,6 +461,12 @@ class MainViewModel(
             is MainAction.Search -> filterConfig(action.query)
             is MainAction.SetShowServersWithoutPing -> setShowServersWithoutPing(action.show)
             MainAction.SelectFastest -> selectFastest()
+            MainAction.RescueAccept -> acceptRescue()
+            MainAction.ApplyChain -> if (uiState.value.isRunning) dataSource.sendMsg2Service(AppConfig.MSG_STATE_RESTART, "")
+            MainAction.RescueDismiss -> {
+                if (uiState.value.rescue == RescueState.Offer) rescueDeclined = true
+                _uiState.update { it.copy(rescue = null) }
+            }
             MainAction.StartUpdate -> startUpdate()
             MainAction.CheckUpdate -> checkForUpdate()
             MainAction.UpdateLater -> {
@@ -1196,19 +1206,112 @@ class MainViewModel(
 
     private fun autoReconnectEnabled() = MmkvManager.decodeSettingsBool(AppConfig.PREF_DRVPN_AUTO_RECONNECT, true)
 
-    /** The periodic link check now runs in the VPN service (CoreServiceManager watchdog). */
+    /**
+     * The periodic link check runs in the VPN service (CoreServiceManager watchdog). Here, once
+     * after connecting: when the link doesn't work, offer emergency mode (the rescue flow). While
+     * emergency mode runs, follow its search instead.
+     */
     private fun startHealthChecks() {
         healthJob?.cancel()
         healthFailures = 0
+        if (ExtraHopManager.isEmergency()) {
+            followEmergency()
+            return
+        }
+        healthJob = viewModelScope.launch {
+            // A hop (Aether scans first, Tor is slow) needs longer before it can carry traffic.
+            delay(if (ExtraHopManager.mode() != ExtraHopMode.OFF) 45_000 else 6_000)
+            repeat(2) { attempt ->
+                if (!uiState.value.isRunning) return@launch
+                if (linkWorks()) return@launch
+                if (attempt == 0) delay(5_000)
+            }
+            if (uiState.value.isRunning) offerRescue()
+        }
+    }
+
+    /** Whether a page loads through the running connection (its local HTTP proxy). */
+    private suspend fun linkWorks(): Boolean = withContext(Dispatchers.IO) {
+        runCatching { SpeedtestManager.getRemoteIPInfo() != null }.getOrDefault(false)
+    }
+
+    // ---------- Rescue (emergency mode offer) ----------
+    /** "Not now" was tapped: don't ask again until the app restarts. */
+    private var rescueDeclined = false
+
+    private fun offerRescue() {
+        if (uiState.value.rescue != null) return
+        when {
+            // Emergency mode already tried everything.
+            ExtraHopManager.isEmergency() -> _uiState.update { it.copy(rescue = RescueState.Premium) }
+            !rescueDeclined -> _uiState.update { it.copy(rescue = RescueState.Offer) }
+        }
+    }
+
+    /** Turns emergency mode on (before the server unless the user chose after) and reconnects. */
+    private fun acceptRescue() {
+        if (ExtraHopManager.mode() == ExtraHopMode.OFF) {
+            MmkvManager.encodeSettings(AppConfig.PREF_EXTRA_HOP_MODE, ExtraHopMode.BEFORE.value)
+        }
+        MmkvManager.encodeSettings(AppConfig.PREF_EXTRA_HOP_KIND, ExtraHopKind.EMERGENCY.value)
+        MmkvManager.encodeSettings(AppConfig.PREF_EMERGENCY_STATE, "")
+        val total = ExtraHopManager.emergencyCandidates().size
+        _uiState.update { it.copy(rescue = RescueState.Searching(null, 0, total)) }
+        if (uiState.value.isRunning) {
+            dataSource.sendMsg2Service(AppConfig.MSG_STATE_RESTART, "")
+        } else {
+            viewModelScope.launch {
+                runCatching { LauncherManager.startService(app) }
+                    .onFailure { LogUtil.e(AppConfig.TAG, "Emergency start failed", it) }
+            }
+        }
+        followEmergency()
+    }
+
+    /**
+     * Follows the VPN process's emergency search (PREF_EMERGENCY_STATE and the active hop) and
+     * shows it in the rescue dialog, then the result. Without the dialog open (emergency chosen in
+     * settings), only a failure is shown.
+     */
+    private fun followEmergency() {
+        healthJob?.cancel()
+        healthJob = viewModelScope.launch {
+            val candidates = ExtraHopManager.emergencyCandidates()
+            // Each method gets about 90 s in the service; a little more for starting up.
+            val deadline = System.currentTimeMillis() + candidates.size * 95_000L + 60_000L
+            while (System.currentTimeMillis() < deadline) {
+                val (state, active) = withContext(Dispatchers.IO) {
+                    MmkvManager.decodeSettingsString(AppConfig.PREF_EMERGENCY_STATE).orEmpty() to
+                            MmkvManager.decodeSettingsString(AppConfig.PREF_EXTRA_HOP_ACTIVE).orEmpty()
+                }
+                val kind = ExtraHopKind.entries.find { it.value == active.substringBefore('|') }
+                when (state) {
+                    "ok" -> {
+                        if (uiState.value.rescue != null) _uiState.update { it.copy(rescue = RescueState.Success(kind)) }
+                        return@launch
+                    }
+                    "failed" -> {
+                        _uiState.update { it.copy(rescue = RescueState.Premium) }
+                        return@launch
+                    }
+                }
+                if (uiState.value.rescue is RescueState.Searching) {
+                    val tried = candidates.indexOf(kind).coerceAtLeast(0)
+                    _uiState.update { it.copy(rescue = RescueState.Searching(kind, tried, candidates.size)) }
+                }
+                delay(1_000)
+            }
+            _uiState.update { it.copy(rescue = RescueState.Premium) }
+        }
     }
 
     @Suppress("UNUSED_PARAMETER")
     private fun onHealthResult(ok: Boolean) = Unit
 
-    /** A failed start tries the next best pinged server, at most twice in a row. */
-    private fun retryOnAnotherServer() {
-        if (!autoReconnectEnabled() || startRetries >= 2) return
-        val next = nextBestServerGuid() ?: return
+    /** A failed start tries the next best pinged server, at most twice in a row; false when it doesn't. */
+    private fun retryOnAnotherServer(): Boolean {
+        if (!autoReconnectEnabled() || startRetries >= 2) return false
+        val next = nextBestServerGuid() ?: return false
         startRetries++
         updateSelectedGuid(next)
         toast(R.string.home_auto_switched)
@@ -1217,6 +1320,7 @@ class MainViewModel(
             runCatching { LauncherManager.startService(app) }
                 .onFailure { LogUtil.e(AppConfig.TAG, "Auto-reconnect start failed", it) }
         }
+        return true
     }
 
     /** Fastest pinged server other than the current one. */

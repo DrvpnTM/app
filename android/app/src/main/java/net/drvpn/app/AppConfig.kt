@@ -79,6 +79,10 @@ object AppConfig {
     const val PREF_EXTRA_HOP_KIND = "pref_extra_hop_kind"
     /** The WireGuard config (wg-quick text or wireguard:// link) of the "tunnel" extra hop. */
     const val PREF_EXTRA_HOP_WIREGUARD = "pref_extra_hop_wireguard"
+    /** Written by the VPN process: "<kind>|<mode>" of the hop the running connection uses, or empty. */
+    const val PREF_EXTRA_HOP_ACTIVE = "pref_extra_hop_active"
+    /** Written by the VPN process during an emergency search: "searching", "ok" or "failed". */
+    const val PREF_EMERGENCY_STATE = "pref_emergency_state"
     const val PREF_UI_MODE_NIGHT = "pref_ui_mode_night"
     const val PREF_DYNAMIC_COLOR = "pref_dynamic_color"
     const val PREF_IPV6_ENABLED = "pref_ipv6_enabled"

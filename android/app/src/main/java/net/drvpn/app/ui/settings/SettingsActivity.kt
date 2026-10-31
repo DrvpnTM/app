@@ -37,6 +37,7 @@ import net.drvpn.app.AppConfig.VPN
 import net.drvpn.app.R
 import net.drvpn.app.core.ExtraHopKind
 import net.drvpn.app.core.ExtraHopManager
+import net.drvpn.app.ui.compose.ExtraHopPicker
 import net.drvpn.app.core.ExtraHopMode
 import net.drvpn.app.extension.toastError
 import net.drvpn.app.handler.AppLocaleManager
@@ -338,22 +339,15 @@ fun SettingsScreen(
                 expanded = extraHopExpanded,
                 onExpandedChange = { extraHopExpanded = it }
             )
+            if (extraHopExpanded) {
+                ExtraHopPicker(
+                    mode = extraHopMode,
+                    kind = extraHopKind,
+                    onModeChange = { extraHopMode = it },
+                    onKindChange = { extraHopKind = it },
+                )
+            }
             if (extraHopExpanded) SettingsGroup {
-                SettingsListItem(
-                    title = stringResource(R.string.title_extra_hop_mode),
-                    entries = stringArrayResource(R.array.extra_hop_mode).toList(),
-                    values = ExtraHopMode.entries.map { it.value },
-                    selectedValue = extraHopMode,
-                    onSelected = { extraHopMode = it }
-                )
-                SettingsListItem(
-                    title = stringResource(R.string.title_extra_hop_kind),
-                    entries = stringArrayResource(R.array.extra_hop_kind).toList(),
-                    values = ExtraHopKind.entries.map { it.value },
-                    selectedValue = extraHopKind,
-                    enabled = extraHopMode != ExtraHopMode.OFF.value,
-                    onSelected = { extraHopKind = it }
-                )
                 SettingsEditItem(
                     title = stringResource(R.string.title_extra_hop_tunnel_config),
                     value = extraHopWireGuard,

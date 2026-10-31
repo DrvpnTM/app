@@ -735,4 +735,44 @@
         <item>Silk Road (free, before the server only)</item>
         <item>Emergency (try all until one connects)</item>
     </string-array>
+    <string name="hop_great_wall">Great Wall</string>
+    <string name="hop_great_wall_desc">Free · fast · finds a working route by itself</string>
+    <string name="hop_ps_pro">PS Pro</string>
+    <string name="hop_ps_pro_desc">Free · made for heavy filtering</string>
+    <string name="hop_black_cdn">Black Insecure CDN</string>
+    <string name="hop_black_cdn_desc">Free · slow · hides you best</string>
+    <string name="hop_dr_tunnel">Dr Tunnel</string>
+    <string name="hop_dr_tunnel_desc">Your own WireGuard config (below)</string>
+    <string name="hop_silk_road">Silk Road</string>
+    <string name="hop_silk_road_desc">Free · always before the server</string>
+    <string name="hop_emergency">Emergency</string>
+    <string name="hop_emergency_desc">Tries them all until one connects</string>
+    <string name="extra_hop_intro">Chain one more hop to your server, for when the server alone is blocked or you want another final IP.</string>
+    <string name="extra_hop_mode_off">Off</string>
+    <string name="extra_hop_mode_before">Before</string>
+    <string name="extra_hop_mode_after">After</string>
+    <string name="extra_hop_mode_off_desc">Your server connects on its own.</string>
+    <string name="extra_hop_mode_before_desc">Phone → extra hop → your server. Helps when your server is blocked.</string>
+    <string name="extra_hop_mode_after_desc">Phone → your server → extra hop. Sites see the extra hop\'s IP.</string>
+    <string name="extra_hop_role_entry">Before your server</string>
+    <string name="extra_hop_role_exit">Final IP</string>
+    <string name="extra_hop_connecting">Connecting…</string>
+    <string name="extra_hop_emergency_using">Emergency: %1$s</string>
+    <string name="rescue_offer_title">Can\'t connect?</string>
+    <string name="rescue_offer_text">Your internet looks heavily filtered. Turn on emergency mode? Dr VPN will try every way it has until one connects.</string>
+    <string name="rescue_offer_accept">Turn on emergency mode</string>
+    <string name="rescue_not_now">Not now</string>
+    <string name="rescue_hide">Hide</string>
+    <string name="rescue_searching_title">Finding a way through…</string>
+    <string name="rescue_searching_trying">Trying %1$s. This can take a few minutes.</string>
+    <string name="rescue_success_title">Connected!</string>
+    <string name="rescue_success_text">%1$s got you through.</string>
+    <string name="rescue_success_text_plain">Emergency mode got you through.</string>
+    <string name="rescue_great">Great</string>
+    <string name="rescue_premium_title">Your internet is heavily restricted</string>
+    <string name="rescue_premium_text">None of the free ways could get through. Go to drvpn.net, sign up and buy a premium subscription: premium servers are made for exactly this.</string>
+    <string name="rescue_premium_button">Go to drvpn.net</string>
+    <string name="rescue_close">Close</string>
+    <string name="extra_hop_off_row">Extra hop: off · tap to add one</string>
+    <string name="home_button_brand">Dr VPN</string>
 </resources>

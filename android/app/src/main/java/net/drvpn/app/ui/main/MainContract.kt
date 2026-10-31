@@ -50,6 +50,8 @@ data class MainUiState(
     /** The update could not be downloaded in the app; the dialog offers the download page instead. */
     val updateFailed: Boolean = false,
     val shareQRCodeName: String = "",
+    /** The rescue flow (emergency offer, search, result) when a connection doesn't work. */
+    val rescue: RescueState? = null,
 )
 
 /**
@@ -92,6 +94,10 @@ sealed interface MainAction {
     data object StartUpdate : MainAction
     data object CheckUpdate : MainAction
     data object UpdateLater : MainAction
+    data object RescueAccept : MainAction
+    /** The chain was changed from Home: reconnect with it. */
+    data object ApplyChain : MainAction
+    data object RescueDismiss : MainAction
 
     data class ImportBatchConfig(val configText: String) : MainAction
 

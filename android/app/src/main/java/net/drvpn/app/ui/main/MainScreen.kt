@@ -164,6 +164,14 @@ fun MainScreen(
         )
     }
 
+    uiState.rescue?.let { rescue ->
+        RescueDialog(
+            state = rescue,
+            onAccept = { onAction(MainAction.RescueAccept) },
+            onDismiss = { onAction(MainAction.RescueDismiss) },
+        )
+    }
+
     uiState.update?.let { update ->
         UpdateDialog(
             version = update.latestVersion.orEmpty(),

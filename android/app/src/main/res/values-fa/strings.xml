@@ -735,4 +735,44 @@
         <item>جادهٔ ابریشم (رایگان، فقط قبل از سرور)</item>
         <item>حالت اضطراری (همه را امتحان می‌کند تا یکی وصل شود)</item>
     </string-array>
+    <string name="hop_great_wall">دیوار چین</string>
+    <string name="hop_great_wall_desc">رایگان · سریع · خودش مسیر سالم پیدا می‌کند</string>
+    <string name="hop_ps_pro">PS Pro</string>
+    <string name="hop_ps_pro_desc">رایگان · ساخته‌شده برای فیلترینگ شدید</string>
+    <string name="hop_black_cdn">CDN سیاه نا امن</string>
+    <string name="hop_black_cdn_desc">رایگان · کند · بیشترین ناشناسی</string>
+    <string name="hop_dr_tunnel">تونل دکتر</string>
+    <string name="hop_dr_tunnel_desc">کانفیگ WireGuard خودتان (پایین)</string>
+    <string name="hop_silk_road">جادهٔ ابریشم</string>
+    <string name="hop_silk_road_desc">رایگان · همیشه قبل از سرور</string>
+    <string name="hop_emergency">حالت اضطراری</string>
+    <string name="hop_emergency_desc">همه را امتحان می‌کند تا یکی وصل شود</string>
+    <string name="extra_hop_intro">یک حلقهٔ دیگر به سرورتان زنجیر کنید؛ برای وقتی که سرور به‌تنهایی فیلتر است یا IP نهایی دیگری می‌خواهید.</string>
+    <string name="extra_hop_mode_off">خاموش</string>
+    <string name="extra_hop_mode_before">قبل از سرور</string>
+    <string name="extra_hop_mode_after">بعد از سرور</string>
+    <string name="extra_hop_mode_off_desc">سرور شما به‌تنهایی وصل می‌شود.</string>
+    <string name="extra_hop_mode_before_desc">گوشی ← حلقهٔ اضافه ← سرور شما. وقتی سرورتان فیلتر است کمک می‌کند.</string>
+    <string name="extra_hop_mode_after_desc">گوشی ← سرور شما ← حلقهٔ اضافه. سایت‌ها IP حلقهٔ اضافه را می‌بینند.</string>
+    <string name="extra_hop_role_entry">قبل از سرور شما</string>
+    <string name="extra_hop_role_exit">IP نهایی</string>
+    <string name="extra_hop_connecting">در حال اتصال…</string>
+    <string name="extra_hop_emergency_using">اضطراری: %1$s</string>
+    <string name="rescue_offer_title">وصل نمی‌شوید؟</string>
+    <string name="rescue_offer_text">به نظر می‌رسد اینترنت شما به‌شدت فیلتر است. حالت اضطراری برای اتصال را فعال کنم؟ دکتر وی پی ان همهٔ روش‌هایش را امتحان می‌کند تا هر طور شده شما را وصل کند.</string>
+    <string name="rescue_offer_accept">بله، حالت اضطراری را فعال کن</string>
+    <string name="rescue_not_now">فعلاً نه</string>
+    <string name="rescue_hide">پنهان کن</string>
+    <string name="rescue_searching_title">در حال پیدا کردن راه عبور…</string>
+    <string name="rescue_searching_trying">در حال امتحان %1$s. ممکن است چند دقیقه طول بکشد.</string>
+    <string name="rescue_success_title">وصل شدید!</string>
+    <string name="rescue_success_text">%1$s شما را وصل کرد.</string>
+    <string name="rescue_success_text_plain">حالت اضطراری شما را وصل کرد.</string>
+    <string name="rescue_great">عالی</string>
+    <string name="rescue_premium_title">اینترنت شما به‌شدت محدود است</string>
+    <string name="rescue_premium_text">هیچ‌کدام از روش‌های رایگان نتوانست وصل شود. به وب‌سایت drvpn.net بروید، در سایت ثبت‌نام کنید و اشتراک پریمیوم بخرید؛ سرورهای پریمیوم دقیقاً برای همین شرایط ساخته شده‌اند.</string>
+    <string name="rescue_premium_button">رفتن به drvpn.net</string>
+    <string name="rescue_close">بستن</string>
+    <string name="extra_hop_off_row">حلقهٔ اضافه: خاموش · برای افزودن بزنید</string>
+    <string name="home_button_brand">دکتر وی پی ان</string>
 </resources>

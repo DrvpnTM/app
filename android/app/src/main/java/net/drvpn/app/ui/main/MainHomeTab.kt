@@ -24,6 +24,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
+import net.drvpn.app.ui.compose.ExtraHopBand
+import net.drvpn.app.ui.compose.ExtraHopSheet
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -127,6 +129,16 @@ internal fun MainHomeTab(
 ) {
     // Pulling Home up (or tapping the handle / server card) opens the server picker sheet.
     var showPicker by rememberSaveable { mutableStateOf(false) }
+    // Tapping the chain band opens the chain sheet; [chainVersion] makes the band read it again.
+    var showChain by rememberSaveable { mutableStateOf(false) }
+    var chainVersion by remember { mutableStateOf(0) }
+    if (showChain) {
+        ExtraHopSheet { changed ->
+            showChain = false
+            chainVersion++
+            if (changed) onAction(MainAction.ApplyChain)
+        }
+    }
     val selectedRow = serverRows.firstOrNull { it.guid == selectedGuid }
     val openPicker: () -> Unit = { if (serverRows.isNotEmpty()) showPicker = true else onOpenProxies() }
     val latestOpen by rememberUpdatedState(openPicker)
@@ -189,7 +201,7 @@ internal fun MainHomeTab(
                     focusRequester = connectFocus,
                     // In landscape (phones on their side, TVs) the button shrinks with the height so the
                     // status, timer and speed below it stay visible.
-                    size = if (landscape) (availableHeight * 0.42f).coerceIn(110.dp, 200.dp) else 220.dp,
+                    size = if (landscape) (availableHeight * 0.42f).coerceIn(110.dp, 170.dp) else 170.dp,
                 )
                 Spacer(Modifier.height(12.dp))
                 if (!isRunning) {
@@ -259,6 +271,9 @@ internal fun MainHomeTab(
                     LocationCard(
                         row = selectedRow,
                         fallbackName = selectedServerName,
+                        isRunning = isRunning,
+                        chainVersion = chainVersion,
+                        onChainClick = { showChain = true },
                         onClick = openPicker,
                         onShowQr = selectedGuid?.let { guid -> { onAction(MainAction.ShareQRCode(guid)) } }
                     )
@@ -291,6 +306,9 @@ internal fun MainHomeTab(
                 LocationCard(
                     row = selectedRow,
                     fallbackName = selectedServerName,
+                    isRunning = isRunning,
+                    chainVersion = chainVersion,
+                    onChainClick = { showChain = true },
                     onClick = openPicker,
                     onShowQr = selectedGuid?.let { guid -> { onAction(MainAction.ShareQRCode(guid)) } }
                 )
@@ -560,7 +578,7 @@ private fun StatusPill(isRunning: Boolean) {
 }
 
 @Composable
-private fun ConnectButton(isRunning: Boolean, onToggle: () -> Unit, size: Dp = 220.dp, focusRequester: FocusRequester? = null) {
+private fun ConnectButton(isRunning: Boolean, onToggle: () -> Unit, size: Dp = 170.dp, focusRequester: FocusRequester? = null) {
     // Off: brand blue (an invitation to tap, not a "disabled" grey). On: green.
     val top by animateColorAsState(
         targetValue = if (isRunning) Color(0xFF4ADE80) else Color(0xFF60A5FA),
@@ -616,12 +634,23 @@ private fun ConnectButton(isRunning: Boolean, onToggle: () -> Unit, size: Dp = 2
                 .background(Brush.verticalGradient(listOf(top, bottom)))
                 .clickable(onClick = onToggle),
         ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_power_24dp),
-                contentDescription = null,
-                tint = Color.White,
-                modifier = Modifier.size(size * 0.33f),
-            )
+            // A light power sign with the name under it, like a badge.
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_power_24dp),
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(size * 0.22f),
+                )
+                Spacer(Modifier.height(size * 0.02f))
+                Text(
+                    text = stringResource(R.string.home_button_brand),
+                    color = Color.White.copy(alpha = 0.92f),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = (size.value * 0.075f).sp,
+                    maxLines = 1,
+                )
+            }
         }
     }
 }
@@ -634,17 +663,26 @@ private fun ConnectButton(isRunning: Boolean, onToggle: () -> Unit, size: Dp = 2
 private fun LocationCard(
     row: ServerRowUiModel?,
     fallbackName: String,
+    isRunning: Boolean,
+    chainVersion: Int,
+    onChainClick: () -> Unit,
     onClick: () -> Unit,
     onShowQr: (() -> Unit)?,
 ) {
     val shape = RoundedCornerShape(20.dp)
-    Row(
+    // The extra hop, when on, is the card's top band: the chain reads hop, then server (as Hiddify).
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .shadow(10.dp, shape, ambientColor = Color(0x140F172A), spotColor = Color(0x140F172A))
             .clip(shape)
             .background(MaterialTheme.colorScheme.surface)
             .border(1.dp, MaterialTheme.colorScheme.outlineVariant, shape)
+    ) {
+    ExtraHopBand(isRunning, refresh = chainVersion, onClick = onChainClick)
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
             .focusHighlight(shape)
             .clickable(role = Role.Button, onClick = onClick)
             .padding(start = 14.dp, end = 6.dp, top = 12.dp, bottom = 12.dp),
@@ -686,6 +724,7 @@ private fun LocationCard(
                 )
             }
         }
+    }
     }
 }
 

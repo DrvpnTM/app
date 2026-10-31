@@ -131,6 +131,8 @@ object CoreServiceManager {
 
         currentVpnInterface = vpnInterface
         ExtraHopManager.emergencyKind = null
+        // Before the UI hears "connected", so it never reads the last search's result.
+        if (ExtraHopManager.isEmergency()) MmkvManager.encodeSettings(AppConfig.PREF_EMERGENCY_STATE, "searching")
         launchCore(service, vpnInterface)
         startNetworkMonitor(service)
         startWatchdog()
@@ -149,6 +151,7 @@ object CoreServiceManager {
         emergencyJob = null
         val config = currentConfig ?: return
         if (!ExtraHopManager.isEmergency() || ExtraHopManager.hopProfile(service, config) == null) return
+        MmkvManager.encodeSettings(AppConfig.PREF_EMERGENCY_STATE, "searching")
         emergencyJob = watchdogScope.launch {
             val candidates = ExtraHopManager.emergencyCandidates()
             for ((index, kind) in candidates.withIndex()) {
@@ -160,11 +163,13 @@ object CoreServiceManager {
                 }
                 if (waitForConnection()) {
                     LogUtil.i(AppConfig.TAG, "Emergency: connected with ${kind.value}")
+                    MmkvManager.encodeSettings(AppConfig.PREF_EMERGENCY_STATE, "ok")
                     return@launch
                 }
                 if (!isRunning()) return@launch
             }
             LogUtil.w(AppConfig.TAG, "Emergency: no option connected, going back to ${candidates.first().value}")
+            MmkvManager.encodeSettings(AppConfig.PREF_EMERGENCY_STATE, "failed")
             ExtraHopManager.emergencyKind = candidates.first()
             withContext(Dispatchers.Main) { reloadCore() }
         }
@@ -285,6 +290,7 @@ object CoreServiceManager {
         }
         // Aether runs as a program next to Xray; another server ends the one a reload leaves.
         val hop = ExtraHopManager.hopProfile(service, config)
+        MmkvManager.encodeSettings(AppConfig.PREF_EXTRA_HOP_ACTIVE, hop?.let { ExtraHopManager.activeLabel(it) }.orEmpty())
         val aetherHop = hop?.takeIf { it.configType == EConfigType.AETHER }
         if (LanternManager.isHop(hop)) {
             LanternManager.start(service)
@@ -358,6 +364,7 @@ object CoreServiceManager {
 
         AetherManager.stopInBackground()
         LanternManager.stopInBackground()
+        MmkvManager.encodeSettings(AppConfig.PREF_EXTRA_HOP_ACTIVE, "")
 
         // Close existing browser dialer
         CoreNativeManager.reconcileBrowserDialer("")
