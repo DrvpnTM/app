@@ -443,7 +443,8 @@ jobs:
             r=$(curl -sf -H "x-apikey: $VT_API_KEY" "https://www.virustotal.com/api/v3/analyses/$analysis") || continue
             if [ "$(jq -r .data.attributes.status <<<"$r")" = "completed" ]; then
               bad=$(jq '.data.attributes.stats.malicious + .data.attributes.stats.suspicious' <<<"$r")
-              total=$(jq '[.data.attributes.stats[]] | add' <<<"$r")
+              # Engines that scanned it; leaves out timeouts and ones that don't read APKs.
+              total=$(jq '.data.attributes.stats | .malicious + .suspicious + .undetected + .harmless' <<<"$r")
               result="$bad/$total"
               break
             fi
@@ -453,7 +454,9 @@ jobs:
             echo '<div align="center">'
             echo
             if [ -n "$result" ]; then
-              echo "🛡️ **[VirusTotal: $result]($link)** — اسکن ویروس / virus scan"
+              clean=""
+              [ "${result%%/*}" = "0" ] && clean=" — پاک / clean"
+              echo "🛡️ **[VirusTotal: $result$clean]($link)** — اسکن ویروس / virus scan"
             else
               echo "🛡️ **[VirusTotal]($link)** — اسکن ویروس / virus scan"
             fi
