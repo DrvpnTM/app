@@ -8,11 +8,14 @@ package main
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"flag"
 	"log"
 	"os"
 	"os/signal"
 	"path/filepath"
+	"strings"
 	"syscall"
 	"time"
 
@@ -33,8 +36,17 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
+	if err := os.MkdirAll(*dataDir, 0o700); err != nil {
+		log.Fatalf("data folder: %v", err)
+	}
+	deviceID, err := loadDeviceID(*dataDir)
+	if err != nil {
+		log.Fatalf("device ID: %v", err)
+	}
+
 	b, err := backend.NewLocalBackend(ctx, backend.Options{
 		DataDir:          *dataDir,
+		DeviceID:         deviceID,
 		LogDir:           filepath.Join(*dataDir, "logs"),
 		Locale:           *locale,
 		LogLevel:         *logLevel,
@@ -68,4 +80,22 @@ func main() {
 	<-ctx.Done()
 	_ = b.DisconnectVPN()
 	b.Close()
+}
+
+// loadDeviceID returns this install's random device ID, made on first run. On Android Radiance
+// does not make one itself (the Lantern app passes its own), and Lantern's API refuses a new
+// free user without it.
+func loadDeviceID(dataDir string) (string, error) {
+	path := filepath.Join(dataDir, "device-id")
+	if b, err := os.ReadFile(path); err == nil {
+		if id := strings.TrimSpace(string(b)); id != "" {
+			return id, nil
+		}
+	}
+	raw := make([]byte, 16)
+	if _, err := rand.Read(raw); err != nil {
+		return "", err
+	}
+	id := hex.EncodeToString(raw)
+	return id, os.WriteFile(path, []byte(id), 0o600)
 }

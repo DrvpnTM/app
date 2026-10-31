@@ -47,13 +47,19 @@ for abi in $ABIS; do
   # cgo is needed: on Android the DNS lookups and OS version Radiance's libraries use come from C.
   # 16 KB pages, as Android 15 devices ask for. sing-box's libbox reaches into the os package on
   # Android, so the link name check is off, as in Lantern's own mobile build.
+  # The C++ runtime is linked statically: Android doesn't ship libc++_shared.so, and a program run
+  # from the library folder would not start without it.
   (cd "$SRC" && env \
     CGO_ENABLED=1 GOOS=android GOARCH="$goarch" GOARM="$goarm" \
     CC="$TOOLCHAIN/$cc" CXX="$TOOLCHAIN/$cc++" \
     GOFLAGS=-mod=mod \
     go build -tags "$TAGS" -trimpath \
-      -ldflags "-s -w -checklinkname=0 -extldflags '-Wl,-z,max-page-size=16384 -Wl,-z,common-page-size=16384'" \
+      -ldflags "-s -w -checklinkname=0 -extldflags '-static-libstdc++ -Wl,-z,max-page-size=16384 -Wl,-z,common-page-size=16384'" \
       -o "$OUT_DIR/$abi/liblanternhop.so" .)
+  if "$TOOLCHAIN/llvm-readelf" --dynamic-table "$OUT_DIR/$abi/liblanternhop.so" | grep -q 'libc++_shared.so'; then
+    echo "lantern-hop for $abi needs libc++_shared.so, which Android does not ship" >&2
+    exit 1
+  fi
 done
 
 ls -la "$OUT_DIR"/*/
