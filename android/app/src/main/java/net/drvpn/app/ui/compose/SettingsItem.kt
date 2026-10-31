@@ -157,7 +157,8 @@ fun SettingsEditItem(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     isPassword: Boolean = false,
-    keyboardNumber: Boolean = false
+    keyboardNumber: Boolean = false,
+    singleLine: Boolean = true
 ) {
     var showDialog by remember { mutableStateOf(false) }
     val shown = if (isPassword) {
@@ -187,6 +188,7 @@ fun SettingsEditItem(
                 InputField(
                     label = title,
                     value = text,
+                    singleLine = singleLine,
                     visualTransformation = VisualTransformation.None
                 )
             ),

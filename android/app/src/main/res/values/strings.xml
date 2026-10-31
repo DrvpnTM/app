@@ -715,4 +715,24 @@
     <string name="update_try_again">Try again</string>
     <string name="update_later">Later</string>
     <string name="group_my_servers">My servers</string>
+
+    <!-- Extra hop: the provider is never named in the UI -->
+    <string name="title_extra_hop">Extra hop</string>
+    <string name="title_extra_hop_mode">Chain mode</string>
+    <string name="title_extra_hop_kind">Extra hop</string>
+    <string name="title_extra_hop_tunnel_config">Dr Tunnel config (WireGuard)</string>
+    <string name="extra_hop_tunnel_config_invalid">This WireGuard config is not valid</string>
+    <string-array name="extra_hop_mode">
+        <item>Off</item>
+        <item>Before the server (connect to the extra hop first)</item>
+        <item>After the server (final IP from the extra hop)</item>
+    </string-array>
+    <string-array name="extra_hop_kind">
+        <item>Great Wall (free)</item>
+        <item>PS Pro (free)</item>
+        <item>Black Insecure CDN (free, slow)</item>
+        <item>Dr Tunnel (your own config)</item>
+        <item>Silk Road (free, before the server only)</item>
+        <item>Emergency (try all until one connects)</item>
+    </string-array>
 </resources>

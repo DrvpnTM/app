@@ -42,11 +42,17 @@ object CoreConfigManager {
             if (configContext.isCustom) {
                 return buildV2rayCustomConfig(configContext)
             }
-            val v2rayConfig = buildUnifiedConfig(configContext)
-            if (configContext.resolvedOutbounds.first().profile.configType == EConfigType.AETHER) {
+            // Extra hop (ExtraHopManager): only for the running connection, not for ping tests.
+            val mainProfile = configContext.resolvedOutbounds.first().profile
+            val hop = ExtraHopManager.hopProfile(context, mainProfile)
+            val hoppedContext = hop?.let { ExtraHopManager.withHop(configContext, it) } ?: configContext
+            val v2rayConfig = buildUnifiedConfig(hoppedContext)
+            if (mainProfile.configType == EConfigType.AETHER) {
                 addAetherUpstream(v2rayConfig)
+            } else if (hop?.configType == EConfigType.AETHER) {
+                addAetherUpstream(v2rayConfig, ExtraHopManager.aetherUpstreamTarget(v2rayConfig))
             }
-            return toConfigResult(configContext, v2rayConfig)
+            return toConfigResult(hoppedContext, v2rayConfig)
         } catch (e: Exception) {
             LogUtil.e(AppConfig.TAG, "Failed to get V2ray config", e)
             return ConfigResult(
@@ -60,9 +66,10 @@ object CoreConfigManager {
     /**
      * Aether sends its own traffic (to WARP, Tor, Psiphon) through a SOCKS inbound of Xray, which
      * goes out directly: Xray's sockets leave the VPN even with "block connections without VPN" on.
-     * The rule comes first so that no user rule sends it back into the tunnel.
+     * The rule comes first so that no user rule sends it back into the tunnel. When Aether is the
+     * extra hop after the server, [outboundTag] is that server instead, so WARP is reached through it.
      */
-    private fun addAetherUpstream(v2rayConfig: V2rayConfig) {
+    private fun addAetherUpstream(v2rayConfig: V2rayConfig, outboundTag: String = AppConfig.TAG_DIRECT) {
         v2rayConfig.inbounds.add(
             V2rayConfig.InboundBean(
                 tag = AppConfig.TAG_AETHER_UPSTREAM,
@@ -76,7 +83,7 @@ object CoreConfigManager {
             0,
             V2rayConfig.RoutingBean.RulesBean(
                 inboundTag = listOf(AppConfig.TAG_AETHER_UPSTREAM),
-                outboundTag = AppConfig.TAG_DIRECT,
+                outboundTag = outboundTag,
             )
         )
     }

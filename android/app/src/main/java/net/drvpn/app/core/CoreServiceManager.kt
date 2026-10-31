@@ -20,6 +20,7 @@ import net.drvpn.app.dto.ConnectionTestResult
 import net.drvpn.app.dto.OutboundTrafficStat
 import net.drvpn.app.dto.entities.ProfileItem
 import net.drvpn.app.enums.BrowserDialerMode
+import net.drvpn.app.enums.EConfigType
 import net.drvpn.app.extension.delay
 import net.drvpn.app.extension.isNotNullEmpty
 import net.drvpn.app.handler.MmkvManager
@@ -48,6 +49,10 @@ import java.net.InetSocketAddress
 
 object CoreServiceManager {
     private const val WATCHDOG_INTERVAL_MS = 60_000L
+
+    /** Emergency extra hop: how long each option gets to connect (Aether may scan first, Tor is slow). */
+    private const val EMERGENCY_TRY_MS = 90_000L
+    private const val EMERGENCY_CHECK_MS = 5_000L
 
 
     private val coreController: CoreController = CoreNativeManager.newCoreController(CoreCallback())
@@ -125,9 +130,57 @@ object CoreServiceManager {
         ContextCompat.registerReceiver(service, mMsgReceive, mFilter, Utils.receiverFlags())
 
         currentVpnInterface = vpnInterface
+        ExtraHopManager.emergencyKind = null
         launchCore(service, vpnInterface)
         startNetworkMonitor(service)
         startWatchdog()
+        startEmergencySearch(service)
+    }
+
+    // ---------- Dr VPN: emergency extra hop ----------
+    private var emergencyJob: Job? = null
+
+    /**
+     * Emergency extra hop: the first option was started with the core; when it does not connect in
+     * time the next one is put in its place, until one works. When none does, the first one stays.
+     */
+    private fun startEmergencySearch(service: Service) {
+        emergencyJob?.cancel()
+        emergencyJob = null
+        val config = currentConfig ?: return
+        if (!ExtraHopManager.isEmergency() || ExtraHopManager.hopProfile(service, config) == null) return
+        emergencyJob = watchdogScope.launch {
+            val candidates = ExtraHopManager.emergencyCandidates()
+            for ((index, kind) in candidates.withIndex()) {
+                if (index > 0) {
+                    LogUtil.i(AppConfig.TAG, "Emergency: trying ${kind.value}")
+                    ExtraHopManager.emergencyKind = kind
+                    val reloaded = withContext(Dispatchers.Main) { reloadCore() }
+                    if (!reloaded) return@launch
+                }
+                if (waitForConnection()) {
+                    LogUtil.i(AppConfig.TAG, "Emergency: connected with ${kind.value}")
+                    return@launch
+                }
+                if (!isRunning()) return@launch
+            }
+            LogUtil.w(AppConfig.TAG, "Emergency: no option connected, going back to ${candidates.first().value}")
+            ExtraHopManager.emergencyKind = candidates.first()
+            withContext(Dispatchers.Main) { reloadCore() }
+        }
+    }
+
+    /** Whether the connection answers within [EMERGENCY_TRY_MS]. */
+    private suspend fun waitForConnection(): Boolean {
+        val deadline = System.currentTimeMillis() + EMERGENCY_TRY_MS
+        while (System.currentTimeMillis() < deadline) {
+            delay(EMERGENCY_CHECK_MS)
+            if (!isRunning()) return false
+            if (isReloading) continue
+            val ok = runCatching { coreController.measureDelay(SettingsManager.getDelayTestUrl()) >= 0 }.getOrDefault(false)
+            if (ok) return true
+        }
+        return false
     }
 
     // ---------- Dr VPN: background auto-reconnect ----------
@@ -146,8 +199,20 @@ object CoreServiceManager {
             while (isActive) {
                 delay(WATCHDOG_INTERVAL_MS)
                 if (!isRunning() || isReloading) continue
+                // The emergency search tests the connection itself while it runs.
+                if (emergencyJob?.isActive == true) {
+                    failures = 0
+                    continue
+                }
                 // Aether finds and keeps a working WARP endpoint itself, and its first scan can take a while.
                 if (AetherManager.isAether(currentConfig)) {
+                    failures = 0
+                    continue
+                }
+                // The extra hop's Aether may still be scanning: switching servers would not help.
+                if ((AetherManager.isRunning() && !AetherManager.isListening()) ||
+                    (LanternManager.isRunning() && !LanternManager.isListening())
+                ) {
                     failures = 0
                     continue
                 }
@@ -219,8 +284,17 @@ object CoreServiceManager {
             CoreNativeManager.reconcileBrowserDialer(dialerAddr)
         }
         // Aether runs as a program next to Xray; another server ends the one a reload leaves.
+        val hop = ExtraHopManager.hopProfile(service, config)
+        val aetherHop = hop?.takeIf { it.configType == EConfigType.AETHER }
+        if (LanternManager.isHop(hop)) {
+            LanternManager.start(service)
+        } else {
+            LanternManager.stop()
+        }
         if (AetherManager.isAether(config)) {
             AetherManager.start(service, config)
+        } else if (aetherHop != null) {
+            AetherManager.start(service, aetherHop)
         } else {
             AetherManager.stop(service)
         }
@@ -264,6 +338,8 @@ object CoreServiceManager {
         connectionTestScope.coroutineContext.cancelChildren()
         watchdogJob?.cancel()
         watchdogJob = null
+        emergencyJob?.cancel()
+        emergencyJob = null
         val service = getService() ?: return false
 
         networkMonitor?.unregister()
@@ -281,6 +357,7 @@ object CoreServiceManager {
         }
 
         AetherManager.stopInBackground()
+        LanternManager.stopInBackground()
 
         // Close existing browser dialer
         CoreNativeManager.reconcileBrowserDialer("")

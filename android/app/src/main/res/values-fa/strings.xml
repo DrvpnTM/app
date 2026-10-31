@@ -715,4 +715,24 @@
     <string name="update_try_again">دوباره امتحان کن</string>
     <string name="update_later">بعداً</string>
     <string name="group_my_servers">سرورهای من</string>
+
+    <!-- Extra hop: the provider is never named in the UI -->
+    <string name="title_extra_hop">زنجیره اضافه</string>
+    <string name="title_extra_hop_mode">حالت زنجیره</string>
+    <string name="title_extra_hop_kind">حلقهٔ اضافه</string>
+    <string name="title_extra_hop_tunnel_config">کانفیگ تونل دکتر (WireGuard)</string>
+    <string name="extra_hop_tunnel_config_invalid">این کانفیگ WireGuard معتبر نیست</string>
+    <string-array name="extra_hop_mode">
+        <item>غیرفعال</item>
+        <item>قبل از سرور (اول به حلقهٔ اضافه وصل می‌شود)</item>
+        <item>بعد از سرور (IP نهایی از حلقهٔ اضافه)</item>
+    </string-array>
+    <string-array name="extra_hop_kind">
+        <item>دیوار چین (رایگان)</item>
+        <item>PS Pro (رایگان)</item>
+        <item>CDN سیاه نا امن (رایگان، کند)</item>
+        <item>تونل دکتر (کانفیگ خودتان)</item>
+        <item>جادهٔ ابریشم (رایگان، فقط قبل از سرور)</item>
+        <item>حالت اضطراری (همه را امتحان می‌کند تا یکی وصل شود)</item>
+    </string-array>
 </resources>
