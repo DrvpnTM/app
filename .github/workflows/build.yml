@@ -227,19 +227,6 @@ jobs:
           log-accepted-android-sdk-licenses: false
           packages: 'platforms;android-37.0 build-tools;37.0.0 platform-tools'
 
-      - name: Get lantern-hop
-        uses: actions/download-artifact@v4
-        with:
-          name: libs-lantern
-
-      - name: Copy lantern-hop
-        run: |
-          tar xzf libs-lantern.tar.gz
-          for abi in libs-lantern/*/; do
-            mkdir -p "android/app/libs/$(basename "$abi")"
-            cp "$abi"*.so "android/app/libs/$(basename "$abi")/"
-          done
-
       - name: Get libv2ray.aar
         uses: actions/download-artifact@v4
         with:
@@ -309,6 +296,19 @@ jobs:
         run: |
           tar xzf libs-aether.tar.gz
           for abi in libs-aether/*/; do
+            mkdir -p "android/app/libs/$(basename "$abi")"
+            cp "$abi"*.so "android/app/libs/$(basename "$abi")/"
+          done
+
+      - name: Get lantern-hop
+        uses: actions/download-artifact@v4
+        with:
+          name: libs-lantern
+
+      - name: Copy lantern-hop
+        run: |
+          tar xzf libs-lantern.tar.gz
+          for abi in libs-lantern/*/; do
             mkdir -p "android/app/libs/$(basename "$abi")"
             cp "$abi"*.so "android/app/libs/$(basename "$abi")/"
           done

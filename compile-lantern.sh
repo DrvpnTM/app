@@ -31,6 +31,9 @@ done
 # Dr VPN's minSdk; the executable must start on Android 7 as well.
 API_LEVEL=24
 ABIS="${ABIS:-arm64-v8a armeabi-v7a x86_64}"
+# novpn: a SOCKS proxy instead of a TUN device. The rest are the tags Radiance's own builds use
+# (its justfile); without them sing-box lacks the protocols Lantern's servers speak (QUIC, ...).
+TAGS="novpn,with_gvisor,with_quic,with_dhcp,with_wireguard,with_utls,with_acme"
 
 for abi in $ABIS; do
   case "$abi" in
@@ -48,7 +51,7 @@ for abi in $ABIS; do
     CGO_ENABLED=1 GOOS=android GOARCH="$goarch" GOARM="$goarm" \
     CC="$TOOLCHAIN/$cc" CXX="$TOOLCHAIN/$cc++" \
     GOFLAGS=-mod=mod \
-    go build -tags novpn -trimpath \
+    go build -tags "$TAGS" -trimpath \
       -ldflags "-s -w -checklinkname=0 -extldflags '-Wl,-z,max-page-size=16384 -Wl,-z,common-page-size=16384'" \
       -o "$OUT_DIR/$abi/liblanternhop.so" .)
 done
