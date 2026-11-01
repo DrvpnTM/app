@@ -10,5 +10,5 @@
     "en": "Visit drvpn.net to buy or renew your subscription."
   },
   "link": "https://drvpn.net",
-  "stats_url": ""
+  "stats_url": "https://drvpn-stats.cdn-1-4cf.workers.dev/ping"
 }
