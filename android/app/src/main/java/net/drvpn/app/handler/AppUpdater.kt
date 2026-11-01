@@ -42,7 +42,9 @@ object AppUpdater {
     private const val PREF_LAST_CHECK = "pref_drvpn_update_last_check"
     private const val PREF_LATER = "pref_drvpn_update_later"
     private const val PREF_NOTIFIED = "pref_drvpn_update_notified"
-    private const val CHECK_INTERVAL_MS = 6 * 60 * 60 * 1000L
+    // On opening the app: check soon, not once per several hours. A short guard only stops a
+    // repeat within minutes (a screen rotation or quick reopen). "Later" still hides a version for a day.
+    private const val CHECK_INTERVAL_MS = 10 * 60 * 1000L
 
     /** "Later" hides a version's dialog for a day. */
     private const val LATER_MS = 24 * 60 * 60 * 1000L

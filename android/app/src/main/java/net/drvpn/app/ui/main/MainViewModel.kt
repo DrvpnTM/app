@@ -134,12 +134,13 @@ class MainViewModel(
 
     // ---------- Service events ----------
     init {
+        // Update check first, so a new version is offered as soon as the app opens.
+        checkForUpdate()
         collectServiceEvents()
         collectSelectedServerName()
         watchAutoPing()
         setupGroupTab()
         loadAnnouncement()
-        checkForUpdate()
     }
 
     // ---------- App update (Dr VPN) ----------

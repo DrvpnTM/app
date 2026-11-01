@@ -114,24 +114,43 @@ export default {
 
     if (url.pathname === '/stats') {
       if (!(await loggedIn(request, env))) return json({ ok: false, error: 'login' }, 401);
-      const since30 = day(29);
+      // The window: 7, 30 or 90 days up to today; prev is the window before it, for trends.
+      const rangeDays = [7, 30, 90].includes(Number(url.searchParams.get('days'))) ? Number(url.searchParams.get('days')) : 30;
+      const start = day(rangeDays - 1);
+      const prevStart = day(2 * rangeDays - 1);
+      const prevEnd = day(rangeDays);
+
+      // Distinct installs, new installs and connections within [from, to].
+      const window = async (from, to) =>
+        (await env.DB.prepare(
+          `SELECT COUNT(DISTINCT p.id) AS users,
+             COUNT(DISTINCT CASE WHEN f.first BETWEEN ? AND ? THEN p.id END) AS newUsers,
+             COALESCE(SUM(p.connects), 0) AS connects
+           FROM pings p JOIN (SELECT id, MIN(day) AS first FROM pings GROUP BY id) f ON f.id = p.id
+           WHERE p.day BETWEEN ? AND ?`
+        ).bind(from, to, from, to).first());
+
       const group = async (column) =>
         (await env.DB.prepare(
           `SELECT ${column} AS k, COUNT(DISTINCT id) AS n FROM pings WHERE day >= ? GROUP BY ${column} ORDER BY n DESC`
-        ).bind(since30).all()).results;
-      const daily = (await env.DB.prepare(
-        `SELECT p.day AS day, COUNT(*) AS installs, SUM(p.connects) AS connects,
-           SUM(CASE WHEN f.first = p.day THEN 1 ELSE 0 END) AS newInstalls
+        ).bind(start).all()).results;
+
+      const series = (await env.DB.prepare(
+        `SELECT p.day AS day, COUNT(DISTINCT p.id) AS active, COALESCE(SUM(p.connects),0) AS connects,
+           COUNT(DISTINCT CASE WHEN f.first = p.day THEN p.id END) AS newUsers
          FROM pings p JOIN (SELECT id, MIN(day) AS first FROM pings GROUP BY id) f ON f.id = p.id
          WHERE p.day >= ? GROUP BY p.day ORDER BY p.day`
-      ).bind(since30).all()).results;
-      const today = daily.find((d) => d.day === day()) || { connects: 0, newInstalls: 0 };
+      ).bind(start).all()).results;
+
       return json({
-        active: { day: await active(1), week: await active(7), month: await active(30) },
-        installsAllTime: (await env.DB.prepare('SELECT COUNT(DISTINCT id) AS n FROM pings').first()).n,
-        today: { connects: today.connects || 0, newInstalls: today.newInstalls || 0 },
+        rangeDays,
         updated: new Date().toISOString(),
-        last30Days: {
+        totalUsers: (await env.DB.prepare('SELECT COUNT(DISTINCT id) AS n FROM pings').first()).n,
+        active: { day: await active(1), week: await active(7), month: await active(30) },
+        period: await window(start, day()),
+        prev: await window(prevStart, prevEnd),
+        series,
+        breakdown: {
           byVersion: await group('version'),
           byRegion: await group('region'),
           byHop: await group('hop'),
@@ -139,7 +158,6 @@ export default {
           byBrand: await group('brand'),
           byModel: (await group("brand || ' ' || model")).slice(0, 15),
           byAndroid: await group('android'),
-          daily,
         },
       });
     }
