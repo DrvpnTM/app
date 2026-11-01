@@ -71,14 +71,36 @@ object UpdateCheckerManager {
         }
     }
 
-    private fun compareVersions(version1: String, version2: String): Int {
-        val v1 = version1.split(".")
-        val v2 = version2.split(".")
+    internal fun compareVersions(version1: String, version2: String): Int {
+        fun split(version: String): Pair<List<Int>, List<String>?> {
+            val withoutBuild = version.substringBefore('+')
+            val parts = withoutBuild.split("-", limit = 2)
+            val numbers = parts.first().split(".").map { it.toIntOrNull() ?: 0 }
+            val prerelease = parts.getOrNull(1)?.split(".")?.takeIf { it.isNotEmpty() }
+            return numbers to prerelease
+        }
 
-        for (i in 0 until maxOf(v1.size, v2.size)) {
-            val num1 = v1.getOrNull(i)?.toIntOrNull() ?: 0
-            val num2 = v2.getOrNull(i)?.toIntOrNull() ?: 0
-            if (num1 != num2) return num1 - num2
+        val (numbers1, prerelease1) = split(version1)
+        val (numbers2, prerelease2) = split(version2)
+        for (i in 0 until maxOf(numbers1.size, numbers2.size)) {
+            val comparison = (numbers1.getOrNull(i) ?: 0).compareTo(numbers2.getOrNull(i) ?: 0)
+            if (comparison != 0) return comparison
+        }
+
+        if (prerelease1 == null) return if (prerelease2 == null) 0 else 1
+        if (prerelease2 == null) return -1
+        for (i in 0 until maxOf(prerelease1.size, prerelease2.size)) {
+            val part1 = prerelease1.getOrNull(i) ?: return -1
+            val part2 = prerelease2.getOrNull(i) ?: return 1
+            val number1 = part1.toLongOrNull()
+            val number2 = part2.toLongOrNull()
+            val comparison = when {
+                number1 != null && number2 != null -> number1.compareTo(number2)
+                number1 != null -> -1
+                number2 != null -> 1
+                else -> part1.compareTo(part2)
+            }
+            if (comparison != 0) return comparison
         }
         return 0
     }

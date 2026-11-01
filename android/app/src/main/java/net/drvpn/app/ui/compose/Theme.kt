@@ -170,23 +170,24 @@ fun resolveDarkTheme(): Boolean {
 }
 
 
-// Dr VPN theme styles. Beyond the default blue, "neomorph" is a soft low-contrast palette and
-// "glass" a cool translucent-looking one; they change colors app-wide (full soft-shadow / blur
+// Dr VPN theme styles. "Neomorph" uses layered surfaces with clear text contrast, while "glass"
+// uses cool translucent-looking colors (full soft-shadow / blur
 // effects are approximated through the color scheme).
 private val NeoLight = LightColor.copy(
     primary = Color(0xFF5B6B89),
     onPrimary = Color(0xFFFFFFFF),
     primaryContainer = Color(0xFFD9E0EC),
     onPrimaryContainer = Color(0xFF1B2536),
-    background = Color(0xFFE6EBF2),
-    onBackground = Color(0xFF2C3444),
-    surface = Color(0xFFE6EBF2),
-    onSurface = Color(0xFF2C3444),
-    surfaceContainerLowest = Color(0xFFDDE3EC),
-    surfaceContainerLow = Color(0xFFE2E8F0),
-    surfaceContainer = Color(0xFFEAEFF6),
-    surfaceContainerHigh = Color(0xFFF0F4FA),
-    surfaceContainerHighest = Color(0xFFF6F9FD),
+    background = Color(0xFFE4EAF2),
+    onBackground = Color(0xFF1D2736),
+    surface = Color(0xFFF8FAFD),
+    onSurface = Color(0xFF1D2736),
+    onSurfaceVariant = Color(0xFF4A586D),
+    surfaceContainerLowest = Color(0xFFFFFFFF),
+    surfaceContainerLow = Color(0xFFF8FAFD),
+    surfaceContainer = Color(0xFFEEF2F7),
+    surfaceContainerHigh = Color(0xFFE8EDF4),
+    surfaceContainerHighest = Color(0xFFDDE4EE),
     surfaceTint = Color(0xFF5B6B89),
 )
 private val NeoDark = DarkColor.copy(
@@ -194,15 +195,16 @@ private val NeoDark = DarkColor.copy(
     onPrimary = Color(0xFF1B2536),
     primaryContainer = Color(0xFF33405A),
     onPrimaryContainer = Color(0xFFD9E0EC),
-    background = Color(0xFF262A31),
-    onBackground = Color(0xFFDCE1EA),
-    surface = Color(0xFF262A31),
-    onSurface = Color(0xFFDCE1EA),
-    surfaceContainerLowest = Color(0xFF20242A),
-    surfaceContainerLow = Color(0xFF2A2F37),
-    surfaceContainer = Color(0xFF2F343D),
-    surfaceContainerHigh = Color(0xFF373D47),
-    surfaceContainerHighest = Color(0xFF414852),
+    background = Color(0xFF171D26),
+    onBackground = Color(0xFFE8EDF5),
+    surface = Color(0xFF202833),
+    onSurface = Color(0xFFE8EDF5),
+    onSurfaceVariant = Color(0xFFB5C0D0),
+    surfaceContainerLowest = Color(0xFF242D39),
+    surfaceContainerLow = Color(0xFF293340),
+    surfaceContainer = Color(0xFF2E3947),
+    surfaceContainerHigh = Color(0xFF364251),
+    surfaceContainerHighest = Color(0xFF414F60),
     surfaceTint = Color(0xFF9DB2D4),
 )
 private val GlassLight = LightColor.copy(

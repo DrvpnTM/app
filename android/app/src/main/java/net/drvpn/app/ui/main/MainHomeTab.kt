@@ -594,10 +594,19 @@ private fun StatusPill(isRunning: Boolean) {
 
 @Composable
 private fun ConnectButton(isRunning: Boolean, onToggle: () -> Unit, size: Dp = 170.dp, focusRequester: FocusRequester? = null) {
-    // Off: deep brand blue (an invitation to tap). On: emerald to teal.
-    val top by animateColorAsState(if (isRunning) Color(0xFF34D399) else Color(0xFF60A5FA), tween(600), label = "connectTop")
-    val bottom by animateColorAsState(if (isRunning) Color(0xFF0F9F6E) else Color(0xFF1D4ED8), tween(600), label = "connectBottom")
-    val glow by animateColorAsState(if (isRunning) Color(0xFF10B981) else Color(0xFF3B82F6), tween(600), label = "connectGlow")
+    val baseColor = if (isRunning) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary
+    val shade = if (isRunning) 0.52f else 0.68f
+    val top by animateColorAsState(baseColor.copy(
+        red = baseColor.red * (shade + 0.12f),
+        green = baseColor.green * (shade + 0.12f),
+        blue = baseColor.blue * (shade + 0.12f),
+    ), tween(600), label = "connectTop")
+    val bottom by animateColorAsState(baseColor.copy(
+        red = baseColor.red * shade,
+        green = baseColor.green * shade,
+        blue = baseColor.blue * shade,
+    ), tween(600), label = "connectBottom")
+    val glow by animateColorAsState(baseColor, tween(600), label = "connectGlow")
     val motion = rememberInfiniteTransition(label = "connect")
     // A slow breath for the glow, and a ring that turns while connected.
     val breath by motion.animateFloat(0.85f, 1f, infiniteRepeatable(tween(1800), RepeatMode.Reverse), label = "breath")
