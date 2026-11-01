@@ -422,49 +422,60 @@ jobs:
 
       # VirusTotal scan of DrVPN.apk, shown in the release notes with its result. Needs the
       # VT_API_KEY secret (a free virustotal.com account); without it the release has no scan line.
-      - name: Scan with VirusTotal
+      - name: Downloads table + VirusTotal
         env:
           VT_API_KEY: ${{ secrets.VT_API_KEY }}
+          VER: ${{ needs.build.outputs.version }}
         run: |
           cp repo/.github/release-body.md body.md
-          sha=$(sha256sum apks/DrVPN.apk | cut -d' ' -f1)
-          link="https://www.virustotal.com/gui/file/$sha"
-          if [ -z "$VT_API_KEY" ]; then
-            echo "No VT_API_KEY secret: no virus scan line."
-            exit 0
-          fi
-          # Files over 32 MB go to a one-time upload URL.
-          url=$(curl -sf -H "x-apikey: $VT_API_KEY" https://www.virustotal.com/api/v3/files/upload_url | jq -r .data) || url=""
-          [ -n "$url" ] || { echo "::warning::VirusTotal: no upload URL"; exit 0; }
-          analysis=$(curl -sf -H "x-apikey: $VT_API_KEY" -F "file=@apks/DrVPN.apk" "$url" | jq -r .data.id) || analysis=""
-          [ -n "$analysis" ] || { echo "::warning::VirusTotal: upload failed"; exit 0; }
-          result=""
-          for i in $(seq 1 40); do
-            sleep 30
-            r=$(curl -sf -H "x-apikey: $VT_API_KEY" "https://www.virustotal.com/api/v3/analyses/$analysis") || continue
-            if [ "$(jq -r .data.attributes.status <<<"$r")" = "completed" ]; then
-              bad=$(jq '.data.attributes.stats.malicious + .data.attributes.stats.suspicious' <<<"$r")
-              # Engines that scanned it; leaves out timeouts and ones that don't read APKs.
-              total=$(jq '.data.attributes.stats | .malicious + .suspicious + .undetected + .harmless' <<<"$r")
-              result="$bad/$total"
-              break
+          base="https://github.com/${GITHUB_REPOSITORY}/releases/download/v${VER}"
+          labels=("APK Universal" "APK ARMv8" "APK ARMv7" "APK x64" "APK x86")
+          files=("DrVPN.apk" "DrVPN_${VER}_arm64-v8a.apk" "DrVPN_${VER}_armeabi-v7a.apk" "DrVPN_${VER}_x86_64.apk" "DrVPN_${VER}_x86.apk")
+          declare -A AN SHA RES
+          # Upload each APK to VirusTotal (large files use a one-time URL), spaced for the free API limit.
+          for f in "${files[@]}"; do
+            [ -f "apks/$f" ] || continue
+            SHA[$f]=$(sha256sum "apks/$f" | cut -d' ' -f1)
+            if [ -n "$VT_API_KEY" ]; then
+              u=$(curl -sf -H "x-apikey: $VT_API_KEY" https://www.virustotal.com/api/v3/files/upload_url | jq -r .data) || u=""
+              [ -n "$u" ] && { AN[$f]=$(curl -sf -H "x-apikey: $VT_API_KEY" -F "file=@apks/$f" "$u" | jq -r .data.id) || AN[$f]=""; }
+              sleep 16
             fi
+          done
+          for f in "${files[@]}"; do
+            [ -n "${AN[$f]:-}" ] || continue
+            for i in $(seq 1 30); do
+              r=$(curl -sf -H "x-apikey: $VT_API_KEY" "https://www.virustotal.com/api/v3/analyses/${AN[$f]}") || { sleep 20; continue; }
+              if [ "$(jq -r .data.attributes.status <<<"$r")" = "completed" ]; then
+                mal=$(jq '.data.attributes.stats.malicious' <<<"$r"); sus=$(jq '.data.attributes.stats.suspicious' <<<"$r")
+                tot=$(jq '.data.attributes.stats | .malicious + .suspicious + .undetected + .harmless' <<<"$r")
+                RES[$f]="$mal/$sus/$tot"; break
+              fi
+              sleep 20
+            done
+            sleep 12
           done
           {
             echo
-            echo '<div align="center">'
+            echo '### بر اساس سیستم‌عامل خود دانلود کنید / Download for your OS'
             echo
-            if [ -n "$result" ]; then
-              clean=""
-              [ "${result%%/*}" = "0" ] && clean=" — پاک / clean"
-              echo "🛡️ **[VirusTotal: $result$clean]($link)** — اسکن ویروس / virus scan"
-            else
-              echo "🛡️ **[VirusTotal]($link)** — اسکن ویروس / virus scan"
-            fi
-            echo
-            echo "<code>SHA-256: $sha</code>"
-            echo
-            echo '</div>'
+            echo '| سیستم‌عامل / OS | دانلود / Download | دانلودها / Downloads | VirusTotal |'
+            echo '|---|---|---|---|'
+            first=1
+            for i in "${!files[@]}"; do
+              f="${files[$i]}"; [ -f "apks/$f" ] || continue
+              oscell=""; [ "$first" = 1 ] && { oscell='**Android**'; first=0; }
+              dl="![](https://img.shields.io/github/downloads/${GITHUB_REPOSITORY}/v${VER}/${f}?label=&color=2ea44f&style=flat-square)"
+              sha="${SHA[$f]}"; vturl="https://www.virustotal.com/gui/file/${sha}"
+              if [ -n "${RES[$f]:-}" ]; then
+                mal="${RES[$f]%%/*}"; rest="${RES[$f]#*/}"; sus="${rest%%/*}"; tot="${rest##*/}"
+                color=2ea44f; [ $((mal + sus)) -ne 0 ] && color=d73a49
+                vt="[![](https://img.shields.io/badge/%CE%A3%20${sha:0:6}-${mal}%2F${sus}%2F${tot}-${color}?style=flat-square)](${vturl})"
+              else
+                vt="[VirusTotal](${vturl})"
+              fi
+              echo "| ${oscell} | [${labels[$i]}](${base}/${f}) | ${dl} | ${vt} |"
+            done
           } >> body.md
 
       - name: Publish release
