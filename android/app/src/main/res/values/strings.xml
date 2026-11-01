@@ -783,5 +783,5 @@
     <string name="gaming_mode_title">Gaming mode</string>
     <string name="gaming_mode_summary">WireGuard servers only, the lowest ping; no extra hop</string>
     <string name="title_stats">Anonymous usage stats</string>
-    <string name="summary_stats">Once a day: a random ID, app version, region and features used. No IP, no traffic, no servers.</string>
+    <string name="summary_stats">Once a day: a random ID, app version, region, features used and phone model. No IP, no traffic, no servers.</string>
 </resources>

@@ -6,4 +6,4 @@ compatibility_date = "2026-10-01"
 binding = "DB"
 database_name = "drvpn-stats"
 # Filled in by: npx wrangler d1 create drvpn-stats
-database_id = "PUT-YOUR-DATABASE-ID-HERE"
+database_id = "cf6cf514-e4f3-424a-9691-a694206dd847"

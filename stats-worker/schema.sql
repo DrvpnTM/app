@@ -8,6 +8,9 @@ CREATE TABLE IF NOT EXISTS pings (
   hop      TEXT NOT NULL,      -- extra hop in use: off, lantern, shield, psiphon, tunnel, tor, emergency
   gaming   INTEGER NOT NULL,   -- gaming mode on
   connects INTEGER NOT NULL,   -- connections that day
+  brand    TEXT NOT NULL DEFAULT '?',  -- phone maker (Samsung, Xiaomi, ...)
+  model    TEXT NOT NULL DEFAULT '?',  -- phone model
+  android  TEXT NOT NULL DEFAULT '?',  -- Android version (14, 15, ...)
   PRIMARY KEY (day, id)
 );
 CREATE INDEX IF NOT EXISTS pings_day ON pings(day);

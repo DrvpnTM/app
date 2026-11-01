@@ -28,8 +28,8 @@ import java.util.concurrent.TimeUnit
 
 /**
  * Anonymous usage stats: once a day the app sends a random install ID (made here, tied to nothing),
- * the app version, the region picked in the app, the extra hop in use, gaming mode and how many
- * times it connected that day. Nothing else: no IP is kept by the server, no traffic, no servers.
+ * the app version, the region picked in the app, the extra hop in use, gaming mode, how many
+ * times it connected that day, and the phone's maker, model and Android version. Nothing else: no IP is kept by the server, no traffic, no servers.
  * Off in Settings (PREF_STATS_ENABLED). The server's address comes from "stats_url" in notice.json,
  * so nothing is sent until the owner sets one (stats-worker/ in the repo).
  */
@@ -82,6 +82,10 @@ object StatsManager {
             .put("hop", hop)
             .put("gaming", MmkvManager.decodeSettingsBool(AppConfig.PREF_GAMING_MODE, false))
             .put("connects", connects)
+            // The phone, for the owner's "which phones" chart: maker, model, Android version.
+            .put("brand", android.os.Build.MANUFACTURER.orEmpty().replaceFirstChar { it.uppercase() })
+            .put("model", android.os.Build.MODEL.orEmpty())
+            .put("android", android.os.Build.VERSION.RELEASE.orEmpty())
             .toString()
         // Through the VPN when it runs (the server may be filtered), else directly.
         val ports = listOfNotNull(SettingsManager.getHttpPort().takeIf { it > 0 }, 0).distinct()

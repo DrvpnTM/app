@@ -16,6 +16,7 @@ on:
       - 'countries/**'
       - 'fastlane/**'
       - 'notice.json'
+      - 'stats-worker/**'
       - 'LICENSE'
 
 permissions:

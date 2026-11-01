@@ -783,5 +783,5 @@
     <string name="gaming_mode_title">حالت گیمینگ</string>
     <string name="gaming_mode_summary">فقط سرورهای وایرگارد با کمترین پینگ؛ بدون حلقهٔ اضافه</string>
     <string name="title_stats">آمار ناشناس استفاده</string>
-    <string name="summary_stats">روزی یک بار: یک شناسهٔ تصادفی، نسخهٔ برنامه، منطقه و قابلیت‌های استفاده‌شده. بدون IP، بدون ترافیک، بدون سرورها.</string>
+    <string name="summary_stats">روزی یک بار: یک شناسهٔ تصادفی، نسخهٔ برنامه، منطقه، قابلیت‌های استفاده‌شده و مدل گوشی. بدون IP، بدون ترافیک، بدون سرورها.</string>
 </resources>
