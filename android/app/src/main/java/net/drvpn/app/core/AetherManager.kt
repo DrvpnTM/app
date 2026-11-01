@@ -207,7 +207,11 @@ object AetherManager {
         process = started
         Thread({
             try {
-                started.inputStream.bufferedReader().forEachLine { line -> LogUtil.i(AppConfig.TAG, "Aether: $line") }
+                started.inputStream.bufferedReader().forEachLine { line ->
+                    // Its warnings and errors show at the app's default log level (warning), for reports from users.
+                    if (" WARN " in line || " ERROR " in line) LogUtil.w(AppConfig.TAG, "Aether: $line")
+                    else LogUtil.i(AppConfig.TAG, "Aether: $line")
+                }
             } catch (_: IOException) {
             }
             LogUtil.i(AppConfig.TAG, "Aether: core ended")

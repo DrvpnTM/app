@@ -745,7 +745,7 @@
     <string name="hop_dr_tunnel_desc">کانفیگ WireGuard خودتان (پایین)</string>
     <string name="hop_silk_road">جادهٔ ابریشم</string>
     <string name="hop_silk_road_desc">رایگان · همیشه قبل از سرور</string>
-    <string name="hop_emergency">حالت اضطراری</string>
+    <string name="hop_emergency">حالت اضطراری (اختلال و نت ملی)</string>
     <string name="hop_emergency_desc">همه را امتحان می‌کند تا یکی وصل شود</string>
     <string name="extra_hop_intro">یک حلقهٔ دیگر به سرورتان زنجیر کنید؛ برای وقتی که سرور به‌تنهایی فیلتر است یا IP نهایی دیگری می‌خواهید.</string>
     <string name="extra_hop_mode_off">خاموش</string>
@@ -775,4 +775,13 @@
     <string name="rescue_close">بستن</string>
     <string name="extra_hop_off_row">حلقهٔ اضافه: خاموش · برای افزودن بزنید</string>
     <string name="home_button_brand">دکتر وی پی ان</string>
+    <string name="gaming_mode">گیمینگ</string>
+    <string name="gaming_on">حالت گیمینگ روشن شد: فقط سرورهای وایرگارد با کمترین پینگ</string>
+    <string name="gaming_off">حالت گیمینگ خاموش شد</string>
+    <string name="gaming_no_servers">این لیست سرور وایرگارد برای حالت گیمینگ ندارد</string>
+    <string name="extra_hop_off_gaming">حلقهٔ اضافه: در حالت گیمینگ خاموش است (کمترین پینگ)</string>
+    <string name="gaming_mode_title">حالت گیمینگ</string>
+    <string name="gaming_mode_summary">فقط سرورهای وایرگارد با کمترین پینگ؛ بدون حلقهٔ اضافه</string>
+    <string name="title_stats">آمار ناشناس استفاده</string>
+    <string name="summary_stats">روزی یک بار: یک شناسهٔ تصادفی، نسخهٔ برنامه، منطقه و قابلیت‌های استفاده‌شده. بدون IP، بدون ترافیک، بدون سرورها.</string>
 </resources>

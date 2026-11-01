@@ -6,6 +6,16 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.draw.rotate
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -122,6 +132,7 @@ internal fun MainHomeTab(
     totalUp: Long,
     totalDown: Long,
     isTesting: Boolean,
+    gamingMode: Boolean = false,
     onAction: (MainAction) -> Unit,
     onOpenProxies: () -> Unit,
     serverRows: List<ServerRowUiModel> = emptyList(),
@@ -193,7 +204,11 @@ internal fun MainHomeTab(
         val availableHeight = maxHeight
         val connectBlock: @Composable () -> Unit = {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                StatusPill(isRunning)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    StatusPill(isRunning)
+                    // Gaming mode is switched in the side menu; Home only shows that it is on.
+                    if (gamingMode) GamingChip(true) { onAction(MainAction.ToggleGaming) }
+                }
                 Spacer(Modifier.height(if (landscape) 8.dp else 14.dp))
                 ConnectButton(
                     isRunning = isRunning,
@@ -579,23 +594,17 @@ private fun StatusPill(isRunning: Boolean) {
 
 @Composable
 private fun ConnectButton(isRunning: Boolean, onToggle: () -> Unit, size: Dp = 170.dp, focusRequester: FocusRequester? = null) {
-    // Off: brand blue (an invitation to tap, not a "disabled" grey). On: green.
-    val top by animateColorAsState(
-        targetValue = if (isRunning) Color(0xFF4ADE80) else Color(0xFF60A5FA),
-        label = "connectTop",
-    )
-    val bottom by animateColorAsState(
-        targetValue = if (isRunning) Color(0xFF16A34A) else Color(0xFF2563EB),
-        label = "connectBottom",
-    )
-    val color = bottom
-    val pulse = rememberInfiniteTransition(label = "connectPulse")
-    val haloScale by pulse.animateFloat(
-        initialValue = 1f,
-        targetValue = if (isRunning) 1.12f else 1.05f,
-        animationSpec = infiniteRepeatable(tween(durationMillis = 1400), RepeatMode.Reverse),
-        label = "haloScale",
-    )
+    // Off: deep brand blue (an invitation to tap). On: emerald to teal.
+    val top by animateColorAsState(if (isRunning) Color(0xFF34D399) else Color(0xFF60A5FA), tween(600), label = "connectTop")
+    val bottom by animateColorAsState(if (isRunning) Color(0xFF0F9F6E) else Color(0xFF1D4ED8), tween(600), label = "connectBottom")
+    val glow by animateColorAsState(if (isRunning) Color(0xFF10B981) else Color(0xFF3B82F6), tween(600), label = "connectGlow")
+    val motion = rememberInfiniteTransition(label = "connect")
+    // A slow breath for the glow, and a ring that turns while connected.
+    val breath by motion.animateFloat(0.85f, 1f, infiniteRepeatable(tween(1800), RepeatMode.Reverse), label = "breath")
+    val spin by motion.animateFloat(0f, 360f, infiniteRepeatable(tween(6000, easing = LinearEasing)), label = "spin")
+    val press = remember { MutableInteractionSource() }
+    val pressed by press.collectIsPressedAsState()
+    val squeeze by animateFloatAsState(if (pressed) 0.94f else 1f, spring(dampingRatio = 0.5f), label = "squeeze")
     val actionLabel = stringResource(if (isRunning) R.string.acc_stop else R.string.acc_start)
     val stateLabel = stringResource(if (isRunning) R.string.home_connected else R.string.connection_not_connected)
 
@@ -610,44 +619,68 @@ private fun ConnectButton(isRunning: Boolean, onToggle: () -> Unit, size: Dp = 1
                 onClick(label = actionLabel) { onToggle(); true }
             },
     ) {
-        Box(
-            modifier = Modifier
-                .size(size * 0.91f)
-                .scale(haloScale)
-                .clip(CircleShape)
-                .background(color.copy(alpha = 0.12f)),
-        )
-        Box(
-            modifier = Modifier
-                .size(size * 0.80f)
-                .clip(CircleShape)
-                .background(color.copy(alpha = 0.18f)),
-        )
+        // Soft glow behind everything.
+        Canvas(Modifier.size(size)) {
+            drawCircle(
+                brush = Brush.radialGradient(
+                    listOf(glow.copy(alpha = 0.30f * breath), glow.copy(alpha = 0.10f * breath), Color.Transparent),
+                ),
+                radius = this.size.minDimension / 2,
+            )
+        }
+        // The ring: a turning gradient arc when connected, a dotted circle when not.
+        Canvas(Modifier.size(size * 0.86f).rotate(if (isRunning) spin else 0f)) {
+            val stroke = 3.dp.toPx()
+            if (isRunning) {
+                drawArc(
+                    brush = Brush.sweepGradient(listOf(Color.Transparent, glow.copy(alpha = 0.25f), glow, Color.Transparent)),
+                    startAngle = 0f, sweepAngle = 300f, useCenter = false,
+                    style = Stroke(width = stroke, cap = StrokeCap.Round),
+                )
+            } else {
+                drawCircle(
+                    color = glow.copy(alpha = 0.45f),
+                    radius = this.size.minDimension / 2 - stroke,
+                    style = Stroke(width = stroke / 1.5f, pathEffect = PathEffect.dashPathEffect(floatArrayOf(2.dp.toPx(), 7.dp.toPx()))),
+                )
+            }
+        }
+        // The core: a glossy disc.
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
                 .size(size * 0.68f)
-                .shadow(elevation = 16.dp, shape = CircleShape, ambientColor = color, spotColor = color)
+                .scale(squeeze)
+                .shadow(elevation = 18.dp, shape = CircleShape, ambientColor = glow, spotColor = glow)
                 .then(if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier)
                 .focusHighlight(CircleShape)
                 .clip(CircleShape)
-                .background(Brush.verticalGradient(listOf(top, bottom)))
-                .clickable(onClick = onToggle),
+                .background(Brush.linearGradient(listOf(top, bottom), start = Offset(0f, 0f), end = Offset(0f, Float.POSITIVE_INFINITY)))
+                .border(1.5.dp, Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.55f), Color.White.copy(alpha = 0.05f))), CircleShape)
+                .clickable(interactionSource = press, indication = null, onClick = onToggle),
         ) {
-            // A light power sign with the name under it, like a badge.
+            // A light sheen across the top half.
+            Canvas(Modifier.size(size * 0.68f)) {
+                drawOval(
+                    brush = Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.28f), Color.Transparent), endY = this.size.height * 0.55f),
+                    topLeft = Offset(this.size.width * 0.12f, this.size.height * 0.04f),
+                    size = androidx.compose.ui.geometry.Size(this.size.width * 0.76f, this.size.height * 0.48f),
+                )
+            }
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Icon(
                     painter = painterResource(R.drawable.ic_power_24dp),
                     contentDescription = null,
                     tint = Color.White,
-                    modifier = Modifier.size(size * 0.22f),
+                    modifier = Modifier.size(size * 0.21f),
                 )
-                Spacer(Modifier.height(size * 0.02f))
+                Spacer(Modifier.height(size * 0.025f))
                 Text(
                     text = stringResource(R.string.home_button_brand),
-                    color = Color.White.copy(alpha = 0.92f),
-                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    fontWeight = FontWeight.ExtraBold,
                     fontSize = (size.value * 0.075f).sp,
+                    letterSpacing = 0.5.sp,
                     maxLines = 1,
                 )
             }
@@ -779,5 +812,29 @@ private fun AnnouncementCard(notice: AnnouncementManager.Announcement, onDismiss
         IconButton(onClick = onDismiss, modifier = Modifier.size(32.dp)) {
             Text("✕", color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
+    }
+}
+
+/** 🎮 Gaming mode switch: purple and lit when on. */
+@Composable
+private fun GamingChip(on: Boolean, onClick: () -> Unit) {
+    val bg by animateColorAsState(if (on) Color(0xFF7C3AED) else MaterialTheme.colorScheme.surfaceVariant, label = "gamingBg")
+    val fg = if (on) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
+    Row(
+        Modifier
+            .clip(RoundedCornerShape(50))
+            .background(bg)
+            .clickable(role = Role.Switch, onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text("🎮", fontSize = 14.sp)
+        Spacer(Modifier.width(6.dp))
+        Text(
+            stringResource(R.string.gaming_mode),
+            color = fg,
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.SemiBold,
+        )
     }
 }

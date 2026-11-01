@@ -234,7 +234,8 @@ private fun maskIp(ip: String): String {
 @Composable
 fun ExtraHopBand(isRunning: Boolean, refresh: Int = 0, onClick: () -> Unit = {}) {
     val chosenMode = remember(refresh) { ExtraHopMode.from(MmkvManager.decodeSettingsString(AppConfig.PREF_EXTRA_HOP_MODE)) }
-    if (chosenMode == ExtraHopMode.OFF) {
+    val gaming = MmkvManager.decodeSettingsBool(AppConfig.PREF_GAMING_MODE, false)
+    if (chosenMode == ExtraHopMode.OFF || gaming) {
         // A slim row, so the chain can be turned on from Home too.
         Row(
             Modifier
@@ -247,7 +248,7 @@ fun ExtraHopBand(isRunning: Boolean, refresh: Int = 0, onClick: () -> Unit = {})
             HopIcon(null, 24.dp)
             Spacer(Modifier.width(10.dp))
             Text(
-                stringResource(R.string.extra_hop_off_row),
+                stringResource(if (gaming) R.string.extra_hop_off_gaming else R.string.extra_hop_off_row),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.weight(1f),
@@ -340,7 +341,7 @@ fun ExtraHopBand(isRunning: Boolean, refresh: Int = 0, onClick: () -> Unit = {})
 @Composable
 fun ExtraHopSheet(onDone: (changed: Boolean) -> Unit) {
     val startMode = remember { MmkvManager.decodeSettingsString(AppConfig.PREF_EXTRA_HOP_MODE) ?: ExtraHopMode.OFF.value }
-    val startKind = remember { MmkvManager.decodeSettingsString(AppConfig.PREF_EXTRA_HOP_KIND) ?: ExtraHopKind.SHIELD.value }
+    val startKind = remember { MmkvManager.decodeSettingsString(AppConfig.PREF_EXTRA_HOP_KIND) ?: ExtraHopKind.LANTERN.value }
     var mode by remember { mutableStateOf(startMode) }
     var kind by remember { mutableStateOf(startKind) }
     ModalBottomSheet(

@@ -52,6 +52,8 @@ data class MainUiState(
     val shareQRCodeName: String = "",
     /** The rescue flow (emergency offer, search, result) when a connection doesn't work. */
     val rescue: RescueState? = null,
+    /** Gaming mode: only WireGuard servers, the lowest ping picked, no extra hop. */
+    val gamingMode: Boolean = false,
 )
 
 /**
@@ -97,6 +99,7 @@ sealed interface MainAction {
     data object RescueAccept : MainAction
     /** The chain was changed from Home: reconnect with it. */
     data object ApplyChain : MainAction
+    data object ToggleGaming : MainAction
     data object RescueDismiss : MainAction
 
     data class ImportBatchConfig(val configText: String) : MainAction

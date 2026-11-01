@@ -1,0 +1,43 @@
+name: Download count
+
+# Real downloads for the README / release badge: only the app's APKs (v* releases and the
+# country editions), not the build files CI keeps as pre-releases (core-*, aether-*, lantern-*),
+# which every build downloads again. Written to docs/downloads.json for a shields.io endpoint badge;
+# docs/ is outside the APK build's paths, so this commit doesn't make a new version.
+on:
+  schedule:
+    - cron: '17 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  count:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Count APK downloads
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          total=$(gh api --paginate "repos/$GITHUB_REPOSITORY/releases?per_page=100" \
+            --jq '.[] | select(.tag_name | test("^(v|countries-v)[0-9]")) | .assets[] | select(.name | endswith(".apk")) | .download_count' \
+            | awk '{s+=$1} END {print s+0}')
+          if [ "$total" -ge 1000000 ]; then shown=$(awk "BEGIN {printf \"%.1fM\", $total/1000000}")
+          elif [ "$total" -ge 1000 ]; then shown=$(awk "BEGIN {printf \"%.1fK\", $total/1000}")
+          else shown="$total"; fi
+          shown=${shown/.0K/K}; shown=${shown/.0M/M}
+          echo "Real APK downloads: $total ($shown)"
+          printf '{"schemaVersion":1,"label":"دانلود / downloads","message":"%s","color":"2ea44f","total":%s}\n' "$shown" "$total" > docs/downloads.json
+
+      - name: Save
+        run: |
+          git diff --quiet docs/downloads.json && exit 0
+          git config user.name "github-actions[bot]"
+          git config user.email "41898299+github-actions[bot]@users.noreply.github.com"
+          git add docs/downloads.json
+          git commit -m "Download count: $(jq -r .message docs/downloads.json)"
+          git push

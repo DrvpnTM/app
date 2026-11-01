@@ -2,11 +2,12 @@
 
 <div dir="rtl">
 
-**آخرین به‌روزرسانی: ۲۷ سپتامبر ۲۰۲۶**
+**آخرین به‌روزرسانی: ۳۱ اکتبر ۲۰۲۶**
 
-دکتر وی پی ان (Dr VPN) یک برنامه متن‌باز است و هیچ اطلاعات شخصی از شما جمع‌آوری، ذخیره یا به سرورهای ما ارسال نمی‌کند.
+دکتر وی پی ان (Dr VPN) یک برنامه متن‌باز است و هیچ اطلاعات شخصی از شما جمع‌آوری، ذخیره یا به سرورهای ما ارسال نمی‌کند. تنها چیزی که فرستاده می‌شود آمار ناشناس روزانه است (پایین‌تر توضیح داده شده) که می‌توانید خاموشش کنید.
 
-- **ترافیک اینترنت:** ترافیک شما فقط از سرورهایی عبور می‌کند که خودتان (با لینک اشتراک یا کانفیگ) به برنامه اضافه می‌کنید. ما به این ترافیک دسترسی نداریم و آن را ثبت نمی‌کنیم.
+- **ترافیک اینترنت:** ترافیک شما از سرورهایی عبور می‌کند که خودتان (با لینک اشتراک یا کانفیگ) اضافه می‌کنید یا سرورهای رایگان داخل برنامه. اگر «حلقهٔ اضافه» یا «حالت اضطراری» را روشن کنید، ترافیک از شبکه‌های رایگان شرکت‌های دیگر هم عبور می‌کند (فهرستشان در کد برنامه هست). ما به این ترافیک دسترسی نداریم و آن را ثبت نمی‌کنیم.
+- **آمار ناشناس (قابل خاموش کردن در تنظیمات):** روزی یک بار برنامه یک شناسهٔ تصادفی (که به شما یا گوشی‌تان ربطی ندارد)، نسخهٔ برنامه، منطقه‌ای که در برنامه انتخاب کرده‌اید، قابلیت‌های روشن (حلقهٔ اضافه، حالت گیمینگ) و تعداد اتصال‌های آن روز را می‌فرستد. آدرس IP، ترافیک، سرورها و هیچ اطلاعات شخصی دیگری ذخیره نمی‌شود. از این آمار فقط برای دانستن تعداد نصب‌های فعال استفاده می‌شود.
 - **اطلاعات روی گوشی:** تنظیمات، سرورها و گزارش‌ها فقط روی گوشی شما ذخیره می‌شوند. بخش «گزارش» فقط ۱۰ دقیقه اخیر را نگه می‌دارد.
 - **بررسی و تست سرعت (فقط وقتی خودتان شروع کنید):** تست سرعت با `speed.cloudflare.com` انجام می‌شود. بررسی نشت DNS از سرویس `bash.ws` استفاده می‌کند و برای تشخیص اپراتور شما یک بار از `api.ip.sb` (خارج از VPN) می‌پرسد. نتایج جایی ذخیره یا فرستاده نمی‌شود.
 - **نمایش پرچم کشور:** کشور هر سرور روی خود دستگاه و با پایگاه‌داده جغرافیایی داخل برنامه پیدا می‌شود. آدرس سرورها به هیچ سرویسی فرستاده نمی‌شود.
@@ -20,11 +21,12 @@
 
 ---
 
-**Last updated: September 27, 2026**
+**Last updated: October 31, 2026**
 
-Dr VPN is an open-source app. It does not collect, store or send any personal data to us.
+Dr VPN is an open-source app. It does not collect, store or send any personal data to us. The only thing it sends is an anonymous daily usage ping (below), which you can turn off.
 
-- **Your traffic** only goes through the servers you add yourself (subscription link or config). We cannot see it and do not log it.
+- **Your traffic** goes through the servers you add yourself (subscription link or config) or the app's built-in free servers. With "Extra hop" or "Emergency mode" on, it also goes through free networks run by other companies (listed in the source code). We cannot see it and do not log it.
+- **Anonymous usage stats (can be turned off in Settings):** once a day the app sends a random ID (not linked to you or your phone), the app version, the region you picked in the app, which features are on (extra hop, gaming mode) and how many times it connected that day. No IP address, traffic, servers or other personal data are stored. They are used only to count active installs.
 - **On-device data:** settings, servers and logs stay on your phone. The in-app Log keeps only the last 10 minutes.
 - **Check & speed test (only when you start it):** the speed test uses `speed.cloudflare.com`. The DNS leak check uses `bash.ws` and asks `api.ip.sb` once (outside the VPN) to identify your provider. Results are not stored or sent anywhere.
 - **Country flags:** each server's country is looked up on the device, in the geographic database bundled with the app. Server addresses are not sent to any service.

@@ -33,26 +33,26 @@ enum class ExtraHopMode(val value: String) {
  * Great Wall, PS Pro and Black CDN are free and need no account; all three run inside Aether.
  */
 enum class ExtraHopKind(val value: String) {
+    /** "Silk Road": Lantern (LanternManager). Free; works only before the server. */
+    LANTERN("lantern"),
+
     /** "Great Wall": Cloudflare WARP. */
     SHIELD("shield"),
 
     /** "PS Pro": Psiphon. */
     PSIPHON("psiphon"),
 
-    /** "Black insecure CDN": Tor. */
-    TOR("tor"),
-
     /** "Dr Tunnel": a WireGuard config the user pastes (Mozilla VPN, Mullvad, ...). */
     TUNNEL("tunnel"),
 
-    /** "Silk Road": Lantern (LanternManager). Free; works only before the server. */
-    LANTERN("lantern"),
+    /** "Black insecure CDN": Tor. */
+    TOR("tor"),
 
-    /** Emergency: tries the others one by one until one connects (CoreServiceManager). */
+    /** Emergency (disruption, national internet): tries the others one by one until one connects. */
     EMERGENCY("emergency");
 
     companion object {
-        fun from(value: String?) = entries.find { it.value == value } ?: SHIELD
+        fun from(value: String?) = entries.find { it.value == value } ?: LANTERN
     }
 }
 
@@ -66,23 +66,31 @@ object ExtraHopManager {
 
     fun kind(): ExtraHopKind = ExtraHopKind.from(MmkvManager.decodeSettingsString(AppConfig.PREF_EXTRA_HOP_KIND))
 
-    fun isEmergency(): Boolean = mode() != ExtraHopMode.OFF && kind() == ExtraHopKind.EMERGENCY
+    fun isEmergency(): Boolean = mode() != ExtraHopMode.OFF && kind() == ExtraHopKind.EMERGENCY &&
+            !MmkvManager.decodeSettingsBool(AppConfig.PREF_GAMING_MODE, false)
+
+    /** Servers gaming mode keeps: WireGuard, and Aether WARP over WireGuard. */
+    fun isGamingServer(profile: ProfileItem): Boolean = when (profile.configType) {
+        EConfigType.WIREGUARD -> true
+        EConfigType.AETHER -> net.drvpn.app.enums.AetherProtocol.fromString(profile.aetherProtocol) == net.drvpn.app.enums.AetherProtocol.WIREGUARD
+        else -> false
+    }
 
     /** In emergency, the kind being tried now. Lives in the VPN process; set by CoreServiceManager. */
     @Volatile
     var emergencyKind: ExtraHopKind? = null
 
     /**
-     * What emergency tries, in order: the ones that connect fastest first, Tor last. Dr Tunnel
+     * What emergency tries, in the order the hops are listed (Tor, the slowest, last). Dr Tunnel
      * only when it has a config.
      */
     fun emergencyCandidates(): List<ExtraHopKind> = buildList {
-        add(ExtraHopKind.SHIELD)
         add(ExtraHopKind.LANTERN)
+        add(ExtraHopKind.SHIELD)
+        add(ExtraHopKind.PSIPHON)
         if (parseWireGuard(MmkvManager.decodeSettingsString(AppConfig.PREF_EXTRA_HOP_WIREGUARD).orEmpty()) != null) {
             add(ExtraHopKind.TUNNEL)
         }
-        add(ExtraHopKind.PSIPHON)
         add(ExtraHopKind.TOR)
     }
 
@@ -99,6 +107,8 @@ object ExtraHopManager {
      */
     fun hopProfile(context: Context, main: ProfileItem): ProfileItem? {
         if (mode() == ExtraHopMode.OFF) return null
+        // Gaming mode wants the lowest ping: a hop would only add to it.
+        if (MmkvManager.decodeSettingsBool(AppConfig.PREF_GAMING_MODE, false)) return null
         if (main.configType == EConfigType.AETHER ||
             main.configType == EConfigType.CUSTOM ||
             main.configType == EConfigType.POLICYGROUP

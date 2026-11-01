@@ -83,6 +83,10 @@ object AppConfig {
     const val PREF_EXTRA_HOP_ACTIVE = "pref_extra_hop_active"
     /** Written by the VPN process during an emergency search: "searching", "ok" or "failed". */
     const val PREF_EMERGENCY_STATE = "pref_emergency_state"
+    /** Gaming mode: WireGuard servers only, the lowest ping picked, no extra hop. */
+    const val PREF_GAMING_MODE = "pref_gaming_mode"
+    /** Anonymous daily usage ping (StatsManager); on unless the user turns it off. */
+    const val PREF_STATS_ENABLED = "pref_drvpn_stats_enabled"
     const val PREF_UI_MODE_NIGHT = "pref_ui_mode_night"
     const val PREF_DYNAMIC_COLOR = "pref_dynamic_color"
     const val PREF_IPV6_ENABLED = "pref_ipv6_enabled"

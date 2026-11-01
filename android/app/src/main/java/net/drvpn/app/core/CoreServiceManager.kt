@@ -292,19 +292,17 @@ object CoreServiceManager {
         val hop = ExtraHopManager.hopProfile(service, config)
         MmkvManager.encodeSettings(AppConfig.PREF_EXTRA_HOP_ACTIVE, hop?.let { ExtraHopManager.activeLabel(it) }.orEmpty())
         val aetherHop = hop?.takeIf { it.configType == EConfigType.AETHER }
-        if (LanternManager.isHop(hop)) {
-            LanternManager.start(service)
-        } else {
-            LanternManager.stop()
-        }
+        if (!LanternManager.isHop(hop)) LanternManager.stop()
+        if (!AetherManager.isAether(config) && aetherHop == null) AetherManager.stop(service)
+        coreController.startLoop(result.content, tunFd)
+        // The hop programs start after Xray: Aether sends its traffic (and Psiphon's) through
+        // Xray's upstream inbound, and Psiphon doesn't recover when that port isn't there yet.
+        if (LanternManager.isHop(hop)) LanternManager.start(service)
         if (AetherManager.isAether(config)) {
             AetherManager.start(service, config)
         } else if (aetherHop != null) {
             AetherManager.start(service, aetherHop)
-        } else {
-            AetherManager.stop(service)
         }
-        coreController.startLoop(result.content, tunFd)
 
         if (!isRunning()) {
             error("Core failed to start")
@@ -330,6 +328,7 @@ object CoreServiceManager {
 
         if (!isReload) {
             MessageHelper.sendMsg2UI(service, AppConfig.MSG_STATE_START_SUCCESS, "")
+            net.drvpn.app.handler.StatsManager.countConnect()
         }
         NotificationManager.startSpeedNotification()
         LogUtil.i(AppConfig.TAG, "StartCore-Manager: Core started successfully")

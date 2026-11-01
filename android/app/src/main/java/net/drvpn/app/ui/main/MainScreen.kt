@@ -190,7 +190,9 @@ fun MainScreen(
                 onNavigate = { route ->
                     scope.launch { drawerState.close() }
                     onNavigate(route)
-                }
+                },
+                gamingMode = uiState.gamingMode,
+                onToggleGaming = { onAction(MainAction.ToggleGaming) },
             )
         }
     ) {
@@ -288,6 +290,7 @@ fun MainScreen(
                     totalUp = uiState.totalUp,
                     totalDown = uiState.totalDown,
                     isTesting = uiState.isTesting,
+                    gamingMode = uiState.gamingMode,
                     onAction = onAction,
                     onOpenProxies = { selectedTab = MainTab.Proxies },
                     serverRows = homeGroupState.rows.ifEmpty { homeGroupState.allRows },

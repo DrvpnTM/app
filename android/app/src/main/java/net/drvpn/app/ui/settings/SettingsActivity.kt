@@ -173,8 +173,9 @@ fun SettingsScreen(
     var uiModeNight by rememberMmkvString(AppConfig.PREF_UI_MODE_NIGHT, "0")
     var themeStyle by rememberMmkvString(AppConfig.PREF_DRVPN_THEME, "default")
     var autoReconnect by rememberMmkvBool(AppConfig.PREF_DRVPN_AUTO_RECONNECT, true)
+    var statsEnabled by rememberMmkvBool(AppConfig.PREF_STATS_ENABLED, true)
     var extraHopMode by rememberMmkvString(AppConfig.PREF_EXTRA_HOP_MODE, ExtraHopMode.OFF.value)
-    var extraHopKind by rememberMmkvString(AppConfig.PREF_EXTRA_HOP_KIND, ExtraHopKind.SHIELD.value)
+    var extraHopKind by rememberMmkvString(AppConfig.PREF_EXTRA_HOP_KIND, ExtraHopKind.LANTERN.value)
     var extraHopWireGuard by rememberMmkvString(AppConfig.PREF_EXTRA_HOP_WIREGUARD, "")
     val extraHopContext = LocalContext.current
     var dynamicColor by rememberMmkvBool(AppConfig.PREF_DYNAMIC_COLOR, false)
@@ -261,6 +262,12 @@ fun SettingsScreen(
                     summary = stringResource(R.string.summary_auto_reconnect),
                     checked = autoReconnect,
                     onCheckedChange = { autoReconnect = it }
+                )
+                SettingsSwitchItem(
+                    title = stringResource(R.string.title_stats),
+                    summary = stringResource(R.string.summary_stats),
+                    checked = statsEnabled,
+                    onCheckedChange = { statsEnabled = it }
                 )
                 SettingsSwitchItem(
                     title = stringResource(R.string.title_pref_speed_enabled),

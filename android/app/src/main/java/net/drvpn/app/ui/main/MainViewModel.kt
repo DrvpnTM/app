@@ -95,7 +95,8 @@ class MainViewModel(
             selectedGuid = dataSource.getSelectServer(),
             confirmRemove = dataSource.getConfirmRemove(),
             doubleColumnDisplay = dataSource.getDoubleColumnDisplay(),
-            showServersWithoutPing = dataSource.getShowServersWithoutPing()
+            showServersWithoutPing = dataSource.getShowServersWithoutPing(),
+            gamingMode = MmkvManager.decodeSettingsBool(AppConfig.PREF_GAMING_MODE, false)
         )
     )
     val uiState: StateFlow<MainUiState> = _uiState.asStateFlow()
@@ -462,6 +463,7 @@ class MainViewModel(
             is MainAction.SetShowServersWithoutPing -> setShowServersWithoutPing(action.show)
             MainAction.SelectFastest -> selectFastest()
             MainAction.RescueAccept -> acceptRescue()
+            MainAction.ToggleGaming -> toggleGaming()
             MainAction.ApplyChain -> if (uiState.value.isRunning) dataSource.sendMsg2Service(AppConfig.MSG_STATE_RESTART, "")
             MainAction.RescueDismiss -> {
                 if (uiState.value.rescue == RescueState.Offer) rescueDeclined = true
@@ -621,6 +623,8 @@ class MainViewModel(
         val ui = uiState.value
         val pending = pingPendingGuids
         val rows = allRows.filter { row ->
+            !ui.gamingMode || ExtraHopManager.isGamingServer(row.profile)
+        }.filter { row ->
             ui.showServersWithoutPing || row.testDelayMillis > 0L ||
                 (row.testDelayMillis == 0L && row.guid in pending) ||
                 // Aether only answers a ping while it runs, so its servers always stay listed.
@@ -636,6 +640,43 @@ class MainViewModel(
         groupUiFlows.values.forEach { flow ->
             flow.update { current -> current.copy(rows = visibleRows(current.allRows)) }
         }
+    }
+
+    /**
+     * Gaming mode on: only WireGuard servers are listed and the lowest ping is picked (pinging
+     * first when none has a result); a running connection restarts without its extra hop.
+     */
+    private fun toggleGaming() {
+        val on = !uiState.value.gamingMode
+        MmkvManager.encodeSettings(AppConfig.PREF_GAMING_MODE, on)
+        _uiState.update { it.copy(gamingMode = on) }
+        groupUiFlows.values.forEach { flow ->
+            flow.update { current -> current.copy(rows = visibleRows(current.allRows)) }
+        }
+        if (!on) {
+            toast(R.string.gaming_off)
+            if (uiState.value.isRunning) dataSource.sendMsg2Service(AppConfig.MSG_STATE_RESTART, "")
+            return
+        }
+        val hasWireGuard = mutableServerGroupState(uiState.value.selectedGroupId).value.allRows
+            .any { ExtraHopManager.isGamingServer(it.profile) }
+        if (!hasWireGuard) {
+            toast(R.string.gaming_no_servers)
+            return
+        }
+        toast(R.string.gaming_on)
+        val gamingRows = mutableServerGroupState(uiState.value.selectedGroupId).value.allRows
+            .filter { ExtraHopManager.isGamingServer(it.profile) }
+        // Only WARP (Aether) ones: they can't be pinged, so take the first.
+        if (gamingRows.all { it.profile.configType == EConfigType.AETHER }) {
+            selectAndApply(gamingRows.first().guid, announce = false)
+            return
+        }
+        val current = uiState.value.selectedGuid
+        val currentOk = mutableServerGroupState(uiState.value.selectedGroupId).value.allRows
+            .any { it.guid == current && ExtraHopManager.isGamingServer(it.profile) }
+        if (!currentOk || fastestServerGuid() != null) selectFastest()
+        else if (uiState.value.isRunning) dataSource.sendMsg2Service(AppConfig.MSG_STATE_RESTART, "")
     }
 
     private fun setShowServersWithoutPing(show: Boolean) {
@@ -1351,6 +1392,7 @@ class MainViewModel(
     /** Lowest-latency server with a successful ping in the selected group, if any. */
     private fun fastestServerGuid(): String? =
         mutableServerGroupState(uiState.value.selectedGroupId).value.allRows
+            .filter { !uiState.value.gamingMode || ExtraHopManager.isGamingServer(it.profile) }
             .filter { it.testDelayMillis > 0L }
             .minByOrNull { it.testDelayMillis }
             ?.guid

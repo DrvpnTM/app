@@ -745,7 +745,7 @@
     <string name="hop_dr_tunnel_desc">Your own WireGuard config (below)</string>
     <string name="hop_silk_road">Silk Road</string>
     <string name="hop_silk_road_desc">Free · always before the server</string>
-    <string name="hop_emergency">Emergency</string>
+    <string name="hop_emergency">Emergency (disruption &amp; national internet)</string>
     <string name="hop_emergency_desc">Tries them all until one connects</string>
     <string name="extra_hop_intro">Chain one more hop to your server, for when the server alone is blocked or you want another final IP.</string>
     <string name="extra_hop_mode_off">Off</string>
@@ -775,4 +775,13 @@
     <string name="rescue_close">Close</string>
     <string name="extra_hop_off_row">Extra hop: off · tap to add one</string>
     <string name="home_button_brand">Dr VPN</string>
+    <string name="gaming_mode">Gaming</string>
+    <string name="gaming_on">Gaming mode on: WireGuard servers only, lowest ping</string>
+    <string name="gaming_off">Gaming mode off</string>
+    <string name="gaming_no_servers">This list has no WireGuard servers for gaming mode</string>
+    <string name="extra_hop_off_gaming">Extra hop: off in gaming mode (lowest ping)</string>
+    <string name="gaming_mode_title">Gaming mode</string>
+    <string name="gaming_mode_summary">WireGuard servers only, the lowest ping; no extra hop</string>
+    <string name="title_stats">Anonymous usage stats</string>
+    <string name="summary_stats">Once a day: a random ID, app version, region and features used. No IP, no traffic, no servers.</string>
 </resources>

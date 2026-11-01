@@ -102,6 +102,8 @@ class MainActivity : HelperBaseComponentActivity() {
         if (intent?.getBooleanExtra(AppUpdater.EXTRA_FROM_UPDATE, false) == true) AppUpdater.forgetLastCheck()
         mainViewModel.onAction(MainAction.Initialize)
         AppUpdater.schedule(this)
+        net.drvpn.app.handler.StatsManager.schedule(this)
+        lifecycleScope.launch(Dispatchers.IO) { runCatching { net.drvpn.app.handler.StatsManager.sendIfDue() } }
         if (savedInstanceState == null &&
             !MmkvManager.decodeSettingsBool(AppConfig.PREF_DRVPN_ONBOARDING_DONE, false)
         ) {

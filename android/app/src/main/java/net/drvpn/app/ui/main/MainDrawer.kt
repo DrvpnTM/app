@@ -105,7 +105,12 @@ private fun MainDestination.badgeColor(): Color = when (this) {
 }
 
 @Composable
-fun MainDrawerContent(drawerState: DrawerState, onNavigate: (MainDestination) -> Unit) {
+fun MainDrawerContent(
+    drawerState: DrawerState,
+    onNavigate: (MainDestination) -> Unit,
+    gamingMode: Boolean = false,
+    onToggleGaming: () -> Unit = {},
+) {
     val drawerScrollState = rememberScrollState()
 
     ModalDrawerSheet(
@@ -144,6 +149,16 @@ fun MainDrawerContent(drawerState: DrawerState, onNavigate: (MainDestination) ->
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
+            }
+            // Gaming mode: WireGuard servers only, the lowest ping, no extra hop.
+            Spacer(Modifier.height(14.dp))
+            SettingsGroup(dividerInset = 60.dp) {
+                net.drvpn.app.ui.compose.SettingsSwitchItem(
+                    title = "🎮  " + stringResource(R.string.gaming_mode_title),
+                    summary = stringResource(R.string.gaming_mode_summary),
+                    checked = gamingMode,
+                    onCheckedChange = { onToggleGaming() },
+                )
             }
             listOf(primaryDrawerItems, drawerItems.drop(primaryDrawerItems.size)).forEach { section ->
                 Spacer(Modifier.height(14.dp))

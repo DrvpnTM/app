@@ -301,7 +301,7 @@ object AngConfigManager {
         configs: List<ParsedProfile>,
         subid: String,
         append: Boolean,
-    ) {
+    ): Set<String> {
         val keyToProfile = linkedMapOf<String, ProfileItem>()
         val rawConfigs = mutableMapOf<String, String>()
 
@@ -317,6 +317,7 @@ object AngConfigManager {
             subscriptionId = subid,
             append = append,
         )
+        return keyToProfile.keys
     }
 
     /**
@@ -531,7 +532,14 @@ object AngConfigManager {
                 return SubscriptionUpdateResult(failureCount = 1)
             }
 
-            val count = parseConfigViaSub(configText, it.guid, false)
+            var count = parseConfigViaSub(configText, it.guid, false)
+            // The free subscription: its own list first, as before, then the servers of the
+            // repo's other lists (WARP, Egypt, ...) added after them.
+            if (count > 0 && MmkvManager.isFreeSubscription(it.guid)) {
+                count += runCatching { appendFreeExtras(it.guid, configText) }
+                    .onFailure { e -> LogUtil.e(AppConfig.TAG, "Free subscription extras failed", e) }
+                    .getOrDefault(0)
+            }
             if (count > 0) {
                 it.subscription.lastUpdated = System.currentTimeMillis()
                 applySubscriptionUserInfo(it.subscription, userInfo)
@@ -611,6 +619,80 @@ object AngConfigManager {
      * @param append Whether to append the configurations.
      * @return The number of configurations parsed.
      */
+    /**
+     * Adds the servers of the free repo's other lists (subscriptions.json next to the free list)
+     * to the free subscription, named DRVPN. Links the app reads are added as they are; Hiddify's
+     * warp:// become Aether WARP servers and phttp:// HTTP proxies; chains ("a -> b") are left out.
+     */
+    private fun appendFreeExtras(subid: String, mainText: String): Int {
+        val base = AppConfig.FREE_SUBSCRIPTION_URL.substringBeforeLast('/')
+        val index = fetchText("$base/subscriptions.json") ?: return 0
+        val urls = JsonUtil.parseString(index)?.asJsonObject?.getAsJsonObject("subscriptions")
+            ?.entrySet()
+            ?.filter { (name, _) -> name != "all" && name != "all_base64" }
+            ?.mapNotNull { (_, v) -> v.takeIf { it.isJsonPrimitive }?.asString }
+            .orEmpty()
+        val known = (Utils.decode(mainText).ifBlank { mainText }).lines().map { it.substringBefore('#').trim() }.toMutableSet()
+        val subItem = MmkvManager.decodeSubscription(subid)
+        val extras = mutableListOf<ProfileItem>()
+        urls.forEach { url ->
+            val text = fetchText(url) ?: return@forEach
+            (Utils.decode(text).takeIf { it.contains("://") } ?: text).lines().forEach line@{ raw ->
+                val line = raw.trim()
+                if (line.isEmpty() || line.startsWith("//") || line.startsWith("#") || "->" in line) return@line
+                val key = line.substringBefore('#').trim()
+                if (!known.add(key)) return@line
+                val profile = freeExtraProfile(key) ?: parseConfig(line, subid, subItem) ?: return@line
+                profile.remarks = "DRVPN"
+                profile.subscriptionId = subid
+                extras.add(profile)
+            }
+        }
+        if (extras.isNotEmpty()) {
+            val added = commitProfiles(extras.map(::ParsedProfile), subid, append = true)
+            // New servers go to the top of a list; these belong after the free list's own.
+            val list = MmkvManager.decodeServerList(subid)
+            MmkvManager.encodeServerList((list.filter { it !in added } + list.filter { it in added }).toMutableList(), subid)
+        }
+        LogUtil.i(AppConfig.TAG, "Free subscription: ${extras.size} servers added from the other lists")
+        return extras.size
+    }
+
+    /** warp://[@host:port] as an Aether WARP server; phttp:// and http://host:port as an HTTP proxy. */
+    private fun freeExtraProfile(link: String): ProfileItem? {
+        val scheme = link.substringBefore("://").lowercase()
+        val rest = link.substringAfter("://").substringBefore('?').substringBefore('/').substringAfter('@')
+        val host = rest.substringBeforeLast(':').removePrefix("[").removeSuffix("]")
+        val port = rest.substringAfterLast(':', "").toIntOrNull()
+        return when (scheme) {
+            "warp" -> ProfileItem.create(EConfigType.AETHER).apply {
+                if (host.isNotBlank() && host != "auto" && port != null) {
+                    server = host
+                    serverPort = port.toString()
+                }
+            }
+            "phttp", "http" -> if (host.isNotBlank() && port != null) {
+                ProfileItem.create(EConfigType.HTTP).apply {
+                    server = host
+                    serverPort = port.toString()
+                }
+            } else null
+            else -> null
+        }
+    }
+
+    private fun fetchText(url: String): String? {
+        val request = UrlContentRequest(
+            url = url,
+            timeout = 15000,
+            httpPort = SettingsManager.getHttpPort(),
+            proxyUsername = SettingsManager.getSocksUsername(),
+            proxyPassword = SettingsManager.getSocksPassword(),
+        )
+        return runCatching { HttpUtil.getUrlContentWithUserInfo(request).first }.getOrNull()?.takeIf { it.isNotBlank() }
+            ?: runCatching { HttpUtil.getUrlContentWithUserInfo(UrlContentRequest(url = url)).first }.getOrNull()?.takeIf { it.isNotBlank() }
+    }
+
     private fun parseConfigViaSub(server: String?, subid: String, append: Boolean): Int {
         var count = parseBatchConfig(Utils.decode(server), subid, append)
         if (count <= 0) {

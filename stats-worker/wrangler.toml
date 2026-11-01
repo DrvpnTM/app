@@ -1,0 +1,9 @@
+name = "drvpn-stats"
+main = "worker.js"
+compatibility_date = "2026-10-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "drvpn-stats"
+# Filled in by: npx wrangler d1 create drvpn-stats
+database_id = "PUT-YOUR-DATABASE-ID-HERE"
