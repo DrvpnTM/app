@@ -36,7 +36,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import net.drvpn.app.ui.compose.ExtraHopBand
 import net.drvpn.app.ui.compose.ExtraHopSheet
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -70,14 +69,13 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.Dp
 import net.drvpn.app.extension.toSpeedString
 import net.drvpn.app.extension.toTrafficString
-import net.drvpn.app.ui.compose.IosBlue
 import net.drvpn.app.ui.compose.IosGreen
-import net.drvpn.app.ui.compose.cell
 import kotlinx.coroutines.delay
 import java.util.Locale
 import net.drvpn.app.dto.entities.SubscriptionItem
 import net.drvpn.app.ui.compose.IosRed
 import net.drvpn.app.ui.compose.IosOrange
+import net.drvpn.app.ui.compose.LocalThemeStyle
 import androidx.compose.material3.LinearProgressIndicator
 import net.drvpn.app.handler.AnnouncementManager
 import androidx.compose.ui.platform.LocalUriHandler
@@ -109,6 +107,7 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
+import net.drvpn.app.ui.compose.themeSurface
 
 private val ConnectedColor = Color(0xFF34C759)
 
@@ -138,6 +137,8 @@ internal fun MainHomeTab(
     serverRows: List<ServerRowUiModel> = emptyList(),
     modifier: Modifier = Modifier,
 ) {
+    val themeStyle = LocalThemeStyle.current
+    val compactStyle = themeStyle == "forest" || themeStyle == "midnight"
     // Pulling Home up (or tapping the handle / server card) opens the server picker sheet.
     var showPicker by rememberSaveable { mutableStateOf(false) }
     // Tapping the chain band opens the chain sheet; [chainVersion] makes the band read it again.
@@ -213,10 +214,17 @@ internal fun MainHomeTab(
                 ConnectButton(
                     isRunning = isRunning,
                     onToggle = { onAction(MainAction.ToggleService) },
+                    themeStyle = themeStyle,
                     focusRequester = connectFocus,
                     // In landscape (phones on their side, TVs) the button shrinks with the height so the
                     // status, timer and speed below it stay visible.
-                    size = if (landscape) (availableHeight * 0.42f).coerceIn(110.dp, 170.dp) else 170.dp,
+                    size = if (landscape) (availableHeight * 0.42f).coerceIn(110.dp, 170.dp)
+                    else 170.dp * when (themeStyle) {
+                        "ocean" -> 1.08f
+                        "forest", "midnight" -> 0.90f
+                        "sunset" -> 1.04f
+                        else -> 1f
+                    },
                 )
                 Spacer(Modifier.height(12.dp))
                 if (!isRunning) {
@@ -303,7 +311,7 @@ internal fun MainHomeTab(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                    .padding(horizontal = if (compactStyle) 14.dp else 16.dp, vertical = if (compactStyle) 8.dp else 12.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 if (announcement != null) {
@@ -315,9 +323,9 @@ internal fun MainHomeTab(
                     subscription = subscription,
                     onUpdate = { onAction(MainAction.UpdateSubscriptions) },
                 )
-                Spacer(Modifier.height(20.dp))
+                Spacer(Modifier.height(if (compactStyle) 12.dp else 20.dp))
                 connectBlock()
-                Spacer(Modifier.height(20.dp))
+                Spacer(Modifier.height(if (compactStyle) 12.dp else 20.dp))
                 LocationCard(
                     row = selectedRow,
                     fallbackName = selectedServerName,
@@ -344,7 +352,7 @@ private fun PullUpHandle(onOpen: () -> Unit) {
     Column(
         Modifier
             .fillMaxWidth()
-            .focusHighlight(RoundedCornerShape(16.dp))
+            .focusHighlight(MaterialTheme.shapes.medium)
             .clickable(role = Role.Button, onClick = onOpen)
             .pointerInput(Unit) {
                 detectVerticalDragGestures { _, dragAmount -> if (dragAmount < -6f) latest() }
@@ -394,24 +402,24 @@ private fun ConnectionTimer(since: Long?) {
 
 @Composable
 private fun SpeedRow(up: Long, down: Long, totalUp: Long, totalDown: Long) {
+    val shape = MaterialTheme.shapes.large
     Row(
         modifier = Modifier
             .widthIn(max = 360.dp)
             .fillMaxWidth()
-            .clip(RoundedCornerShape(18.dp))
-            .background(MaterialTheme.colorScheme.cell)
+            .themeSurface(shape)
             .height(IntrinsicSize.Min)
             .padding(vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        SpeedItem(arrow = "↓", label = stringResource(R.string.home_download), value = down.toSpeedString(), total = totalDown.toTrafficString(), color = IosBlue, modifier = Modifier.weight(1f))
+        SpeedItem(arrow = "↓", label = stringResource(R.string.home_download), value = down.toSpeedString(), total = totalDown.toTrafficString(), color = MaterialTheme.colorScheme.primary, modifier = Modifier.weight(1f))
         Box(
             Modifier
                 .fillMaxHeight()
                 .width(1.dp)
                 .background(MaterialTheme.colorScheme.outlineVariant)
         )
-        SpeedItem(arrow = "↑", label = stringResource(R.string.home_upload), value = up.toSpeedString(), total = totalUp.toTrafficString(), color = IosGreen, modifier = Modifier.weight(1f))
+        SpeedItem(arrow = "↑", label = stringResource(R.string.home_upload), value = up.toSpeedString(), total = totalUp.toTrafficString(), color = MaterialTheme.colorScheme.tertiary, modifier = Modifier.weight(1f))
     }
 }
 
@@ -466,13 +474,12 @@ internal fun FastestButton(busy: Boolean, onClick: () -> Unit) {
 @Composable
 private fun ProfileCard(profileName: String, subscription: SubscriptionItem?, onUpdate: () -> Unit) {
     val primary = MaterialTheme.colorScheme.primary
-    val shape = RoundedCornerShape(18.dp)
+    val shape = MaterialTheme.shapes.large
     val sub = subscription?.takeIf { it.usedBytes > 0 || it.totalBytes > 0 || it.expireAt > 0 }
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(shape)
-            .background(MaterialTheme.colorScheme.cell)
+            .themeSurface(shape)
             .padding(start = 12.dp, end = 10.dp, top = 10.dp, bottom = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -593,7 +600,19 @@ private fun StatusPill(isRunning: Boolean) {
 }
 
 @Composable
-private fun ConnectButton(isRunning: Boolean, onToggle: () -> Unit, size: Dp = 170.dp, focusRequester: FocusRequester? = null) {
+private fun ConnectButton(
+    isRunning: Boolean,
+    onToggle: () -> Unit,
+    themeStyle: String,
+    size: Dp = 170.dp,
+    focusRequester: FocusRequester? = null
+) {
+    val coreShape = when (themeStyle) {
+        "midnight" -> RoundedCornerShape(size * 0.14f)
+        "forest" -> RoundedCornerShape(size * 0.28f)
+        else -> CircleShape
+    }
+    val animatedStyle = themeStyle == "glass" || themeStyle == "ocean" || themeStyle == "sunset"
     val baseColor = if (isRunning) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary
     val shade = if (isRunning) 0.52f else 0.68f
     val top by animateColorAsState(baseColor.copy(
@@ -632,13 +651,13 @@ private fun ConnectButton(isRunning: Boolean, onToggle: () -> Unit, size: Dp = 1
         Canvas(Modifier.size(size)) {
             drawCircle(
                 brush = Brush.radialGradient(
-                    listOf(glow.copy(alpha = 0.30f * breath), glow.copy(alpha = 0.10f * breath), Color.Transparent),
+                    listOf(glow.copy(alpha = 0.30f * if (animatedStyle) breath else 0.85f), glow.copy(alpha = 0.10f), Color.Transparent),
                 ),
-                radius = this.size.minDimension / 2,
+                radius = this.size.minDimension / 2 * if (animatedStyle) breath else 0.88f,
             )
         }
         // The ring: a turning gradient arc when connected, a dotted circle when not.
-        Canvas(Modifier.size(size * 0.86f).rotate(if (isRunning) spin else 0f)) {
+        Canvas(Modifier.size(size * 0.86f).rotate(if (isRunning && animatedStyle) spin else 0f)) {
             val stroke = 3.dp.toPx()
             if (isRunning) {
                 drawArc(
@@ -660,12 +679,17 @@ private fun ConnectButton(isRunning: Boolean, onToggle: () -> Unit, size: Dp = 1
             modifier = Modifier
                 .size(size * 0.68f)
                 .scale(squeeze)
-                .shadow(elevation = 18.dp, shape = CircleShape, ambientColor = glow, spotColor = glow)
+                .shadow(
+                    elevation = if (themeStyle == "midnight") 4.dp else 18.dp,
+                    shape = coreShape,
+                    ambientColor = glow,
+                    spotColor = glow
+                )
                 .then(if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier)
-                .focusHighlight(CircleShape)
-                .clip(CircleShape)
+                .focusHighlight(coreShape)
+                .clip(coreShape)
                 .background(Brush.linearGradient(listOf(top, bottom), start = Offset(0f, 0f), end = Offset(0f, Float.POSITIVE_INFINITY)))
-                .border(1.5.dp, Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.55f), Color.White.copy(alpha = 0.05f))), CircleShape)
+                .border(1.5.dp, Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.55f), Color.White.copy(alpha = 0.05f))), coreShape)
                 .clickable(interactionSource = press, indication = null, onClick = onToggle),
         ) {
             // A light sheen across the top half.
@@ -711,15 +735,12 @@ private fun LocationCard(
     onClick: () -> Unit,
     onShowQr: (() -> Unit)?,
 ) {
-    val shape = RoundedCornerShape(20.dp)
+    val shape = MaterialTheme.shapes.large
     // The extra hop, when on, is the card's top band: the chain reads hop, then server (as Hiddify).
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .shadow(10.dp, shape, ambientColor = Color(0x140F172A), spotColor = Color(0x140F172A))
-            .clip(shape)
-            .background(MaterialTheme.colorScheme.surface)
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, shape)
+            .themeSurface(shape, MaterialTheme.colorScheme.surface)
     ) {
     ExtraHopBand(isRunning, refresh = chainVersion, onClick = onChainClick)
     Row(
@@ -774,12 +795,12 @@ private fun LocationCard(
 @Composable
 private fun FreeServerPromo() {
     val uriHandler = LocalUriHandler.current
+    val shape = MaterialTheme.shapes.medium
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .focusHighlight(RoundedCornerShape(16.dp))
-            .clip(RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
+            .focusHighlight(shape)
+            .themeSurface(shape, MaterialTheme.colorScheme.primaryContainer)
             .clickable { runCatching { uriHandler.openUri(AppConfig.APP_URL) } }
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -798,12 +819,12 @@ private fun FreeServerPromo() {
 @Composable
 private fun AnnouncementCard(notice: AnnouncementManager.Announcement, onDismiss: () -> Unit) {
     val uriHandler = LocalUriHandler.current
+    val shape = MaterialTheme.shapes.medium
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .focusHighlight(RoundedCornerShape(16.dp))
-            .clip(RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
+            .focusHighlight(shape)
+            .themeSurface(shape, MaterialTheme.colorScheme.primaryContainer)
             .clickable(enabled = notice.link != null) { notice.link?.let { runCatching { uriHandler.openUri(it) } } }
             .padding(start = 16.dp, top = 12.dp, bottom = 12.dp, end = 4.dp),
         verticalAlignment = Alignment.Top,

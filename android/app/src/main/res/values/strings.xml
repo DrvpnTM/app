@@ -599,6 +599,10 @@
         <item>Neumorphism</item>
         <item>Glassmorphism</item>
     </string-array>
+    <string name="theme_ocean">Ocean</string>
+    <string name="theme_forest">Forest</string>
+    <string name="theme_sunset">Sunset</string>
+    <string name="theme_midnight">Midnight</string>
     <string name="advanced_scan_apply">Apply</string>
     <string name="advanced_scan_applied">Applied to the selected server</string>
     <string name="advanced_scan_no_selected">Select a server first</string>

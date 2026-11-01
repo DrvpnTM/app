@@ -40,6 +40,7 @@ import net.drvpn.app.dto.GroupMapItem
 import net.drvpn.app.dto.entities.ServersCache
 import net.drvpn.app.ui.compose.cell
 import net.drvpn.app.ui.compose.focusHighlight
+import net.drvpn.app.ui.compose.LocalThemeStyle
 
 /**
  * Subscription switcher above the server list: one chip per subscription (name + server count).
@@ -89,7 +90,9 @@ private fun GroupChip(
     val servers by serverFlow.collectAsStateWithLifecycle()
     val primary = MaterialTheme.colorScheme.primary
     val content = if (selected) Color.White else primary
-    val shape = RoundedCornerShape(50)
+    val shape = if (LocalThemeStyle.current in setOf("midnight", "forest")) {
+        MaterialTheme.shapes.medium
+    } else RoundedCornerShape(50)
     Row(
         modifier = Modifier
             .focusHighlight(shape)

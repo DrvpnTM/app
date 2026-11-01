@@ -29,6 +29,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -52,6 +53,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import net.drvpn.app.ui.compose.focusHighlight
 import net.drvpn.app.dto.entities.ProfileItem
 import net.drvpn.app.ui.compose.QRCodeDialog
+import net.drvpn.app.ui.compose.LocalThemeStyle
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
@@ -61,6 +63,7 @@ fun MainScreen(
     onAction: (MainAction) -> Unit,
     onNavigate: (MainDestination) -> Unit,
 ) {
+    val themeStyle = LocalThemeStyle.current
     val uiState by mainViewModel.uiState.collectAsStateWithLifecycle()
     val groups = uiState.groups
     val isLoading by mainViewModel.isLoading.collectAsStateWithLifecycle()
@@ -235,10 +238,18 @@ fun MainScreen(
             },
             bottomBar = {
                 Column {
-                HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant)
+                if (themeStyle !in setOf("ocean", "glass", "sunset")) {
+                    HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant)
+                }
                 NavigationBar(
-                    containerColor = MaterialTheme.colorScheme.background.copy(alpha = 0.96f),
-                    tonalElevation = 0.dp
+                    modifier = if (themeStyle in setOf("ocean", "glass", "sunset")) {
+                        Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+                            .clip(MaterialTheme.shapes.extraLarge)
+                    } else Modifier,
+                    containerColor = if (themeStyle in setOf("ocean", "glass", "sunset")) {
+                        MaterialTheme.colorScheme.surfaceContainerLow
+                    } else MaterialTheme.colorScheme.background.copy(alpha = 0.96f),
+                    tonalElevation = if (themeStyle == "midnight") 0.dp else 3.dp
                 ) {
                     MainTab.entries.forEach { tab ->
                         NavigationBarItem(
@@ -259,7 +270,9 @@ fun MainScreen(
                                 selectedTextColor = MaterialTheme.colorScheme.primary,
                                 unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
                                 unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                indicatorColor = Color.Transparent
+                                indicatorColor = if (themeStyle in setOf("ocean", "forest", "sunset", "glass")) {
+                                    MaterialTheme.colorScheme.primaryContainer
+                                } else Color.Transparent
                             )
                         )
                     }

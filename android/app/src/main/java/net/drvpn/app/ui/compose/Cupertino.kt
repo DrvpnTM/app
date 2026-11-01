@@ -29,9 +29,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -175,7 +177,8 @@ internal val IosShapes = Shapes(
     extraLarge = RoundedCornerShape(16.dp),
 )
 
-val IosGroupShape = RoundedCornerShape(12.dp)
+val IosGroupShape: androidx.compose.ui.graphics.Shape
+    @Composable get() = MaterialTheme.shapes.medium
 
 /** Section footnote / header caption style (13sp secondary label). */
 val iosCaption: TextStyle
@@ -220,14 +223,14 @@ fun SettingsGroup(
 ) {
     val separator = MaterialTheme.colorScheme.outlineVariant
     val offsets = remember { DividerOffsets() }
+    val groupShape = MaterialTheme.shapes.medium
     CompositionLocalProvider(LocalInSettingsGroup provides true) {
         Layout(
             content = content,
             modifier = modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 4.dp)
-                .clip(IosGroupShape)
-                .background(MaterialTheme.colorScheme.cell)
+                .themeSurface(groupShape)
                 .drawWithContent {
                     drawContent()
                     val inset = dividerInset.toPx()
@@ -254,11 +257,47 @@ fun SettingsGroup(
 }
 
 /** Standalone row card used when a settings row is not inside a [SettingsGroup]. */
+@Composable
 fun Modifier.iosStandaloneCell(inGroup: Boolean, cell: Color): Modifier =
     if (inGroup) this else this
         .padding(horizontal = 16.dp, vertical = 3.dp)
-        .clip(IosGroupShape)
-        .background(cell)
+        .themeSurface(IosGroupShape, cell)
+
+/** Applies the selected skin's card shape, elevation, and border to a reusable surface. */
+fun Modifier.themeSurface(shape: Shape? = null, containerColor: Color? = null): Modifier = composed {
+    val style = LocalThemeStyle.current
+    val colors = MaterialTheme.colorScheme
+    val surfaceShape = shape ?: MaterialTheme.shapes.large
+    val elevation = when (style) {
+        "glass" -> 12.dp
+        "sunset" -> 9.dp
+        "ocean" -> 7.dp
+        "neomorph" -> 6.dp
+        "forest" -> 2.dp
+        "midnight" -> 0.dp
+        else -> 1.dp
+    }
+    val shadowColor = when (style) {
+        "ocean" -> colors.primary.copy(alpha = 0.12f)
+        "sunset" -> colors.secondary.copy(alpha = 0.10f)
+        "glass" -> colors.primary.copy(alpha = 0.12f)
+        else -> colors.onSurface.copy(alpha = 0.08f)
+    }
+    val base = if (elevation > 0.dp) {
+        shadow(elevation, surfaceShape, ambientColor = shadowColor, spotColor = shadowColor)
+    } else {
+        this
+    }
+    val surface = base
+        .clip(surfaceShape)
+        .background(containerColor ?: colors.cell)
+    val borderColor = when (style) {
+        "glass" -> colors.outlineVariant.copy(alpha = 0.75f)
+        "ocean", "forest", "midnight", "neomorph" -> colors.outlineVariant
+        else -> Color.Transparent
+    }
+    if (borderColor == Color.Transparent) surface else surface.border(1.dp, borderColor, surfaceShape)
+}
 
 /** iOS-Settings style leading icon: white glyph on a rounded colored square. */
 @Composable
@@ -278,10 +317,11 @@ fun IosIconBadge(icon: Painter, tint: Color = MaterialTheme.colorScheme.primary,
  * TV / remote-control support: draws a clear primary-colored ring around the element while it has
  * D-pad focus. Put it before the clickable/selectable modifier so it observes that element's focus.
  */
-fun Modifier.focusHighlight(shape: androidx.compose.ui.graphics.Shape = IosGroupShape): Modifier = composed {
+fun Modifier.focusHighlight(shape: androidx.compose.ui.graphics.Shape? = null): Modifier = composed {
     var focused by remember { mutableStateOf(false) }
     val ring = MaterialTheme.colorScheme.primary
+    val highlightShape = shape ?: MaterialTheme.shapes.medium
     this
         .onFocusChanged { focused = it.hasFocus }
-        .then(if (focused) Modifier.border(3.dp, ring, shape) else Modifier)
+        .then(if (focused) Modifier.border(3.dp, ring, highlightShape) else Modifier)
 }

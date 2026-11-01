@@ -213,7 +213,12 @@ fun SettingsScreen(
     val languageValues = stringArrayResource(R.array.language_select_value).toList()
     val uiModeNightEntries = stringArrayResource(R.array.ui_mode_night).toList()
     val uiModeNightValues = stringArrayResource(R.array.ui_mode_night_value).toList()
-    val themeEntries = stringArrayResource(R.array.drvpn_theme).toList()
+    val themeEntries = stringArrayResource(R.array.drvpn_theme).toList() + listOf(
+        stringResource(R.string.theme_ocean),
+        stringResource(R.string.theme_forest),
+        stringResource(R.string.theme_sunset),
+        stringResource(R.string.theme_midnight),
+    )
     val themeValues = stringArrayResource(R.array.drvpn_theme_value).toList()
     val bypassLanEntries = stringArrayResource(R.array.vpn_bypass_lan).toList()
     val bypassLanValues = stringArrayResource(R.array.vpn_bypass_lan_value).toList()

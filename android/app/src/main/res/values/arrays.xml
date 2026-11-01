@@ -232,5 +232,9 @@
         <item>default</item>
         <item>neomorph</item>
         <item>glass</item>
+        <item>ocean</item>
+        <item>forest</item>
+        <item>sunset</item>
+        <item>midnight</item>
     </string-array>
 </resources>

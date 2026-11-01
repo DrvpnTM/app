@@ -599,6 +599,10 @@
         <item>نیومورفیک</item>
         <item>گلس‌مورفیک</item>
     </string-array>
+    <string name="theme_ocean">اقیانوسی</string>
+    <string name="theme_forest">جنگلی</string>
+    <string name="theme_sunset">غروب</string>
+    <string name="theme_midnight">نیمه‌شب</string>
     <string name="advanced_scan_apply">اعمال</string>
     <string name="advanced_scan_applied">روی سرور انتخاب‌شده اعمال شد</string>
     <string name="advanced_scan_no_selected">ابتدا یک سرور انتخاب کنید</string>

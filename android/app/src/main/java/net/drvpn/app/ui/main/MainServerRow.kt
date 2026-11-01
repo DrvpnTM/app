@@ -166,7 +166,7 @@ internal fun ServerLocationRow(
     modifier: Modifier = Modifier,
 ) {
     val selectedLabel = if (isSelected) stringResource(R.string.acc_selected_server) else null
-    val shape = RoundedCornerShape(16.dp)
+    val shape = MaterialTheme.shapes.medium
     Row(
         modifier = modifier
             .fillMaxWidth()
