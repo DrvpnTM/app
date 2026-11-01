@@ -67,6 +67,7 @@ export const dashboardPage = () => `${head('پنل مدیریت دکتر وی پ
 select#theme{height:38px;border:1px solid var(--line);border-radius:11px;background:var(--card);color:var(--muted);padding:0 10px;cursor:pointer;outline:none}
 main{max-width:1240px;margin:auto;padding:18px}
 .live{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:16px;color:var(--muted);font-size:13px}
+.load-error{color:var(--red);font-size:12px}.load-error[hidden]{display:none}
 .chip{display:inline-flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 13px;box-shadow:var(--shadow)}
 .chip b{color:var(--text);font-size:14px}
 .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px rgba(22,163,74,.18)}
@@ -106,8 +107,8 @@ td.rank{color:var(--faint);width:26px;font-size:13px}
 @media (max-width:620px){.hdr small{display:none}.seg button{padding:7px 10px}}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-chart-geo@4.3.4/build/index.umd.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 </head>
 <body>
 <header class="hdr"><div class="in">
@@ -121,7 +122,7 @@ td.rank{color:var(--faint);width:26px;font-size:13px}
 <a class="ico" href="/logout">خروج</a>
 </div></header>
 <main>
-<div class="live" id="live"><span class="dot"></span><span>فعال امروز: <b id="aDay">–</b></span><span>·</span><span>هفته: <b id="aWeek">–</b></span><span>·</span><span>ماه: <b id="aMonth">–</b></span><span class="sp"></span><span id="upd"></span></div>
+<div class="live" id="live"><span class="dot"></span><span>فعال امروز: <b id="aDay">–</b></span><span>·</span><span>هفته: <b id="aWeek">–</b></span><span>·</span><span>ماه: <b id="aMonth">–</b></span><span class="sp"></span><span id="upd"></span><span id="loadError" class="load-error" role="alert" hidden></span></div>
 
 <section class="kpis">
 <div class="kpi"><div class="top"><span class="lbl">کاربران فعال</span><span class="trend flat" id="tUsers">–</span></div><div class="val" id="vUsers">–</div><div class="spark"><canvas id="sUsers"></canvas></div></div>
@@ -138,7 +139,7 @@ td.rank{color:var(--faint);width:26px;font-size:13px}
 
 <div class="sect"><span style="background:var(--green)"></span><h2>نقشهٔ جهان</h2><small>موقعیت تقریبی از روی IP · یک نقطه برای هر ناحیه</small></div>
 <section class="grid">
-<div class="card"><h3>کاربران روی نقشه</h3><div class="chart" style="height:420px"><canvas id="cMap"></canvas></div></div>
+<div class="card"><h3>کاربران روی نقشه <em>با غلتک ماوس زوم، با کشیدن جابه‌جا</em></h3><div id="cMap" style="height:420px;border-radius:14px;overflow:hidden;z-index:0"></div></div>
 <div class="card"><h3>کشورها <em>بر پایهٔ کاربر</em></h3><div id="tCountries" style="max-height:420px;overflow:auto"></div></div>
 </section>
 <section class="grid2" style="margin-top:14px">
@@ -174,38 +175,41 @@ const PALETTE = ['#2563eb', '#7c3aed', '#16a34a', '#f59e0b', '#db2777', '#0d9488
 const CNAME = { IR: 'ایران', CN: 'چین', RU: 'روسیه', US: 'آمریکا', DE: 'آلمان', TR: 'ترکیه', AE: 'امارات', GB: 'انگلیس', FR: 'فرانسه', NL: 'هلند', CA: 'کانادا', IN: 'هند', IQ: 'عراق', AF: 'افغانستان', PK: 'پاکستان', SE: 'سوئد', FI: 'فنلاند', IT: 'ایتالیا', ES: 'اسپانیا', PL: 'لهستان', AZ: 'آذربایجان', AM: 'ارمنستان', GE: 'گرجستان', QA: 'قطر', OM: 'عمان', KW: 'کویت', SA: 'عربستان', MY: 'مالزی', ID: 'اندونزی', JP: 'ژاپن', KR: 'کره جنوبی', AU: 'استرالیا', BR: 'برزیل', UA: 'اوکراین', BY: 'بلاروس', CH: 'سوئیس', AT: 'اتریش', BE: 'بلژیک', NO: 'نروژ', DK: 'دانمارک', CZ: 'چک', RO: 'رومانی' };
 const flag = (cc) => (cc && cc.length === 2 && /^[A-Z]{2}$/.test(cc)) ? String.fromCodePoint(...[...cc].map((c) => 0x1f1e6 + c.charCodeAt(0) - 65)) : '🏳️';
 const cname = (cc) => CNAME[cc] || cc;
-let worldFeatures = null;
-async function world() {
-  if (worldFeatures) return worldFeatures;
-  try {
-    const topo = await (await fetch('https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-110m.json')).json();
-    worldFeatures = topojson.feature(topo, topo.objects.countries).features;
-  } catch (e) { worldFeatures = []; }
-  return worldFeatures;
-}
+// Leaflet world map: real pan/zoom. One small circle per user area (approximate IP location).
+let leafMap = null, leafTiles = null, leafMarkers = null, leafDark = null, leafFitted = false;
+function tileUrl() { return isDark() ? 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}' : 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}'; }
 function rows(el, data, label, color) {
   const max = Math.max(1, ...data.map((r) => r.n));
   el.innerHTML = data.length
     ? '<table>' + data.map((r, i) => '<tr><td class="rank">' + fa(i + 1) + '</td><td>' + label(r) + '<div class="bar" style="width:' + Math.round((r.n / max) * 100) + '%;background:' + (color || 'linear-gradient(90deg,#93c5fd,#2563eb)') + '"></div></td><td class="n">' + fa(r.n) + '</td></tr>').join('') + '</table>'
     : '<div class="empty">هنوز داده‌ای نیست</div>';
 }
-async function renderMap(points) {
+function renderMap(points) {
   const el = document.getElementById('cMap');
-  if (!window.ChartGeo || typeof topojson === 'undefined') { el.parentElement.innerHTML = '<div class="empty">نقشه بارگذاری نشد</div>'; return; }
-  if (window.ChartGeo.BubbleMapController) try { Chart.register(window.ChartGeo.BubbleMapController, window.ChartGeo.GeoFeature, window.ChartGeo.ProjectionScale, window.ChartGeo.SizeScale); } catch (e) {}
-  const feats = await world();
-  const fill = isDark() ? 'rgba(148,163,184,.14)' : 'rgba(100,116,139,.12)';
-  if (charts.cMap) charts.cMap.destroy();
-  charts.cMap = new Chart(el, {
-    type: 'bubbleMap',
-    data: { labels: points.map(() => ''), datasets: [{
-      outline: feats, showOutline: true, outlineBackgroundColor: fill, outlineBorderColor: css('--line'), outlineBorderWidth: 0.6,
-      backgroundColor: 'rgba(37,99,235,.6)', borderColor: '#1d4ed8', borderWidth: 0.5, hoverBackgroundColor: '#2563eb',
-      data: points.map((p) => ({ longitude: p.lon, latitude: p.lat, value: p.n })),
-    }] },
-    options: { showGraticule: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => ' کاربر: ' + fa(c.raw.value) } } },
-      scales: { projection: { axis: 'x', projection: 'equalEarth' }, size: { axis: 'x', size: [5, 24] } } },
+  if (typeof L === 'undefined') { el.innerHTML = '<div class="empty">نقشه بارگذاری نشد</div>'; return; }
+  if (!leafMap) {
+    leafMap = L.map(el, { worldCopyJump: true, zoomControl: true, attributionControl: true, minZoom: 2 }).setView([25, 20], 2);
+    leafMarkers = L.layerGroup().addTo(leafMap);
+  }
+  // Tiles only swap when the theme actually changed (keeps the admin's current view).
+  if (leafTiles === null || leafDark !== isDark()) {
+    if (leafTiles) leafMap.removeLayer(leafTiles);
+    leafDark = isDark();
+    leafTiles = L.tileLayer(tileUrl(), { maxZoom: 16, attribution: 'Tiles &copy; Esri' }).addTo(leafMap);
+  }
+  leafMarkers.clearLayers();
+  const pts = (points || []).filter((p) => p.lat != null && p.lon != null);
+  const bounds = [];
+  pts.forEach((p) => {
+    const r = 4 + Math.min(16, Math.sqrt(p.n) * 2.4);
+    L.circleMarker([p.lat, p.lon], { radius: r, color: '#1d4ed8', weight: 1, fillColor: '#2563eb', fillOpacity: 0.45 })
+      .bindTooltip('کاربران این ناحیه: ' + fa(p.n), { direction: 'top' })
+      .addTo(leafMarkers);
+    bounds.push([p.lat, p.lon]);
   });
+  // Fit to the data once; later refreshes keep whatever the admin is looking at.
+  if (bounds.length && !leafFitted) { leafMap.fitBounds(bounds, { padding: [40, 40], maxZoom: 6 }); leafFitted = true; }
+  setTimeout(() => leafMap.invalidateSize(), 60);
 }
 const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 function isDark() { const t = document.documentElement.getAttribute('data-theme'); if (t === 'dark') return true; if (t === 'light' || t === 'glass') return false; return matchMedia('(prefers-color-scheme:dark)').matches; }
@@ -267,13 +271,19 @@ function fillDays(series, n) {
   return out;
 }
 
-let days = 30, lastRows = [];
+let days = 30, lastRows = [], loadSequence = 0;
 async function load() {
+  const sequence = ++loadSequence;
   const btn = document.getElementById('refresh'); btn.classList.add('spin');
+  const error = document.getElementById('loadError');
+  error.hidden = true;
+  try {
   const r = await fetch('/stats?days=' + days, { credentials: 'same-origin' });
-  btn.classList.remove('spin');
+  if (sequence !== loadSequence) return;
   if (r.status === 401) { location.reload(); return; }
+  if (!r.ok) throw new Error('Stats request failed with status ' + r.status);
   const s = await r.json();
+  if (sequence !== loadSequence) return;
   const d = fillDays(s.series, s.rangeDays); lastRows = d;
   document.getElementById('aDay').textContent = fa(s.active.day);
   document.getElementById('aWeek').textContent = fa(s.active.week);
@@ -322,6 +332,15 @@ async function load() {
   rows(document.getElementById('tCountries'), bd.byCountry || [], (r) => flag(r.k) + '&nbsp; ' + cname(r.k), 'linear-gradient(90deg,#86efac,#16a34a)');
   rows(document.getElementById('tCities'), (bd.byCity || []).map((r) => ({ n: r.n, k: r.k })), (r) => { const p = r.k.split('|'); return flag(p[0]) + '&nbsp; ' + (p[1] || '?').replace(/[<>&]/g, '') + ' <span style="color:var(--faint)">· ' + cname(p[0]) + '</span>'; }, 'linear-gradient(90deg,#c4b5fd,#7c3aed)');
   renderMap(s.points || []);
+  } catch (e) {
+    if (sequence === loadSequence) {
+      error.textContent = 'بارگذاری آمار ناموفق بود. اتصال را بررسی کنید و دوباره تلاش کنید.';
+      error.hidden = false;
+      console.error('Failed to load dashboard statistics:', e);
+    }
+  } finally {
+    if (sequence === loadSequence) btn.classList.remove('spin');
+  }
 }
 
 document.getElementById('seg').addEventListener('click', (e) => {
@@ -438,24 +457,46 @@ document.getElementById('pwBtn').addEventListener('click', async (e) => {
   if (n1 !== n2) return show(msg, false, 'رمز جدید و تکرارش یکی نیستند');
   if (n1.length < 8) return show(msg, false, 'رمز جدید باید حداقل ۸ نویسه باشد');
   btn.disabled = true;
-  const f = new FormData(); f.set('current', cur); f.set('next', n1);
-  const { r, j } = await post('/settings/password', f); btn.disabled = false;
-  if (j.ok) { show(msg, true, 'رمز با موفقیت عوض شد.'); document.getElementById('cur').value = document.getElementById('n1').value = document.getElementById('n2').value = ''; }
-  else show(msg, false, j.error || 'خطا در تغییر رمز');
+  try {
+    const f = new FormData(); f.set('current', cur); f.set('next', n1);
+    const { j } = await post('/settings/password', f);
+    if (j.ok) { show(msg, true, 'رمز با موفقیت عوض شد.'); document.getElementById('cur').value = document.getElementById('n1').value = document.getElementById('n2').value = ''; }
+    else show(msg, false, j.error || 'خطا در تغییر رمز');
+  } catch (err) {
+    show(msg, false, 'ارتباط با سرور برقرار نشد. دوباره تلاش کنید.');
+    console.error('Failed to change admin password:', err);
+  } finally {
+    btn.disabled = false;
+  }
 });
 document.getElementById('pruneBtn').addEventListener('click', async (e) => {
   const msg = document.getElementById('dataMsg'), days = document.getElementById('pdays').value;
   if (!confirm('دادهٔ قدیمی‌تر از ' + days + ' روز حذف شود؟')) return;
   e.target.disabled = true; const f = new FormData(); f.set('days', days);
-  const { j } = await post('/settings/prune', f); e.target.disabled = false;
-  show(msg, !!j.ok, j.ok ? (j.deleted + ' ردیف قدیمی حذف شد.') : 'خطا');
+  try {
+    const { j } = await post('/settings/prune', f);
+    show(msg, !!j.ok, j.ok ? (j.deleted + ' ردیف قدیمی حذف شد.') : 'خطا');
+  } catch (err) {
+    show(msg, false, 'ارتباط با سرور برقرار نشد. دوباره تلاش کنید.');
+    console.error('Failed to prune old statistics:', err);
+  } finally {
+    e.target.disabled = false;
+  }
 });
 document.getElementById('resetBtn').addEventListener('click', async (e) => {
   const msg = document.getElementById('dataMsg');
   if (!confirm('همهٔ آمار برای همیشه پاک شود؟ این کار برگشت‌ناپذیر است.')) return;
   if (!confirm('مطمئنید؟ تمام داده‌ها حذف می‌شود.')) return;
-  e.target.disabled = true; const { j } = await post('/settings/reset', new FormData()); e.target.disabled = false;
-  show(msg, !!j.ok, j.ok ? (j.deleted + ' ردیف حذف شد. آمار از صفر شروع می‌شود.') : 'خطا');
+  e.target.disabled = true;
+  try {
+    const { j } = await post('/settings/reset', new FormData());
+    show(msg, !!j.ok, j.ok ? (j.deleted + ' ردیف حذف شد. آمار از صفر شروع می‌شود.') : 'خطا');
+  } catch (err) {
+    show(msg, false, 'ارتباط با سرور برقرار نشد. دوباره تلاش کنید.');
+    console.error('Failed to reset statistics:', err);
+  } finally {
+    e.target.disabled = false;
+  }
 });
 </script>
 </body></html>`;
