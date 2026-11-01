@@ -5,7 +5,7 @@
 <a href="https://github.com/DrvpnTM/app/releases/latest/download/DrVPN.apk"><img src="https://raw.githubusercontent.com/DrvpnTM/app/main/docs/icons/download-button.svg" width="320" alt="Download DrVPN.apk"></a>
 
 <a href="https://github.com/DrvpnTM/app/releases"><img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FDrvpnTM%2Fapp%2Fmain%2Fdocs%2Fdownloads.json&style=for-the-badge" alt="downloads"></a>
-<a href="https://drvpn-stats.cdn-1-4cf.workers.dev/stats"><img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fdrvpn-stats.cdn-1-4cf.workers.dev%2Fbadge&style=for-the-badge" alt="active installs"></a>
+<a href="https://github.com/DrvpnTM/app/releases/latest"><img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fdrvpn-stats.cdn-1-4cf.workers.dev%2Fbadge&style=for-the-badge" alt="active installs"></a>
 
 <table>
 <tr>
