@@ -10,14 +10,21 @@ const head = (title) => `<!doctype html>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#eef2f9;--card:#fff;--card2:#f8fafc;--text:#0f172a;--muted:#64748b;--faint:#94a3b8;--line:#e5e9f2;--blue:#2563eb;--green:#16a34a;--red:#dc2626;--violet:#7c3aed;--amber:#f59e0b;--pink:#db2777;--shadow:0 1px 2px rgba(15,23,42,.04),0 10px 30px rgba(15,23,42,.07);--radius:18px}
-@media (prefers-color-scheme:dark){:root{--bg:#070c18;--card:#0f1726;--card2:#131c2e;--text:#e5edf7;--muted:#9aa7bd;--faint:#64748b;--line:#1c2740;--shadow:0 1px 2px rgba(0,0,0,.4),0 12px 34px rgba(0,0,0,.45)}}
+:root{--bg:#eef2f9;--card:#fff;--card2:#f8fafc;--text:#0f172a;--muted:#64748b;--faint:#94a3b8;--line:#e5e9f2;--blue:#2563eb;--green:#16a34a;--red:#dc2626;--violet:#7c3aed;--amber:#f59e0b;--pink:#db2777;--shadow:0 1px 2px rgba(15,23,42,.04),0 10px 30px rgba(15,23,42,.07);--radius:18px;--blur:none;--bgimg:none}
+/* dark values, shared by auto-dark and the explicit dark theme */
+@media (prefers-color-scheme:dark){:root:not([data-theme]){--bg:#070c18;--card:#0f1726;--card2:#131c2e;--text:#e5edf7;--muted:#9aa7bd;--faint:#64748b;--line:#1c2740;--shadow:0 1px 2px rgba(0,0,0,.4),0 12px 34px rgba(0,0,0,.45)}}
+:root[data-theme="dark"]{--bg:#070c18;--card:#0f1726;--card2:#131c2e;--text:#e5edf7;--muted:#9aa7bd;--faint:#64748b;--line:#1c2740;--shadow:0 1px 2px rgba(0,0,0,.4),0 12px 34px rgba(0,0,0,.45)}
+/* glass: a soft aurora background with frosted, translucent cards */
+:root[data-theme="glass"]{--bg:#e6eefc;--card:rgba(255,255,255,.58);--card2:rgba(255,255,255,.42);--text:#1f2a44;--muted:#566586;--faint:#8794b2;--line:rgba(120,140,190,.22);--shadow:0 10px 34px rgba(70,90,170,.16);--radius:22px;--blur:saturate(180%) blur(18px);--bgimg:radial-gradient(55vw 48vh at 90% -6%,rgba(130,190,255,.7),transparent 62%),radial-gradient(60vw 52vh at 8% 8%,rgba(150,205,255,.45),transparent 60%),radial-gradient(75vw 60vh at 50% 116%,rgba(170,140,255,.6),transparent 60%),linear-gradient(155deg,#dfeaff,#e8ecff 42%,#f0e8ff)}
+:root[data-theme="glass"] .card,:root[data-theme="glass"] .kpi,:root[data-theme="glass"] .chip,:root[data-theme="glass"] .seg,:root[data-theme="glass"] .ico,:root[data-theme="glass"] select#theme{border-color:rgba(255,255,255,.75)}
+:root[data-theme="glass"] .kpi,:root[data-theme="glass"] .card{background-image:linear-gradient(180deg,rgba(255,255,255,.35),transparent 40%)}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font-family:Vazirmatn,system-ui,sans-serif;-webkit-font-smoothing:antialiased;font-feature-settings:"ss01"}
+body{margin:0;background:var(--bg);background-image:var(--bgimg);background-attachment:fixed;color:var(--text);font-family:Vazirmatn,system-ui,sans-serif;-webkit-font-smoothing:antialiased;font-feature-settings:"ss01"}
 .logo{width:44px;height:44px;border-radius:13px;background:linear-gradient(160deg,#60a5fa,#1d4ed8);display:grid;place-items:center;box-shadow:0 6px 18px rgba(37,99,235,.4);flex:none}
 .logo svg{width:24px;height:24px}
-button,input{font:inherit}
-</style>`;
+button,input,select{font:inherit}
+</style>
+<script>try{var t=localStorage.getItem('drvpn_theme');if(t&&t!=='auto')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>`;
 
 const logo = `<div class="logo"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2.8l7.5 3v5.7c0 4.6-3.2 8.4-7.5 9.7-4.3-1.3-7.5-5.1-7.5-9.7V5.8z" fill="#fff" fill-opacity=".95"/><path d="M12 8.2v7.6M8.2 12h7.6" stroke="#2563eb" stroke-width="2.4" stroke-linecap="round"/></svg></div>`;
 
@@ -56,6 +63,8 @@ export const dashboardPage = () => `${head('پنل مدیریت دکتر وی پ
 .ico{display:grid;place-items:center;min-width:38px;height:38px;padding:0 12px;border:1px solid var(--line);border-radius:11px;background:var(--card);color:var(--muted);cursor:pointer;text-decoration:none;font-size:14px;font-weight:600}
 .ico:hover{color:var(--text)}
 .ico.spin svg{animation:sp 1s linear infinite}@keyframes sp{to{transform:rotate(360deg)}}
+.card,.kpi,.chip,.seg,.ico,select#theme{backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur)}
+select#theme{height:38px;border:1px solid var(--line);border-radius:11px;background:var(--card);color:var(--muted);padding:0 10px;cursor:pointer;outline:none}
 main{max-width:1240px;margin:auto;padding:18px}
 .live{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:16px;color:var(--muted);font-size:13px}
 .chip{display:inline-flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 13px;box-shadow:var(--shadow)}
@@ -97,14 +106,18 @@ td.rank{color:var(--faint);width:26px;font-size:13px}
 @media (max-width:620px){.hdr small{display:none}.seg button{padding:7px 10px}}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-chart-geo@4.3.4/build/index.umd.min.js"></script>
 </head>
 <body>
 <header class="hdr"><div class="in">
 <div class="brand">${logo}<div><b>پنل مدیریت</b><small>آمار دکتر وی پی ان</small></div></div>
 <div class="sp"></div>
 <div class="seg" id="seg"><button data-d="7">۷ روز</button><button data-d="30" class="on">۳۰ روز</button><button data-d="90">۹۰ روز</button></div>
+<select id="theme" title="تم"><option value="auto">خودکار</option><option value="light">روشن</option><option value="dark">تیره</option><option value="glass">شیشه‌ای</option></select>
 <button class="ico" id="refresh" title="به‌روزرسانی"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M20 11A8 8 0 1 0 18.4 16"/><path d="M20 4v5h-5"/></svg></button>
 <a class="ico" id="csv" title="دانلود CSV">CSV</a>
+<a class="ico" href="/settings" title="تنظیمات"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 1 1-4 0v-.1A1.6 1.6 0 0 0 7 19.4a1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0-1.1-2.7H1a2 2 0 1 1 0-4h.1A1.6 1.6 0 0 0 2.6 7a1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3H7a1.6 1.6 0 0 0 1-1.5V1a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 2.7 1.1 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8V7a1.6 1.6 0 0 0 1.5 1H23a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/></svg></a>
 <a class="ico" href="/logout">خروج</a>
 </div></header>
 <main>
@@ -121,6 +134,16 @@ td.rank{color:var(--faint);width:26px;font-size:13px}
 <section class="grid">
 <div class="card"><h3>کاربران فعال و جدید <em>در روز</em></h3><div class="chart"><canvas id="cDaily"></canvas></div></div>
 <div class="card"><h3>منطقه</h3><div class="chart"><canvas id="cRegion"></canvas></div></div>
+</section>
+
+<div class="sect"><span style="background:var(--green)"></span><h2>نقشهٔ جهان</h2><small>موقعیت تقریبی از روی IP · یک نقطه برای هر ناحیه</small></div>
+<section class="grid">
+<div class="card"><h3>کاربران روی نقشه</h3><div class="chart" style="height:420px"><canvas id="cMap"></canvas></div></div>
+<div class="card"><h3>کشورها <em>بر پایهٔ کاربر</em></h3><div id="tCountries" style="max-height:420px;overflow:auto"></div></div>
+</section>
+<section class="grid2" style="margin-top:14px">
+<div class="card"><h3>شهرها <em>برای تبلیغ محلی · فقط تعداد</em></h3><div id="tCities"></div></div>
+<div class="card"><h3>راهنما</h3><p style="color:var(--faint);font-size:13px;line-height:1.9;margin:0">هر نقطه روی نقشه، ناحیهٔ تقریبیِ یک یا چند کاربر است که از روی آدرس IP و با دقت حدود ۱۱ کیلومتر مشخص می‌شود. آدرس دقیق، خیابان یا موقعیت GPS جمع نمی‌شود. برای برنامه‌ریزی تبلیغات، تعداد کاربر در هر کشور و شهر کافی است.</p></div>
 </section>
 
 <div class="sect"><span style="background:var(--pink)"></span><h2>استفاده</h2></div>
@@ -148,11 +171,48 @@ const REGION = { ir: 'ایران', cn: 'چین', ru: 'روسیه', other: 'سا�
 const HOP = { off: 'بدون حلقه', lantern: 'جادهٔ ابریشم', shield: 'دیوار چین', psiphon: 'PS Pro', tunnel: 'تونل دکتر', tor: 'CDN سیاه نا امن', emergency: 'حالت اضطراری' };
 const HOP_COLOR = { off: '#94a3b8', lantern: '#0d9488', shield: '#c62828', psiphon: '#f59e0b', tunnel: '#2563eb', tor: '#334155', emergency: '#db2777' };
 const PALETTE = ['#2563eb', '#7c3aed', '#16a34a', '#f59e0b', '#db2777', '#0d9488', '#64748b', '#ea580c', '#0891b2'];
-const dark = matchMedia('(prefers-color-scheme: dark)').matches;
+const CNAME = { IR: 'ایران', CN: 'چین', RU: 'روسیه', US: 'آمریکا', DE: 'آلمان', TR: 'ترکیه', AE: 'امارات', GB: 'انگلیس', FR: 'فرانسه', NL: 'هلند', CA: 'کانادا', IN: 'هند', IQ: 'عراق', AF: 'افغانستان', PK: 'پاکستان', SE: 'سوئد', FI: 'فنلاند', IT: 'ایتالیا', ES: 'اسپانیا', PL: 'لهستان', AZ: 'آذربایجان', AM: 'ارمنستان', GE: 'گرجستان', QA: 'قطر', OM: 'عمان', KW: 'کویت', SA: 'عربستان', MY: 'مالزی', ID: 'اندونزی', JP: 'ژاپن', KR: 'کره جنوبی', AU: 'استرالیا', BR: 'برزیل', UA: 'اوکراین', BY: 'بلاروس', CH: 'سوئیس', AT: 'اتریش', BE: 'بلژیک', NO: 'نروژ', DK: 'دانمارک', CZ: 'چک', RO: 'رومانی' };
+const flag = (cc) => (cc && cc.length === 2 && /^[A-Z]{2}$/.test(cc)) ? String.fromCodePoint(...[...cc].map((c) => 0x1f1e6 + c.charCodeAt(0) - 65)) : '🏳️';
+const cname = (cc) => CNAME[cc] || cc;
+let worldFeatures = null;
+async function world() {
+  if (worldFeatures) return worldFeatures;
+  try {
+    const topo = await (await fetch('https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-110m.json')).json();
+    worldFeatures = topojson.feature(topo, topo.objects.countries).features;
+  } catch (e) { worldFeatures = []; }
+  return worldFeatures;
+}
+function rows(el, data, label, color) {
+  const max = Math.max(1, ...data.map((r) => r.n));
+  el.innerHTML = data.length
+    ? '<table>' + data.map((r, i) => '<tr><td class="rank">' + fa(i + 1) + '</td><td>' + label(r) + '<div class="bar" style="width:' + Math.round((r.n / max) * 100) + '%;background:' + (color || 'linear-gradient(90deg,#93c5fd,#2563eb)') + '"></div></td><td class="n">' + fa(r.n) + '</td></tr>').join('') + '</table>'
+    : '<div class="empty">هنوز داده‌ای نیست</div>';
+}
+async function renderMap(points) {
+  const el = document.getElementById('cMap');
+  if (!window.ChartGeo || typeof topojson === 'undefined') { el.parentElement.innerHTML = '<div class="empty">نقشه بارگذاری نشد</div>'; return; }
+  if (window.ChartGeo.BubbleMapController) try { Chart.register(window.ChartGeo.BubbleMapController, window.ChartGeo.GeoFeature, window.ChartGeo.ProjectionScale, window.ChartGeo.SizeScale); } catch (e) {}
+  const feats = await world();
+  const fill = isDark() ? 'rgba(148,163,184,.14)' : 'rgba(100,116,139,.12)';
+  if (charts.cMap) charts.cMap.destroy();
+  charts.cMap = new Chart(el, {
+    type: 'bubbleMap',
+    data: { labels: points.map(() => ''), datasets: [{
+      outline: feats, showOutline: true, outlineBackgroundColor: fill, outlineBorderColor: css('--line'), outlineBorderWidth: 0.6,
+      backgroundColor: 'rgba(37,99,235,.6)', borderColor: '#1d4ed8', borderWidth: 0.5, hoverBackgroundColor: '#2563eb',
+      data: points.map((p) => ({ longitude: p.lon, latitude: p.lat, value: p.n })),
+    }] },
+    options: { showGraticule: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => ' کاربر: ' + fa(c.raw.value) } } },
+      scales: { projection: { axis: 'x', projection: 'equalEarth' }, size: { axis: 'x', size: [5, 24] } } },
+  });
+}
+const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function isDark() { const t = document.documentElement.getAttribute('data-theme'); if (t === 'dark') return true; if (t === 'light' || t === 'glass') return false; return matchMedia('(prefers-color-scheme:dark)').matches; }
+function chartTheme() { Chart.defaults.color = css('--muted') || '#64748b'; Chart.defaults.borderColor = css('--line') || '#e5e9f2'; }
 Chart.defaults.font.family = 'Vazirmatn, system-ui, sans-serif';
 Chart.defaults.font.size = 12;
-Chart.defaults.color = dark ? '#9aa7bd' : '#64748b';
-Chart.defaults.borderColor = dark ? '#1c2740' : '#e5e9f2';
+chartTheme();
 Chart.defaults.plugins.legend.labels.usePointStyle = true;
 Chart.defaults.plugins.legend.labels.boxWidth = 8;
 Chart.defaults.plugins.legend.labels.padding = 14;
@@ -249,7 +309,7 @@ async function load() {
   const bd = s.breakdown;
   put('cRegion', doughnut(bd.byRegion, REGION));
   put('cHop', doughnut(bd.byHop, HOP, HOP_COLOR));
-  put('cGaming', doughnut(bd.gaming.map((r) => ({ n: r.n, k: r.k ? 'روشن' : 'خاموش' })), null, { 'روشن': '#7c3aed', 'خاموش': dark ? '#334155' : '#cbd5e1' }));
+  put('cGaming', doughnut(bd.gaming.map((r) => ({ n: r.n, k: r.k ? 'روشن' : 'خاموش' })), null, { 'روشن': '#7c3aed', 'خاموش': isDark() ? '#334155' : '#cbd5e1' }));
   put('cBrand', doughnut(bd.byBrand.map((r) => ({ n: r.n, k: r.k === '?' ? 'نامشخص' : r.k }))));
   put('cAndroid', bars(bd.byAndroid.map((r) => r.k === '?' ? 'نامشخص' : 'اندروید ' + r.k), bd.byAndroid.map((r) => r.n), '#16a34a'));
   put('cVersion', doughnut(bd.byVersion.map((r) => ({ n: r.n, k: 'v' + r.k }))));
@@ -258,6 +318,10 @@ async function load() {
   document.getElementById('tModels').innerHTML = top.length
     ? '<table>' + top.map((r, i) => '<tr><td class="rank">' + fa(i + 1) + '</td><td>' + r.k.replace(/[<>&]/g, '') + '<div class="bar" style="width:' + Math.round((r.n / max) * 100) + '%"></div></td><td class="n">' + fa(r.n) + '</td></tr>').join('') + '</table>'
     : '<div class="empty">هنوز داده‌ای نیست (از نسخهٔ ۰٫۲٫۰ ثبت می‌شود)</div>';
+
+  rows(document.getElementById('tCountries'), bd.byCountry || [], (r) => flag(r.k) + '&nbsp; ' + cname(r.k), 'linear-gradient(90deg,#86efac,#16a34a)');
+  rows(document.getElementById('tCities'), (bd.byCity || []).map((r) => ({ n: r.n, k: r.k })), (r) => { const p = r.k.split('|'); return flag(p[0]) + '&nbsp; ' + (p[1] || '?').replace(/[<>&]/g, '') + ' <span style="color:var(--faint)">· ' + cname(p[0]) + '</span>'; }, 'linear-gradient(90deg,#c4b5fd,#7c3aed)');
+  renderMap(s.points || []);
 }
 
 document.getElementById('seg').addEventListener('click', (e) => {
@@ -266,6 +330,18 @@ document.getElementById('seg').addEventListener('click', (e) => {
   b.classList.add('on'); days = Number(b.dataset.d); load();
 });
 document.getElementById('refresh').addEventListener('click', load);
+const themeSel = document.getElementById('theme');
+try { themeSel.value = localStorage.getItem('drvpn_theme') || 'auto'; } catch (e) {}
+themeSel.addEventListener('change', () => {
+  const v = themeSel.value;
+  try { localStorage.setItem('drvpn_theme', v); } catch (e) {}
+  if (v === 'auto') document.documentElement.removeAttribute('data-theme');
+  else document.documentElement.setAttribute('data-theme', v);
+  Object.values(charts).forEach((c) => c.destroy());
+  for (const k in charts) delete charts[k];
+  chartTheme();
+  load();
+});
 document.getElementById('csv').addEventListener('click', (e) => {
   e.preventDefault();
   const rows = [['date', 'active_users', 'new_users', 'connects'], ...lastRows.map((x) => [x.day, x.active, x.newUsers, x.connects])];
@@ -273,5 +349,113 @@ document.getElementById('csv').addEventListener('click', (e) => {
   const a = document.createElement('a'); a.href = url; a.download = 'drvpn-stats-' + days + 'd.csv'; a.click(); URL.revokeObjectURL(url);
 });
 load(); setInterval(load, 60000);
+</script>
+</body></html>`;
+
+export const settingsPage = () => `${head('تنظیمات · آمار دکتر وی پی ان')}
+<style>
+.hdr{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.hdr .in{max-width:720px;margin:auto;padding:12px 18px;display:flex;align-items:center;gap:12px}
+.hdr b{font-size:16px}.hdr small{display:block;color:var(--muted);font-size:12px}
+.hdr .brand{display:flex;align-items:center;gap:11px}.sp{flex:1}
+.ico{display:grid;place-items:center;height:38px;padding:0 14px;border:1px solid var(--line);border-radius:11px;background:var(--card);color:var(--muted);cursor:pointer;text-decoration:none;font-size:13px;font-weight:600;backdrop-filter:var(--blur)}
+.ico:hover{color:var(--text)}
+main{max-width:720px;margin:auto;padding:18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);margin-bottom:16px;backdrop-filter:var(--blur)}
+.card h3{margin:0 0 4px;font-size:15px}
+.card p{margin:0 0 16px;color:var(--muted);font-size:13px;line-height:1.7}
+label{display:block;font-size:13px;color:var(--muted);margin:12px 0 6px}
+input{width:100%;padding:11px 13px;border-radius:11px;border:1px solid var(--line);background:var(--bg);color:var(--text);outline:none;direction:ltr;text-align:left}
+input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.18)}
+.btn{margin-top:16px;padding:11px 18px;border:0;border-radius:11px;background:linear-gradient(160deg,#3b82f6,#1d4ed8);color:#fff;font-weight:700;cursor:pointer}
+.btn:hover{filter:brightness(1.08)}.btn:disabled{opacity:.6;cursor:default}
+.btn.ghost{background:var(--card2);color:var(--text);border:1px solid var(--line)}
+.btn.danger{background:linear-gradient(160deg,#f87171,#dc2626)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.msg{margin-top:14px;padding:10px 12px;border-radius:10px;font-size:13px;display:none}
+.msg.ok{display:block;background:rgba(22,163,74,.12);color:#15803d}
+.msg.err{display:block;background:rgba(220,38,38,.12);color:#dc2626}
+.danger-zone{border-color:rgba(220,38,38,.3)}
+code{background:var(--card2);padding:2px 7px;border-radius:7px;direction:ltr;display:inline-block;font-size:12px}
+select#theme{height:40px;border:1px solid var(--line);border-radius:11px;background:var(--bg);color:var(--text);padding:0 10px;cursor:pointer;outline:none}
+</style></head>
+<body>
+<header class="hdr"><div class="in">
+<div class="brand">${logo}<div><b>تنظیمات</b><small>آمار دکتر وی پی ان</small></div></div>
+<div class="sp"></div>
+<a class="ico" href="/">بازگشت به داشبورد</a>
+</div></header>
+<main>
+
+<div class="card">
+<h3>تم پیش‌فرض</h3>
+<p>ظاهر پنل. روی همین مرورگر ذخیره می‌شود.</p>
+<select id="theme"><option value="auto">خودکار (مثل سیستم)</option><option value="light">روشن</option><option value="dark">تیره</option><option value="glass">شیشه‌ای</option></select>
+</div>
+
+<div class="card">
+<h3>تغییر رمز عبور</h3>
+<p>نام کاربری ثابت است: <code>admin</code>. رمز جدید باید حداقل ۸ نویسه باشد. با تغییر رمز، همهٔ دستگاه‌های واردشده از پنل خارج می‌شوند.</p>
+<label for="cur">رمز فعلی</label><input id="cur" type="password" autocomplete="current-password">
+<label for="n1">رمز جدید</label><input id="n1" type="password" autocomplete="new-password">
+<label for="n2">تکرار رمز جدید</label><input id="n2" type="password" autocomplete="new-password">
+<button class="btn" id="pwBtn">ذخیرهٔ رمز</button>
+<div class="msg" id="pwMsg"></div>
+</div>
+
+<div class="card">
+<h3>اطلاعات</h3>
+<p>نشان «نصب فعال» (عمومی):<br><code id="badgeUrl"></code></p>
+<p>آمار فقط ناشناس است: شناسهٔ تصادفی هر نصب، بدون IP ذخیره‌شده، بدون ترافیک. موقعیت روی نقشه تقریبی و از روی IP است (گرد‌شده به ~۱۱ کیلومتر)، بدون آدرس دقیق.</p>
+</div>
+
+<div class="card danger-zone">
+<h3>مدیریت داده</h3>
+<p>حذف دادهٔ قدیمی برای سبک ماندن، یا پاک کردن کامل آمار (برگشت‌ناپذیر).</p>
+<div class="row">
+<div><label for="pdays">حذف دادهٔ قدیمی‌تر از (روز)</label><input id="pdays" type="number" value="90" min="7" max="365" style="width:120px"></div>
+<button class="btn ghost" id="pruneBtn">حذف قدیمی‌ها</button>
+</div>
+<div style="margin-top:18px"><button class="btn danger" id="resetBtn">پاک کردن کامل آمار</button></div>
+<div class="msg" id="dataMsg"></div>
+</div>
+
+</main>
+<script>
+const sel = document.getElementById('theme');
+try { sel.value = localStorage.getItem('drvpn_theme') || 'auto'; } catch (e) {}
+sel.addEventListener('change', () => {
+  const v = sel.value; try { localStorage.setItem('drvpn_theme', v); } catch (e) {}
+  if (v === 'auto') document.documentElement.removeAttribute('data-theme'); else document.documentElement.setAttribute('data-theme', v);
+});
+document.getElementById('badgeUrl').textContent = location.origin + '/badge';
+function show(el, ok, text) { el.className = 'msg ' + (ok ? 'ok' : 'err'); el.textContent = text; }
+async function post(path, form) { const r = await fetch(path, { method: 'POST', body: form, credentials: 'same-origin' }); let j = {}; try { j = await r.json(); } catch (e) {} return { r, j }; }
+
+document.getElementById('pwBtn').addEventListener('click', async (e) => {
+  const btn = e.target, msg = document.getElementById('pwMsg');
+  const cur = document.getElementById('cur').value, n1 = document.getElementById('n1').value, n2 = document.getElementById('n2').value;
+  if (n1 !== n2) return show(msg, false, 'رمز جدید و تکرارش یکی نیستند');
+  if (n1.length < 8) return show(msg, false, 'رمز جدید باید حداقل ۸ نویسه باشد');
+  btn.disabled = true;
+  const f = new FormData(); f.set('current', cur); f.set('next', n1);
+  const { r, j } = await post('/settings/password', f); btn.disabled = false;
+  if (j.ok) { show(msg, true, 'رمز با موفقیت عوض شد.'); document.getElementById('cur').value = document.getElementById('n1').value = document.getElementById('n2').value = ''; }
+  else show(msg, false, j.error || 'خطا در تغییر رمز');
+});
+document.getElementById('pruneBtn').addEventListener('click', async (e) => {
+  const msg = document.getElementById('dataMsg'), days = document.getElementById('pdays').value;
+  if (!confirm('دادهٔ قدیمی‌تر از ' + days + ' روز حذف شود؟')) return;
+  e.target.disabled = true; const f = new FormData(); f.set('days', days);
+  const { j } = await post('/settings/prune', f); e.target.disabled = false;
+  show(msg, !!j.ok, j.ok ? (j.deleted + ' ردیف قدیمی حذف شد.') : 'خطا');
+});
+document.getElementById('resetBtn').addEventListener('click', async (e) => {
+  const msg = document.getElementById('dataMsg');
+  if (!confirm('همهٔ آمار برای همیشه پاک شود؟ این کار برگشت‌ناپذیر است.')) return;
+  if (!confirm('مطمئنید؟ تمام داده‌ها حذف می‌شود.')) return;
+  e.target.disabled = true; const { j } = await post('/settings/reset', new FormData()); e.target.disabled = false;
+  show(msg, !!j.ok, j.ok ? (j.deleted + ' ردیف حذف شد. آمار از صفر شروع می‌شود.') : 'خطا');
+});
 </script>
 </body></html>`;
