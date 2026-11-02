@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+  <defs>
+    <linearGradient id="android" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#55d98a"/>
+      <stop offset="1" stop-color="#159b62"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="44" height="44" rx="13" fill="url(#android)"/>
+  <path d="m15 15-2-3m20 3 2-3M13 21a11 11 0 0 1 22 0v11H13z" fill="#fff"/>
+  <path d="M10 22v8m28-8v8M17 33v5m14-5v5" stroke="#fff" stroke-linecap="round" stroke-width="3"/>
+  <circle cx="20" cy="19" r="1.2" fill="#159b62"/>
+  <circle cx="28" cy="19" r="1.2" fill="#159b62"/>
+</svg>

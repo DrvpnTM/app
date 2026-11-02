@@ -416,14 +416,17 @@ jobs:
       - name: Checkout release notes
         uses: actions/checkout@v5
         with:
-          sparse-checkout: .github/release-body.md
+          sparse-checkout: |
+            .github/release-body.md
+            docs/generate-release-history.py
           sparse-checkout-cone-mode: false
           path: repo
 
       # VirusTotal scan of DrVPN.apk, shown in the release notes with its result. Needs the
       # VT_API_KEY secret (a free virustotal.com account); without it the release has no scan line.
-      - name: Downloads table + VirusTotal
+      - name: Downloads table, release history + VirusTotal
         env:
+          GH_TOKEN: ${{ github.token }}
           VT_API_KEY: ${{ secrets.VT_API_KEY }}
           VER: ${{ needs.build.outputs.version }}
         run: |
@@ -464,7 +467,7 @@ jobs:
             first=1
             for i in "${!files[@]}"; do
               f="${files[$i]}"; [ -f "apks/$f" ] || continue
-              oscell=""; [ "$first" = 1 ] && { oscell='**Android**'; first=0; }
+              oscell=""; [ "$first" = 1 ] && { oscell='<img src="https://raw.githubusercontent.com/DrvpnTM/app/main/docs/icons/platforms/android.svg" width="28" alt="Android"> **Android**'; first=0; }
               dl="![](https://img.shields.io/github/downloads/${GITHUB_REPOSITORY}/v${VER}/${f}?label=&color=2ea44f&style=flat-square)"
               sha="${SHA[$f]}"; vturl="https://www.virustotal.com/gui/file/${sha}"
               if [ -n "${RES[$f]:-}" ]; then
@@ -477,6 +480,24 @@ jobs:
               echo "| ${oscell} | [${labels[$i]}](${base}/${f}) | ${dl} | ${vt} |"
             done
           } >> body.md
+          gh api --paginate --slurp "repos/${GITHUB_REPOSITORY}/releases?per_page=100" | jq 'add' > android-releases.json
+          page=1
+          while :; do
+            curl --fail --silent --show-error --location \
+              -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/repos/DrvpnTM/satelite-proxy/releases?per_page=100&page=${page}" \
+              > "desktop-releases-${page}.json"
+            count=$(jq length "desktop-releases-${page}.json")
+            [ "$count" -lt 100 ] && break
+            page=$((page + 1))
+          done
+          jq -s 'add' desktop-releases-*.json > desktop-releases.json
+          python3 repo/docs/generate-release-history.py \
+            --body body.md \
+            --android-releases android-releases.json \
+            --desktop-releases desktop-releases.json \
+            --version "$VER" \
+            --android-assets apks
 
       - name: Publish release
         uses: softprops/action-gh-release@v2
