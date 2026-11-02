@@ -4,6 +4,11 @@ name: Windows Store MSIX
 # MSIX for Partner Center (the Store signs it on submission).
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - "windows-store/**"
+      - ".github/workflows/windows-store.yml"
   workflow_dispatch:
     inputs:
       tag:
