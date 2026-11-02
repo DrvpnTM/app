@@ -1,0 +1,59 @@
+name: Windows Store MSIX
+
+# Repackages the newest DrvpnTM/satelite-proxy portable build as an unsigned
+# MSIX for Partner Center (the Store signs it on submission).
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "satelite-proxy release tag (empty = latest)"
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  msix:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download portable build
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          gh release download $TAG -R DrvpnTM/satelite-proxy -D dl -p '*_x64_portable.zip'
+          ls dl
+
+      - name: Build MSIX
+        shell: pwsh
+        run: |
+          $Zip = Get-ChildItem dl\*_x64_portable.zip | Select-Object -First 1
+          $Version = [regex]::Match($Zip.Name, '_(\d+\.\d+\.\d+)_').Groups[1].Value
+          if (-not $Version) { throw "No version in $($Zip.Name)" }
+
+          Expand-Archive $Zip.FullName -DestinationPath unzip
+          $Stage = (Get-ChildItem unzip -Directory | Select-Object -First 1).FullName
+          # The Store build is an installed app, not portable.
+          Remove-Item (Join-Path $Stage "portable.flag"), (Join-Path $Stage "README.txt") -ErrorAction SilentlyContinue
+          Copy-Item -Recurse windows-store\Images (Join-Path $Stage "Images")
+
+          # The Store wants a four-part version whose last part is 0.
+          $Manifest = (Get-Content windows-store\AppxManifest.xml.in -Raw).Replace("{{VERSION}}", "$Version.0")
+          Set-Content (Join-Path $Stage "AppxManifest.xml") $Manifest -Encoding utf8
+
+          $MakeAppx = Get-ChildItem "${env:ProgramFiles(x86)}\Windows Kits\10\bin\*\x64\makeappx.exe" |
+            Sort-Object FullName -Descending | Select-Object -First 1
+          New-Item -ItemType Directory -Force out | Out-Null
+          & $MakeAppx.FullName pack /d $Stage /p "out\DrVPN_${Version}_x64.msix" /o
+          if ($LASTEXITCODE -ne 0) { throw "makeappx failed ($LASTEXITCODE)" }
+          Get-ChildItem out
+
+      - name: Upload MSIX
+        uses: actions/upload-artifact@v4
+        with:
+          name: DrVPN-msix
+          path: out/*.msix

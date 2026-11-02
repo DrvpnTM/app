@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  MSIX manifest for the Microsoft Store build (.github/workflows/windows-store.yml).
+  Identity and PublisherDisplayName come from Partner Center > Product identity
+  and must match it exactly. The package is unsigned: the Store signs it.
+-->
+<Package
+  xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+  xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
+  xmlns:desktop6="http://schemas.microsoft.com/appx/manifest/desktop/windows10/6"
+  xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+  IgnorableNamespaces="uap desktop desktop6 rescap">
+
+  <Identity
+    Name="DrVPN.DrVPN"
+    Publisher="CN=151B9BD2-F26B-43BF-AD32-07861F3663A2"
+    Version="{{VERSION}}"
+    ProcessorArchitecture="x64" />
+
+  <Properties>
+    <DisplayName>DrVPN</DisplayName>
+    <PublisherDisplayName>Dr VPN</PublisherDisplayName>
+    <Logo>Images\StoreLogo.png</Logo>
+    <!-- The app writes its cores to %APPDATA% and the Run key itself, and the
+         elevated TUN core must see the same paths, so turn off write
+         virtualization for both. -->
+    <desktop6:FileSystemWriteVirtualization>disabled</desktop6:FileSystemWriteVirtualization>
+    <desktop6:RegistryWriteVirtualization>disabled</desktop6:RegistryWriteVirtualization>
+  </Properties>
+
+  <Dependencies>
+    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.19041.0" MaxVersionTested="10.0.26100.0" />
+  </Dependencies>
+
+  <Resources>
+    <Resource Language="en-us" />
+    <Resource Language="fa-ir" />
+  </Resources>
+
+  <Applications>
+    <Application Id="DrVPN" Executable="drvpn-desktop.exe" EntryPoint="Windows.FullTrustApplication">
+      <uap:VisualElements
+        DisplayName="DrVPN"
+        Description="DrVPN"
+        BackgroundColor="transparent"
+        Square150x150Logo="Images\Square150x150Logo.png"
+        Square44x44Logo="Images\Square44x44Logo.png" />
+      <Extensions>
+        <uap:Extension Category="windows.protocol">
+          <uap:Protocol Name="clash" />
+        </uap:Extension>
+        <uap:Extension Category="windows.protocol">
+          <uap:Protocol Name="sing-box" />
+        </uap:Extension>
+        <uap:Extension Category="windows.protocol">
+          <uap:Protocol Name="singbox" />
+        </uap:Extension>
+      </Extensions>
+    </Application>
+  </Applications>
+
+  <Capabilities>
+    <Capability Name="internetClient" />
+    <Capability Name="internetClientServer" />
+    <Capability Name="privateNetworkClientServer" />
+    <rescap:Capability Name="runFullTrust" />
+    <!-- TUN mode starts the core with UAC to create the wintun adapter. -->
+    <rescap:Capability Name="allowElevation" />
+    <rescap:Capability Name="unvirtualizedResources" />
+  </Capabilities>
+</Package>
