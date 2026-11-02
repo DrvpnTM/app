@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Append a complete Android and desktop release index to GitHub release notes."""
+"""Append the latest Android and desktop versions to GitHub release notes."""
 
 import argparse
 import json
@@ -105,16 +105,9 @@ def build_history(
             "assets": [{"name": name} for name in android_assets],
         }
     ]
-    android_versions.extend(
-        release
-        for release in android
-        if release.get("tag_name", "").startswith("v")
-        and release.get("tag_name") != current_tag
-        and not release.get("draft")
-    )
 
     rows = [
-        "### همه نسخه‌های منتشرشده / All published versions",
+        "### آخرین نسخه / Latest version",
         "",
         "| سیستم‌عامل / OS | نسخه / Version | دانلود / Downloads |",
         "|---|---|---|",
@@ -134,10 +127,19 @@ def build_history(
                 f"| {downloads} |"
             )
 
-    for release in desktop:
+    # Only the newest published desktop release; older ones are in the archive link below.
+    latest_desktop = next(
+        (
+            release
+            for release in desktop
+            if release.get("tag_name", "").startswith("v")
+            and not release.get("draft")
+            and not release.get("prerelease")
+        ),
+        None,
+    )
+    for release in [latest_desktop] if latest_desktop else []:
         tag = release.get("tag_name", "")
-        if not tag.startswith("v") or release.get("draft"):
-            continue
         assets = [asset.get("name", "") for asset in release.get("assets", [])]
         rows.extend(
             desktop_download_rows(
