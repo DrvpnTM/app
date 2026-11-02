@@ -22,6 +22,20 @@
 
 <br><br>
 
+<h2>💻 نسخه کامپیوتر</h2>
+
+<table>
+<tr>
+<td align="center" width="33%"><a href="https://github.com/DrvpnTM/satelite-proxy/releases/download/v1.0.47/DrVPN_1.0.47_x64-setup.exe"><img src="docs/icons/platforms/windows.svg" width="64" alt="Windows"></a><br><b>Windows</b><br><a href="https://github.com/DrvpnTM/satelite-proxy/releases/download/v1.0.47/DrVPN_1.0.47_x64-setup.exe">نصب‌کننده</a> · <a href="https://github.com/DrvpnTM/satelite-proxy/releases/download/v1.0.47/DrVPN_1.0.47_x64_portable.zip">قابل‌حمل</a></td>
+<td align="center" width="33%"><a href="https://github.com/DrvpnTM/satelite-proxy/releases/download/v1.0.47/DrVPN_1.0.47_aarch64.dmg"><img src="docs/icons/platforms/macos.svg" width="64" alt="macOS"></a><br><b>macOS</b><br><a href="https://github.com/DrvpnTM/satelite-proxy/releases/download/v1.0.47/DrVPN_1.0.47_aarch64.dmg">Apple silicon (M1 به بالا)</a> · <a href="https://github.com/DrvpnTM/satelite-proxy/releases/download/v1.0.47/DrVPN_1.0.47_x64.dmg">Intel</a></td>
+<td align="center" width="33%"><a href="https://github.com/DrvpnTM/satelite-proxy/releases/download/v1.0.47/DrVPN_1.0.47_amd64.AppImage"><img src="docs/icons/platforms/linux.svg" width="64" alt="Linux"></a><br><b>Linux</b><br><a href="https://github.com/DrvpnTM/satelite-proxy/releases/download/v1.0.47/DrVPN_1.0.47_amd64.AppImage">AppImage</a></td>
+</tr>
+</table>
+
+<sub>نسخه v1.0.47 · <a href="https://github.com/DrvpnTM/satelite-proxy/releases">همه نسخه‌ها</a></sub>
+
+<br><br>
+
 <h2>📱 خیلی ساده، در ۴ قدم</h2>
 
 <table>
