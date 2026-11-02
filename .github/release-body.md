@@ -7,6 +7,8 @@
 <a href="https://github.com/DrvpnTM/app/releases"><img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FDrvpnTM%2Fapp%2Fmain%2Fdocs%2Fdownloads.json&style=for-the-badge" alt="downloads"></a>
 <a href="https://github.com/DrvpnTM/app/releases/latest"><img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fdrvpn-stats.cdn-1-4cf.workers.dev%2Fbadge&style=for-the-badge" alt="active installs"></a>
 
+<!-- DESKTOP_BUTTONS -->
+
 <table>
 <tr>
 <td align="center" width="50%"><img src="https://raw.githubusercontent.com/DrvpnTM/app/main/docs/icons/v2/apk.svg" width="64" alt=""><br><b><code>DrVPN.apk</code></b><br>⬆️ همین را دانلود کنید<br>Download this one</td>

@@ -422,6 +422,19 @@ jobs:
           sparse-checkout-cone-mode: false
           path: repo
 
+      # The desktop app (Windows, macOS, Linux) is built in DrvpnTM/satelite-proxy. Its newest
+      # release files are attached here too, so every platform is in this release's Assets.
+      # The in-app updater picks APKs by ABI name (arm64-v8a, x86_64, ...), which these names don't contain.
+      - name: Download desktop files
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p desktop
+          gh release download -R DrvpnTM/satelite-proxy -D desktop \
+            -p '*_x64-setup.exe' -p '*_x64_portable.zip' -p '*.dmg' -p '*.AppImage' \
+            || echo "::warning::Desktop files could not be downloaded; this release has Android only."
+          ls -la desktop
+
       # VirusTotal scan of DrVPN.apk, shown in the release notes with its result. Needs the
       # VT_API_KEY secret (a free virustotal.com account); without it the release has no scan line.
       - name: Downloads table, release history + VirusTotal
@@ -480,6 +493,36 @@ jobs:
               echo "| ${oscell} | [${labels[$i]}](${base}/${f}) | ${dl} | ${vt} |"
             done
           } >> body.md
+          # Desktop: buttons at the top of the notes and rows in the OS table, linking to this release's copies.
+          dfile() { (cd desktop 2>/dev/null && ls -1 2>/dev/null | grep -m1 -e "$1\$") || true; }
+          raw="https://raw.githubusercontent.com/DrvpnTM/app/main/docs/icons/platforms"
+          specs=("windows|Windows|_x64-setup.exe|نصب‌کننده / Installer" "windows|Windows|_x64_portable.zip|قابل‌حمل / Portable"
+                 "macos|macOS|_aarch64.dmg|Apple silicon (M1+)" "macos|macOS|_x64.dmg|Intel"
+                 "linux|Linux|.AppImage|AppImage")
+          declare -A CELL MAIN
+          rows=""; last=""
+          for spec in "${specs[@]}"; do
+            IFS='|' read -r os label suffix text <<<"$spec"
+            f=$(dfile "$suffix"); [ -n "$f" ] || continue
+            [ -n "${MAIN[$os]:-}" ] || MAIN[$os]="${base}/${f}"
+            CELL[$os]="${CELL[$os]:+${CELL[$os]} · }<a href=\"${base}/${f}\">${text}</a>"
+            oscell=""; [ "$os" != "$last" ] && oscell="<img src=\"${raw}/${os}.svg\" width=\"28\" alt=\"${label}\"> **${label}**"; last=$os
+            dl="![](https://img.shields.io/github/downloads/${GITHUB_REPOSITORY}/v${VER}/${f}?label=&color=2ea44f&style=flat-square)"
+            sha=$(sha256sum "desktop/$f" | cut -d' ' -f1)
+            rows+="| ${oscell} | [${text}](${base}/${f}) | ${dl} | [VirusTotal](https://www.virustotal.com/gui/file/${sha}) |"$'\n'
+          done
+          printf '%s' "$rows" >> body.md
+          buttons=""
+          if [ ${#MAIN[@]} -gt 0 ]; then
+            buttons=$'<h3>💻 نسخه کامپیوتر / Desktop</h3>\n\n<table>\n<tr>\n'
+            for os in windows macos linux; do
+              [ -n "${MAIN[$os]:-}" ] || continue
+              case $os in windows) label=Windows;; macos) label=macOS;; linux) label=Linux;; esac
+              buttons+="<td align=\"center\" width=\"33%\"><a href=\"${MAIN[$os]}\"><img src=\"${raw}/${os}.svg\" width=\"64\" alt=\"${label}\"></a><br><b>${label}</b><br>${CELL[$os]}</td>"$'\n'
+            done
+            buttons+=$'</tr>\n</table>'
+          fi
+          BUTTONS="$buttons" python3 -c 'import os,pathlib; p=pathlib.Path("body.md"); p.write_text(p.read_text(encoding="utf-8").replace("<!-- DESKTOP_BUTTONS -->", os.environ["BUTTONS"]), encoding="utf-8")'
           gh api --paginate --slurp "repos/${GITHUB_REPOSITORY}/releases?per_page=100" | jq 'add' > android-releases.json
           page=1
           while :; do
@@ -503,7 +546,9 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           body_path: body.md
-          files: apks/*.apk
+          files: |
+            apks/*.apk
+            desktop/*
           tag_name: v${{ needs.build.outputs.version }}
           target_commitish: ${{ github.sha }}
           name: Dr VPN v${{ needs.build.outputs.version }}
