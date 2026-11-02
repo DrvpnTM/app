@@ -134,23 +134,6 @@ def build_history(
                 f"| {downloads} |"
             )
 
-    for release in android:
-        tag = release.get("tag_name", "")
-        if not tag.startswith("countries-v") or release.get("draft"):
-            continue
-        assets = [
-            asset
-            for asset in release.get("assets", [])
-            if asset.get("name", "").lower().endswith(".apk")
-        ]
-        if assets:
-            release_url = release.get("html_url", "#")
-            rows.append(
-                f"| {icon('android', 'Android · regional')} "
-                f"| {version_link(tag, release_url)} "
-                f"| [View {len(assets)} country APKs]({release_url}) |"
-            )
-
     for release in desktop:
         tag = release.get("tag_name", "")
         if not tag.startswith("v") or release.get("draft"):
