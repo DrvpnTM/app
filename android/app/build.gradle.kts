@@ -10,7 +10,7 @@ android {
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "net.drvpn.app"
+        applicationId = "net.drvpn.vpn"
         minSdk = 24
         targetSdk = 37
         versionCode = 25
