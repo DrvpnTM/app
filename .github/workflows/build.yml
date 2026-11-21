@@ -278,7 +278,7 @@ jobs:
           packages: 'platforms;android-37.0 build-tools;37.0.0 platform-tools'
 
       - name: Get libv2ray.aar
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: libv2ray
           path: android/app/libs
@@ -338,7 +338,7 @@ jobs:
         run: cp -r libs android/app/
 
       - name: Get Aether
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: libs-aether
 
@@ -351,7 +351,7 @@ jobs:
           done
 
       - name: Get lantern-hop
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: libs-lantern
 
@@ -364,7 +364,7 @@ jobs:
           done
 
       - name: Get OpenVPN
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: libs-openvpn
 
@@ -377,7 +377,7 @@ jobs:
           done
 
       - name: Get libv2ray.aar
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: libv2ray
           path: android/app/libs
@@ -464,7 +464,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download release APKs
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: release-apks
           path: apks
