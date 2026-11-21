@@ -57,6 +57,8 @@ class OpenVpnSession(private val context: Context, private val listener: Listene
     private val configFile = File(dir, "client.ovpn")
     private val stopping = AtomicBoolean(false)
     private val exited = AtomicBoolean(false)
+    /** Reconnects show CONNECTED again; the app hears it once. */
+    private val connected = AtomicBoolean(false)
     private var process: Process? = null
     private var server: LocalServerSocket? = null
     private var serverSocket: LocalSocket? = null
@@ -166,7 +168,7 @@ class OpenVpnSession(private val context: Context, private val listener: Listene
     private fun state(body: String) {
         val name = body.split(',').getOrNull(1) ?: return
         LogUtil.i(AppConfig.TAG, "OpenVPN: state $name")
-        if (name == "CONNECTED") listener.onConnected()
+        if (name == "CONNECTED" && connected.compareAndSet(false, true)) listener.onConnected()
     }
 
     /** ">NEED-OK:Need 'TYPE' confirmation MSG:argument" */

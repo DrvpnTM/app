@@ -25,6 +25,13 @@ object BuiltinServers {
     private const val PREF_SERVERLESS_ADDED = "pref_drvpn_serverless_added_v1"
     private const val PREF_OPENVPN_ADDED = "pref_drvpn_openvpn_added_v1"
 
+    /**
+     * Never picked as "fastest" or switched to automatically: Dr Open VPN's ping is a bare TCP
+     * connect (always lower than a real ping, even where OpenVPN is blocked) and it cannot run as
+     * an Xray reload; Dr Serverless only gets past SNI filtering, not every block.
+     */
+    fun isBuiltin(guid: String?): Boolean = guid == SERVERLESS_GUID || guid == OPENVPN_GUID
+
     fun ensure(context: Context) {
         addOnce(PREF_SERVERLESS_ADDED, SERVERLESS_GUID) {
             val raw = Utils.readTextFromAssets(context, "serverless.json")

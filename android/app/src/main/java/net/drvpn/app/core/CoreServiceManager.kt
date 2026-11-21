@@ -292,7 +292,7 @@ object CoreServiceManager {
         val subId = MmkvManager.decodeServerConfig(current)?.subscriptionId.orEmpty()
         return MmkvManager.decodeServerList(subId)
             .asSequence()
-            .filter { it != current }
+            .filter { it != current && !net.drvpn.app.handler.BuiltinServers.isBuiltin(it) }
             .mapNotNull { guid -> MmkvManager.decodeServerAffiliationInfo(guid)?.testDelayMillis?.takeIf { it > 0L }?.let { guid to it } }
             .minByOrNull { it.second }
             ?.first
