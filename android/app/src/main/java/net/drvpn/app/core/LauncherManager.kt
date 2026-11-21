@@ -89,6 +89,7 @@ object LauncherManager {
         // An Aether profile may have no endpoint: Aether then scans for one itself.
         if (!config.configType.isComplexType()
             && config.configType != EConfigType.AETHER
+            && config.configType != EConfigType.OPENVPN
             && !Utils.isValidUrl(config.server)
             && !Utils.isPureIpAddress(config.server.orEmpty())
         ) {
@@ -113,6 +114,11 @@ object LauncherManager {
         if (isRootMode && !RootManager.isRootAvailable()) {
             LogUtil.e(AppConfig.TAG, "LauncherManager: root mode requires root but none available")
             error(context.getString(R.string.toast_root_required))
+        }
+
+        // Dr Open VPN gets its addresses and routes from OpenVPN, so it runs only as the VPN.
+        if (config.configType == EConfigType.OPENVPN && (isRootMode || !SettingsManager.isVpnMode())) {
+            error(context.getString(R.string.openvpn_needs_vpn_mode))
         }
 
         val intent = if (isRootMode) {

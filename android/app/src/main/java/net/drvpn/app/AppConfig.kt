@@ -267,6 +267,7 @@ object AppConfig {
     const val HYSTERIA = "hysteria://"
     const val HYSTERIA2 = "hysteria2://"
     const val AETHER = "aether://"
+    const val OPENVPN = "openvpn://"
     const val HY2 = "hy2://"
     const val V2RAYNFMTS = "v2rayn://"
 

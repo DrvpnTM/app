@@ -51,6 +51,9 @@ import net.drvpn.app.ui.compose.focusHighlight
 @Composable
 internal fun serverRowTitle(row: ServerRowUiModel): String =
     if (row.profile.configType == net.drvpn.app.enums.EConfigType.AETHER) row.remarks.ifBlank { "Aether WARP" }
+    else if (row.profile.configType == net.drvpn.app.enums.EConfigType.OPENVPN ||
+        row.guid == net.drvpn.app.handler.BuiltinServers.SERVERLESS_GUID
+    ) row.remarks
     else serverRowTitle(row.country)
 
 /** Title of a server row: the country name, or DRVPN when the location is unknown. */

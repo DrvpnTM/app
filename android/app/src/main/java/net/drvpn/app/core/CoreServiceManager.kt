@@ -86,6 +86,37 @@ object CoreServiceManager {
      */
     fun isRunning() = coreController.isRunning
 
+    /** Dr Open VPN: OpenVPN (OpenVpnSession) runs instead of Xray. Set by CoreVpnService. */
+    @Volatile
+    var isOpenVpnRunning = false
+        private set
+
+    /** The selected server is Dr Open VPN. */
+    fun isOpenVpnSelected(): Boolean =
+        MmkvManager.getSelectServer()?.let { MmkvManager.decodeServerConfig(it) }?.configType == EConfigType.OPENVPN
+
+    /** Dr Open VPN is starting: the service listens for stop requests and shows its notification. */
+    fun startOpenVpnLoop(service: Service) {
+        val mFilter = IntentFilter(AppConfig.BROADCAST_ACTION_SERVICE)
+        mFilter.addAction(Intent.ACTION_SCREEN_ON)
+        mFilter.addAction(Intent.ACTION_SCREEN_OFF)
+        mFilter.addAction(Intent.ACTION_USER_PRESENT)
+        ContextCompat.registerReceiver(service, mMsgReceive, mFilter, Utils.receiverFlags())
+        currentConfig = MmkvManager.getSelectServer()?.let { MmkvManager.decodeServerConfig(it) }
+        isOpenVpnRunning = true
+        MmkvManager.encodeSettings(AppConfig.PREF_EXTRA_HOP_ACTIVE, "")
+        NotificationManager.showNotification(currentConfig)
+    }
+
+    fun onOpenVpnConnected(service: Service) {
+        MessageHelper.sendMsg2UI(service, AppConfig.MSG_STATE_START_SUCCESS, "")
+        net.drvpn.app.handler.StatsManager.countConnect()
+    }
+
+    fun onOpenVpnFailed(service: Service, message: String) {
+        MessageHelper.sendMsg2UI(service, AppConfig.MSG_STATE_START_FAILURE, message)
+    }
+
     /**
      * Gets the name of the currently running server.
      * @return The name of the running server.
@@ -350,6 +381,7 @@ object CoreServiceManager {
         networkMonitor?.unregister()
         networkMonitor = null
         currentVpnInterface = null
+        isOpenVpnRunning = false
 
         if (isRunning()) {
             CoroutineScope(Dispatchers.IO).launch {
@@ -619,7 +651,7 @@ object CoreServiceManager {
             val serviceControl = serviceControl?.get() ?: return
             when (intent?.getIntExtra("key", 0)) {
                 AppConfig.MSG_REGISTER_CLIENT -> {
-                    if (isRunning()) {
+                    if (isRunning() || isOpenVpnRunning) {
                         MessageHelper.sendMsg2UI(serviceControl.getService(), AppConfig.MSG_STATE_RUNNING, "")
                     } else {
                         MessageHelper.sendMsg2UI(serviceControl.getService(), AppConfig.MSG_STATE_NOT_RUNNING, "")

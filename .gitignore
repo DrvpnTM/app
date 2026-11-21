@@ -73,6 +73,7 @@ drvpn-release.jks
 # Aether native build (compile-aether.sh)
 libs-aether/
 libs-lantern/
+libs-openvpn/
 build-aether-src/
 _site/
 _mkdocs/

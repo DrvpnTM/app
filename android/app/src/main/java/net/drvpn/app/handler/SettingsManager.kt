@@ -45,6 +45,7 @@ object SettingsManager {
         migrateHysteria2PinSHA256()
         // After the migrations, which may add the "Default" group at the top.
         MmkvManager.ensureFreeSubscription(first = true)
+        BuiltinServers.ensure(context)
     }
 
     /**

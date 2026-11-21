@@ -108,6 +108,7 @@ class RealPingWorkerService(
         val retFailure = -1L
 
         val config = MmkvManager.decodeServerConfig(guid) ?: return retFailure
+        if (config.configType == EConfigType.OPENVPN) return riseupPing()
         if (!config.configType.isComplexType()
             && config.configType != EConfigType.HYSTERIA2
             && config.configType != EConfigType.WIREGUARD
@@ -137,6 +138,7 @@ class RealPingWorkerService(
         val retFailure = -1L
 
         val config = MmkvManager.decodeServerConfig(guid) ?: return retFailure
+        if (config.configType == EConfigType.OPENVPN) return riseupPing()
         if (!config.configType.isComplexType()
             && config.configType != EConfigType.HYSTERIA2
             && config.configType != EConfigType.WIREGUARD
@@ -153,5 +155,11 @@ class RealPingWorkerService(
         }
 
         return retFailure
+    }
+
+    /** Dr Open VPN: a TCP connect to a Riseup gateway (port 80), or -1 before the gateways are known. */
+    private fun riseupPing(): Long {
+        val (ip, port) = net.drvpn.app.core.RiseupManager.pingTarget() ?: return -1L
+        return SpeedtestManager.socketConnectTime(ip, port, 1000)
     }
 }
