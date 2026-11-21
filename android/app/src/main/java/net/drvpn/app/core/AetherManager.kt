@@ -8,6 +8,7 @@ import net.drvpn.app.enums.AetherProtocol
 import net.drvpn.app.enums.AetherPsiphon
 import net.drvpn.app.enums.AetherScanMode
 import net.drvpn.app.enums.AetherTor
+import net.drvpn.app.handler.MmkvManager
 import net.drvpn.app.enums.AetherTransport
 import net.drvpn.app.enums.EConfigType
 import net.drvpn.app.util.LogUtil
@@ -193,6 +194,7 @@ object AetherManager {
             File(libDir, TRANSPORT_BINARY).takeIf { it.exists() }?.let { transport ->
                 put("AETHER_TOR_PT", torTransports.joinToString(";") { "$it=${transport.absolutePath}" })
             }
+            if (torNeedsBridges(profile)) put("AETHER_TOR_BRIDGES", "force")
             certificateDirectories.filter { File(it).isDirectory }.joinToString(":").takeIf { it.isNotEmpty() }
                 ?.let { put("SSL_CERT_DIR", it) }
             put("AETHER_PSIPHON_DIR", File(workDir, "psiphon").apply { mkdirs() }.absolutePath)
@@ -217,6 +219,25 @@ object AetherManager {
             LogUtil.i(AppConfig.TAG, "Aether: core ended")
         }, "aether-output").apply { isDaemon = true }.start()
     }
+
+    /**
+     * Tor reached directly (Tor alone, or WARP over Tor) from Iran, China or Russia, where direct
+     * Tor is always blocked: Aether goes to its bridges at once (bridgedb, then its built-in
+     * Snowflake and meek bridges) instead of trying direct Tor for 75 seconds first. That wait
+     * alone would use up most of an emergency try. Tor inside WARP is not seen by the filter.
+     */
+    internal fun torNeedsBridges(profile: ProfileItem): Boolean {
+        val tor = AetherTor.fromString(profile.aetherTor)
+        if (tor != AetherTor.ONLY && tor != AetherTor.REVERSE) return false
+        val region = net.drvpn.app.enums.Region.fromCode(MmkvManager.decodeSettingsString(AppConfig.PREF_DRVPN_REGION))
+        return region in CENSORED_REGIONS
+    }
+
+    private val CENSORED_REGIONS = setOf(
+        net.drvpn.app.enums.Region.IRAN,
+        net.drvpn.app.enums.Region.CHINA,
+        net.drvpn.app.enums.Region.RUSSIA,
+    )
 
     /** Ends the core and the Psiphon and Tor helpers it started, also ones left from an earlier run. */
     @Synchronized

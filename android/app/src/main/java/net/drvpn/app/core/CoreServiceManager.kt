@@ -52,6 +52,12 @@ object CoreServiceManager {
 
     /** Emergency extra hop: how long each option gets to connect (Aether may scan first, Tor is slow). */
     private const val EMERGENCY_TRY_MS = 90_000L
+
+    /**
+     * Tor gets longer: where it is blocked it starts from bridges (Snowflake, meek), which take a
+     * few minutes to come up. It is tried last, so the others are not slowed down.
+     */
+    private const val EMERGENCY_TOR_TRY_MS = 240_000L
     private const val EMERGENCY_CHECK_MS = 5_000L
 
 
@@ -192,7 +198,8 @@ object CoreServiceManager {
                     val reloaded = withContext(Dispatchers.Main) { reloadCore() }
                     if (!reloaded) return@launch
                 }
-                if (waitForConnection()) {
+                val tryMs = if (kind == ExtraHopKind.TOR) EMERGENCY_TOR_TRY_MS else EMERGENCY_TRY_MS
+                if (waitForConnection(tryMs)) {
                     LogUtil.i(AppConfig.TAG, "Emergency: connected with ${kind.value}")
                     MmkvManager.encodeSettings(AppConfig.PREF_EMERGENCY_STATE, "ok")
                     return@launch
@@ -206,9 +213,9 @@ object CoreServiceManager {
         }
     }
 
-    /** Whether the connection answers within [EMERGENCY_TRY_MS]. */
-    private suspend fun waitForConnection(): Boolean {
-        val deadline = System.currentTimeMillis() + EMERGENCY_TRY_MS
+    /** Whether the connection answers within [timeoutMs]. */
+    private suspend fun waitForConnection(timeoutMs: Long): Boolean {
+        val deadline = System.currentTimeMillis() + timeoutMs
         while (System.currentTimeMillis() < deadline) {
             delay(EMERGENCY_CHECK_MS)
             if (!isRunning()) return false
