@@ -15,12 +15,28 @@ CREATE TABLE IF NOT EXISTS pings (
   lat      REAL,                       -- approximate IP latitude, rounded to ~11 km (for the map)
   lon      REAL,                       -- approximate IP longitude, rounded to ~11 km
   city     TEXT NOT NULL DEFAULT '?',  -- IP city (Cloudflare), only shown as a per-city count, never per user
+  server   TEXT NOT NULL DEFAULT '?',  -- kind of server in use: xray, aether, openvpn, serverless, custom, group
   PRIMARY KEY (day, id)
 );
 CREATE INDEX IF NOT EXISTS pings_day ON pings(day);
 
--- Panel settings (currently just the admin password the owner sets in the panel; PBKDF2, never plain).
+-- Panel settings and kept results: the admin password (PBKDF2, never plain), the panel's last
+-- numbers (stats_<days>), the badge count, the auto-delete setting.
 CREATE TABLE IF NOT EXISTS settings (
   key   TEXT PRIMARY KEY,
   value TEXT NOT NULL
+);
+
+-- Each install's first day, so "new users" needs no scan of every ping.
+CREATE TABLE IF NOT EXISTS installs (
+  id    TEXT PRIMARY KEY,
+  first TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS installs_first ON installs(first);
+
+-- Past days rolled up once: they never change, so the panel does not count them again.
+CREATE TABLE IF NOT EXISTS daily (
+  day      TEXT PRIMARY KEY,
+  active   INTEGER NOT NULL,
+  connects INTEGER NOT NULL
 );

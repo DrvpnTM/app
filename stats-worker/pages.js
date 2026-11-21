@@ -101,6 +101,9 @@ td.n{text-align:left;font-weight:700;width:64px;font-variant-numeric:tabular-num
 td.rank{color:var(--faint);width:26px;font-size:13px}
 .bar{height:6px;border-radius:6px;background:linear-gradient(90deg,#93c5fd,#2563eb);margin-top:6px}
 .note{color:var(--faint);font-size:12px;margin:26px 0 8px;text-align:center}
+.banner{margin:0 0 16px;padding:11px 14px;border-radius:12px;font-size:13px;line-height:1.8}
+.banner.err{background:rgba(220,38,38,.1);color:#dc2626;border:1px solid rgba(220,38,38,.25)}
+.banner.warn{background:rgba(245,158,11,.12);color:#b45309;border:1px solid rgba(245,158,11,.3)}
 .skel{color:transparent;background:linear-gradient(90deg,var(--line),var(--card2),var(--line));background-size:200% 100%;animation:sh 1.3s infinite;border-radius:8px}
 @keyframes sh{to{background-position:-200% 0}}
 @media (max-width:1000px){.kpis{grid-template-columns:repeat(2,1fr)}.grid,.grid3,.grid2{grid-template-columns:1fr}}
@@ -122,7 +125,9 @@ td.rank{color:var(--faint);width:26px;font-size:13px}
 <a class="ico" href="/logout">خروج</a>
 </div></header>
 <main>
-<div class="live" id="live"><span class="dot"></span><span>فعال امروز: <b id="aDay">–</b></span><span>·</span><span>هفته: <b id="aWeek">–</b></span><span>·</span><span>ماه: <b id="aMonth">–</b></span><span class="sp"></span><span id="upd"></span><span id="loadError" class="load-error" role="alert" hidden></span></div>
+<div class="live" id="live"><span class="dot"></span><span>فعال امروز: <b id="aDay">–</b></span><span>·</span><span>هفته: <b id="aWeek">–</b></span><span>·</span><span>ماه: <b id="aMonth">–</b></span><span>·</span><span title="از نصب‌های ۷ تا ۱۳ روز پیش، چند درصد در ۷ روز اخیر دوباره آمده‌اند">بازگشت هفتهٔ بعد: <b id="aRet">–</b></span><span class="sp"></span><span id="upd"></span></div>
+<div id="loadError" class="banner err" role="alert" hidden></div>
+<div id="staleNote" class="banner warn" role="status" hidden></div>
 
 <section class="kpis">
 <div class="kpi"><div class="top"><span class="lbl">کاربران فعال</span><span class="trend flat" id="tUsers">–</span></div><div class="val" id="vUsers">–</div><div class="spark"><canvas id="sUsers"></canvas></div></div>
@@ -153,6 +158,10 @@ td.rank{color:var(--faint);width:26px;font-size:13px}
 <div class="card"><h3>حلقهٔ اضافه</h3><div class="chart"><canvas id="cHop"></canvas></div></div>
 <div class="card"><h3>حالت گیمینگ</h3><div class="chart"><canvas id="cGaming"></canvas></div></div>
 </section>
+<section class="grid2 small" style="margin-top:14px">
+<div class="card"><h3>نوع سرور <em>از نسخهٔ ۰٫۲٫۶ ثبت می‌شود</em></h3><div class="chart"><canvas id="cServer"></canvas></div></div>
+<div class="card"><h3>بازگشت کاربران <em>نگهداشت هفتهٔ اول</em></h3><div id="tRetention" class="empty">–</div></div>
+</section>
 
 <div class="sect"><span style="background:var(--violet)"></span><h2>دستگاه‌ها</h2></div>
 <section class="grid">
@@ -164,12 +173,14 @@ td.rank{color:var(--faint);width:26px;font-size:13px}
 <div class="card"><h3>نسخهٔ برنامه</h3><div class="chart"><canvas id="cVersion"></canvas></div></div>
 </section>
 
-<p class="note">فقط آمار ناشناس: یک شناسهٔ تصادفی برای هر نصب، بدون IP و بدون ترافیک. هر دقیقه به‌روز می‌شود.</p>
+<p class="note">فقط آمار ناشناس: یک شناسهٔ تصادفی برای هر نصب، بدون IP و بدون ترافیک. وقتی این صفحه باز است هر ۵ دقیقه به‌روز می‌شود؛ عددها حداکثر ۱۵ دقیقه قدیمی‌اند (برای ماندن در سهمیهٔ رایگان پایگاه‌داده).</p>
 </main>
 <script>
 const fa = (n) => Number(n || 0).toLocaleString('fa-IR');
 const REGION = { ir: 'ایران', cn: 'چین', ru: 'روسیه', other: 'سایر کشورها' };
 const HOP = { off: 'بدون حلقه', lantern: 'جادهٔ ابریشم', shield: 'دیوار چین', psiphon: 'PS Pro', tunnel: 'تونل دکتر', tor: 'CDN سیاه نا امن', emergency: 'حالت اضطراری' };
+const SERVER = { xray: 'سرور Xray', aether: 'Aether WARP', openvpn: 'Dr Open VPN', serverless: 'Dr Serverless', custom: 'کانفیگ دستی', group: 'گروه/زنجیر', '?': 'نسخهٔ قدیمی' };
+const SERVER_COLOR = { xray: '#2563eb', aether: '#f59e0b', openvpn: '#16a34a', serverless: '#7c3aed', custom: '#0d9488', group: '#db2777', '?': '#94a3b8' };
 const HOP_COLOR = { off: '#94a3b8', lantern: '#0d9488', shield: '#c62828', psiphon: '#f59e0b', tunnel: '#2563eb', tor: '#334155', emergency: '#db2777' };
 const PALETTE = ['#2563eb', '#7c3aed', '#16a34a', '#f59e0b', '#db2777', '#0d9488', '#64748b', '#ea580c', '#0891b2'];
 const CNAME = { IR: 'ایران', CN: 'چین', RU: 'روسیه', US: 'آمریکا', DE: 'آلمان', TR: 'ترکیه', AE: 'امارات', GB: 'انگلیس', FR: 'فرانسه', NL: 'هلند', CA: 'کانادا', IN: 'هند', IQ: 'عراق', AF: 'افغانستان', PK: 'پاکستان', SE: 'سوئد', FI: 'فنلاند', IT: 'ایتالیا', ES: 'اسپانیا', PL: 'لهستان', AZ: 'آذربایجان', AM: 'ارمنستان', GE: 'گرجستان', QA: 'قطر', OM: 'عمان', KW: 'کویت', SA: 'عربستان', MY: 'مالزی', ID: 'اندونزی', JP: 'ژاپن', KR: 'کره جنوبی', AU: 'استرالیا', BR: 'برزیل', UA: 'اوکراین', BY: 'بلاروس', CH: 'سوئیس', AT: 'اتریش', BE: 'بلژیک', NO: 'نروژ', DK: 'دانمارک', CZ: 'چک', RO: 'رومانی' };
@@ -271,24 +282,37 @@ function fillDays(series, n) {
   return out;
 }
 
-let days = 30, lastRows = [], loadSequence = 0;
-async function load() {
+let days = 30, lastRows = [], loadSequence = 0, lastLoad = 0;
+async function load(fresh) {
+  lastLoad = Date.now();
   const sequence = ++loadSequence;
   const btn = document.getElementById('refresh'); btn.classList.add('spin');
-  const error = document.getElementById('loadError');
+  const error = document.getElementById('loadError'), staleNote = document.getElementById('staleNote');
   error.hidden = true;
   try {
-  const r = await fetch('/stats?days=' + days, { credentials: 'same-origin' });
+  const r = await fetch('/stats?days=' + days + (fresh ? '&fresh=1' : ''), { credentials: 'same-origin' });
   if (sequence !== loadSequence) return;
   if (r.status === 401) { location.reload(); return; }
-  if (!r.ok) throw new Error('Stats request failed with status ' + r.status);
-  const s = await r.json();
+  let s = null; try { s = await r.json(); } catch (e) {}
+  if (!r.ok || !s || s.ok === false) { const err = new Error('Stats request failed with status ' + r.status); err.detail = s && s.error; throw err; }
   if (sequence !== loadSequence) return;
+  const at = (t) => new Date(t).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
+  staleNote.hidden = !s.stale && !s.limited;
+  if (s.limited) staleNote.textContent = 'سهمیهٔ امروزِ پنل برای خواندن پایگاه‌داده تمام شده؛ عددهای ساعت ' + at(s.cachedAt) + ' نشان داده می‌شود و فردا دوباره تازه می‌شود. ثبت آمار برنامه ادامه دارد.';
+  if (s.stale) staleNote.textContent = 'پایگاه‌داده الان جواب نمی‌دهد؛ آخرین عددهای سالم (ساعت ' + at(s.cachedAt) + ') نشان داده می‌شود. ' + (s.error || '');
   const d = fillDays(s.series, s.rangeDays); lastRows = d;
   document.getElementById('aDay').textContent = fa(s.active.day);
   document.getElementById('aWeek').textContent = fa(s.active.week);
   document.getElementById('aMonth').textContent = fa(s.active.month);
-  document.getElementById('upd').textContent = 'به‌روزرسانی: ' + new Date(s.updated).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
+  document.getElementById('upd').textContent = 'به‌روزرسانی: ' + at(s.updated);
+  const ret = s.retention || { cohort: 0, back: 0 };
+  const retPct = ret.cohort ? Math.round((ret.back / ret.cohort) * 100) : null;
+  document.getElementById('aRet').textContent = retPct == null ? '–' : fa(retPct) + '٪';
+  const tRet = document.getElementById('tRetention');
+  if (ret.cohort) {
+    tRet.className = '';
+    tRet.innerHTML = '<div style="font-size:40px;font-weight:800;margin:18px 0 6px">' + fa(retPct) + '٪</div><p style="color:var(--muted);font-size:13px;line-height:1.9;margin:0">از ' + fa(ret.cohort) + ' نصبی که ۷ تا ۱۳ روز پیش اولین بار دیده شدند، ' + fa(ret.back) + ' نصب در ۷ روز اخیر دوباره برنامه را باز کرده‌اند.</p>';
+  } else { tRet.className = 'empty'; tRet.textContent = 'هنوز دادهٔ کافی نیست'; }
   document.getElementById('rngLabel').textContent = fa(s.rangeDays) + ' روز اخیر';
 
   document.getElementById('vUsers').textContent = fa(s.period.users);
@@ -319,6 +343,7 @@ async function load() {
   const bd = s.breakdown;
   put('cRegion', doughnut(bd.byRegion, REGION));
   put('cHop', doughnut(bd.byHop, HOP, HOP_COLOR));
+  put('cServer', doughnut(bd.byServer || [], SERVER, SERVER_COLOR));
   put('cGaming', doughnut(bd.gaming.map((r) => ({ n: r.n, k: r.k ? 'روشن' : 'خاموش' })), null, { 'روشن': '#7c3aed', 'خاموش': isDark() ? '#334155' : '#cbd5e1' }));
   put('cBrand', doughnut(bd.byBrand.map((r) => ({ n: r.n, k: r.k === '?' ? 'نامشخص' : r.k }))));
   put('cAndroid', bars(bd.byAndroid.map((r) => r.k === '?' ? 'نامشخص' : 'اندروید ' + r.k), bd.byAndroid.map((r) => r.n), '#16a34a'));
@@ -334,7 +359,9 @@ async function load() {
   renderMap(s.points || []);
   } catch (e) {
     if (sequence === loadSequence) {
-      error.textContent = 'بارگذاری آمار ناموفق بود. اتصال را بررسی کنید و دوباره تلاش کنید.';
+      error.textContent = e.detail
+        ? 'بارگذاری آمار ناموفق بود: ' + e.detail
+        : 'بارگذاری آمار ناموفق بود. اتصال اینترنت را بررسی کنید و دوباره تلاش کنید.';
       error.hidden = false;
       console.error('Failed to load dashboard statistics:', e);
     }
@@ -348,7 +375,7 @@ document.getElementById('seg').addEventListener('click', (e) => {
   document.querySelectorAll('#seg button').forEach((x) => x.classList.remove('on'));
   b.classList.add('on'); days = Number(b.dataset.d); load();
 });
-document.getElementById('refresh').addEventListener('click', load);
+document.getElementById('refresh').addEventListener('click', () => load(true));
 const themeSel = document.getElementById('theme');
 try { themeSel.value = localStorage.getItem('drvpn_theme') || 'auto'; } catch (e) {}
 themeSel.addEventListener('change', () => {
@@ -367,7 +394,13 @@ document.getElementById('csv').addEventListener('click', (e) => {
   const url = URL.createObjectURL(new Blob([rows.map((r) => r.join(',')).join('\\n')], { type: 'text/csv' }));
   const a = document.createElement('a'); a.href = url; a.download = 'drvpn-stats-' + days + 'd.csv'; a.click(); URL.revokeObjectURL(url);
 });
-load(); setInterval(load, 60000);
+// Every 5 minutes, and only while the page is in view: each load reads the database, which has a
+// free daily limit. Coming back to the tab loads again when the numbers are older than that.
+load();
+setInterval(() => { if (document.visibilityState === 'visible') load(); }, 5 * 60000);
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && Date.now() - lastLoad > 5 * 60000) load();
+});
 </script>
 </body></html>`;
 
@@ -428,6 +461,22 @@ select#theme{height:40px;border:1px solid var(--line);border-radius:11px;backgro
 <p>آمار فقط ناشناس است: شناسهٔ تصادفی هر نصب، بدون IP ذخیره‌شده، بدون ترافیک. موقعیت روی نقشه تقریبی و از روی IP است (گرد‌شده به ~۱۱ کیلومتر)، بدون آدرس دقیق.</p>
 </div>
 
+<div class="card">
+<h3>سلامت پایگاه‌داده</h3>
+<p>پایگاه‌داده (Cloudflare D1) در طرح رایگان روزی ۵ میلیون ردیف خواندن دارد؛ اگر تمام شود، تا ساعت ۰۰:۰۰ UTC هیچ آماری ثبت و نشان داده نمی‌شود.</p>
+<table id="health"><tr><td>در حال بارگذاری…</td></tr></table>
+</div>
+
+<div class="card">
+<h3>حذف خودکار دادهٔ قدیمی</h3>
+<p>هر شب دادهٔ قدیمی‌تر از این تعداد روز پاک می‌شود تا پایگاه‌داده سبک بماند. «کل کاربران» و روند روزهای گذشته حفظ می‌شود. ۰ یعنی خاموش.</p>
+<div class="row">
+<div><label for="adays">نگه‌داشتن (روز)</label><input id="adays" type="number" value="0" min="0" max="365" style="width:120px"></div>
+<button class="btn ghost" id="autoBtn">ذخیره</button>
+</div>
+<div class="msg" id="autoMsg"></div>
+</div>
+
 <div class="card danger-zone">
 <h3>مدیریت داده</h3>
 <p>حذف دادهٔ قدیمی برای سبک ماندن، یا پاک کردن کامل آمار (برگشت‌ناپذیر).</p>
@@ -469,13 +518,48 @@ document.getElementById('pwBtn').addEventListener('click', async (e) => {
     btn.disabled = false;
   }
 });
+const faN = (n) => Number(n || 0).toLocaleString('fa-IR');
+const size = (b) => b == null ? '–' : b >= 1048576 ? faN((b / 1048576).toFixed(1)) + ' مگابایت' : faN(Math.round(b / 1024)) + ' کیلوبایت';
+async function loadHealth() {
+  const t = document.getElementById('health');
+  try {
+    const h = await (await fetch('/health', { credentials: 'same-origin' })).json();
+    const lc = h.lastCompute;
+    const row = (k, v) => '<tr><td style="color:var(--muted)">' + k + '</td><td class="n" style="width:auto">' + v + '</td></tr>';
+    t.innerHTML = (h.ok ? row('وضعیت', '<span style="color:var(--green)">سالم</span>') : row('وضعیت', '<span style="color:var(--red)">' + (h.error || 'خطا').replace(/[<>&]/g, '') + '</span>'))
+      + row('کل نصب‌ها', faN(h.installs))
+      + row('پینگ‌های امروز', faN(h.todayPings))
+      + row('قدیمی‌ترین روز ذخیره‌شده', h.oldestDay || '–')
+      + row('حجم پایگاه‌داده', size(h.dbBytes))
+      + row('آخرین محاسبهٔ آمار', lc ? new Date(lc.at).toLocaleString('fa-IR') + ' · ' + faN(lc.rowsRead) + ' ردیف خوانده شد' : '–')
+      + row('خواندن امروزِ پنل', faN(h.readsToday) + ' از ' + faN(h.readsBudget) + ' ردیف')
+      + row('تازه‌سازی آمار', 'هر ' + faN(h.statsTtlMinutes) + ' دقیقه');
+    document.getElementById('adays').value = h.keepDays || 0;
+  } catch (err) {
+    t.innerHTML = '<tr><td style="color:var(--red)">سلامت پایگاه‌داده خوانده نشد.</td></tr>';
+    console.error('Failed to load health:', err);
+  }
+}
+loadHealth();
+document.getElementById('autoBtn').addEventListener('click', async (e) => {
+  const msg = document.getElementById('autoMsg'), f = new FormData();
+  f.set('days', document.getElementById('adays').value);
+  e.target.disabled = true;
+  try {
+    const { j } = await post('/settings/autoprune', f);
+    if (j.ok) { document.getElementById('adays').value = j.keepDays; show(msg, true, j.keepDays ? 'هر شب دادهٔ قدیمی‌تر از ' + faN(j.keepDays) + ' روز پاک می‌شود.' : 'حذف خودکار خاموش شد.'); }
+    else show(msg, false, j.error || 'خطا');
+  } catch (err) {
+    show(msg, false, 'ارتباط با سرور برقرار نشد. دوباره تلاش کنید.');
+  } finally { e.target.disabled = false; }
+});
 document.getElementById('pruneBtn').addEventListener('click', async (e) => {
   const msg = document.getElementById('dataMsg'), days = document.getElementById('pdays').value;
   if (!confirm('دادهٔ قدیمی‌تر از ' + days + ' روز حذف شود؟')) return;
   e.target.disabled = true; const f = new FormData(); f.set('days', days);
   try {
     const { j } = await post('/settings/prune', f);
-    show(msg, !!j.ok, j.ok ? (j.deleted + ' ردیف قدیمی حذف شد.') : 'خطا');
+    show(msg, !!j.ok, j.ok ? (j.deleted + ' ردیف قدیمی حذف شد.') : (j.error || 'خطا'));
   } catch (err) {
     show(msg, false, 'ارتباط با سرور برقرار نشد. دوباره تلاش کنید.');
     console.error('Failed to prune old statistics:', err);
@@ -490,7 +574,7 @@ document.getElementById('resetBtn').addEventListener('click', async (e) => {
   e.target.disabled = true;
   try {
     const { j } = await post('/settings/reset', new FormData());
-    show(msg, !!j.ok, j.ok ? (j.deleted + ' ردیف حذف شد. آمار از صفر شروع می‌شود.') : 'خطا');
+    show(msg, !!j.ok, j.ok ? (j.deleted + ' ردیف حذف شد. آمار از صفر شروع می‌شود.') : (j.error || 'خطا'));
   } catch (err) {
     show(msg, false, 'ارتباط با سرور برقرار نشد. دوباره تلاش کنید.');
     console.error('Failed to reset statistics:', err);
