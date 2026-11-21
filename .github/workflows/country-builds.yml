@@ -107,6 +107,23 @@ jobs:
             cp "$abi"*.so "android/app/libs/$(basename "$abi")/"
           done
 
+      - name: Get OpenVPN
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # The OpenVPN the main build made for compile-openvpn.sh (the "openvpn" job in build.yml).
+          # Without it the country edition still works; Dr Open VPN then says it is not available.
+          hash=$(sha256sum compile-openvpn.sh | cut -c1-12)
+          if gh release download "openvpn-$hash" --repo "$GITHUB_REPOSITORY" -p libs-openvpn.tar.gz; then
+            tar xzf libs-openvpn.tar.gz
+            for abi in libs-openvpn/*/; do
+              mkdir -p "android/app/libs/$(basename "$abi")"
+              cp "$abi"*.so "android/app/libs/$(basename "$abi")/"
+            done
+          else
+            echo "::warning::No OpenVPN build for compile-openvpn.sh; Dr Open VPN is left out."
+          fi
+
       - name: Download libv2ray.aar
         env:
           GH_TOKEN: ${{ github.token }}
