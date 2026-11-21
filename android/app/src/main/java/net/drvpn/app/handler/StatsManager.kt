@@ -81,6 +81,7 @@ object StatsManager {
             .put("region", MmkvManager.decodeSettingsString(AppConfig.PREF_DRVPN_REGION) ?: "other")
             .put("hop", hop)
             .put("gaming", MmkvManager.decodeSettingsBool(AppConfig.PREF_GAMING_MODE, false))
+            .put("server", serverKind())
             .put("connects", connects)
             // The phone, for the owner's "which phones" chart: maker, model, Android version.
             .put("brand", android.os.Build.MANUFACTURER.orEmpty().replaceFirstChar { it.uppercase() })
@@ -101,6 +102,20 @@ object StatsManager {
             }
         }
         LogUtil.w(AppConfig.TAG, "Stats: ping not sent")
+    }
+
+    /** The kind of server selected, for the owner's "server type" chart. No address, no name. */
+    private fun serverKind(): String {
+        val guid = MmkvManager.getSelectServer() ?: return "none"
+        if (guid == BuiltinServers.SERVERLESS_GUID) return "serverless"
+        return when (MmkvManager.decodeServerConfig(guid)?.configType) {
+            null -> "none"
+            net.drvpn.app.enums.EConfigType.OPENVPN -> "openvpn"
+            net.drvpn.app.enums.EConfigType.AETHER -> "aether"
+            net.drvpn.app.enums.EConfigType.CUSTOM -> "custom"
+            net.drvpn.app.enums.EConfigType.POLICYGROUP, net.drvpn.app.enums.EConfigType.PROXYCHAIN -> "group"
+            else -> "xray"
+        }
     }
 
     /** "stats_url" of notice.json, or null when there is none. */
