@@ -310,6 +310,8 @@ class MainActivity : HelperBaseComponentActivity() {
     }
 
     private fun editServer(guid: String, profile: ProfileItem) {
+        // Dr Open VPN (RiseupVPN) is set up by the app; there is nothing to edit.
+        if (profile.configType == EConfigType.OPENVPN) return
         val activityClass = when (profile.configType) {
             EConfigType.CUSTOM -> ServerCustomConfigActivity::class.java
             EConfigType.POLICYGROUP -> ServerGroupActivity::class.java

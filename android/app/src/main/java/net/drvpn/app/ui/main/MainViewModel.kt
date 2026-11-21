@@ -1256,6 +1256,9 @@ class MainViewModel(
     private fun startHealthChecks() {
         healthJob?.cancel()
         healthFailures = 0
+        // Dr Open VPN has no Xray proxy to test through; OpenVPN checks the link itself
+        // (keepalive) and reconnects, and the service reports when it gives up.
+        if (MmkvManager.decodeServerConfig(uiState.value.selectedGuid.orEmpty())?.configType == EConfigType.OPENVPN) return
         if (ExtraHopManager.isEmergency()) {
             followEmergency()
             return
@@ -1319,8 +1322,10 @@ class MainViewModel(
         healthJob?.cancel()
         healthJob = viewModelScope.launch {
             val candidates = ExtraHopManager.emergencyCandidates()
-            // Each method gets about 90 s in the service; a little more for starting up.
-            val deadline = System.currentTimeMillis() + candidates.size * 95_000L + 60_000L
+            // Each method gets about 90 s in the service, Tor 240 s (it starts from bridges); a
+            // little more for starting up.
+            val torExtra = if (ExtraHopKind.TOR in candidates) 150_000L else 0L
+            val deadline = System.currentTimeMillis() + candidates.size * 95_000L + torExtra + 60_000L
             while (System.currentTimeMillis() < deadline) {
                 val (state, active) = withContext(Dispatchers.IO) {
                     MmkvManager.decodeSettingsString(AppConfig.PREF_EMERGENCY_STATE).orEmpty() to
@@ -1369,7 +1374,7 @@ class MainViewModel(
     private fun nextBestServerGuid(): String? {
         val current = uiState.value.selectedGuid
         return mutableServerGroupState(uiState.value.selectedGroupId).value.allRows
-            .filter { it.testDelayMillis > 0L && it.guid != current }
+            .filter { it.testDelayMillis > 0L && it.guid != current && !net.drvpn.app.handler.BuiltinServers.isBuiltin(it.guid) }
             .minByOrNull { it.testDelayMillis }
             ?.guid
     }
@@ -1394,7 +1399,7 @@ class MainViewModel(
     private fun fastestServerGuid(): String? =
         mutableServerGroupState(uiState.value.selectedGroupId).value.allRows
             .filter { !uiState.value.gamingMode || ExtraHopManager.isGamingServer(it.profile) }
-            .filter { it.testDelayMillis > 0L }
+            .filter { it.testDelayMillis > 0L && !net.drvpn.app.handler.BuiltinServers.isBuiltin(it.guid) }
             .minByOrNull { it.testDelayMillis }
             ?.guid
 

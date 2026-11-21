@@ -17,6 +17,8 @@ enum class EConfigType(val value: Int, val protocolScheme: String) {
     HTTP(10, AppConfig.HTTP),
     /** Aether, PattN's WARP core, run as a program of its own; same value as in PattNG. */
     AETHER(500, AppConfig.AETHER),
+    /** "Dr Open VPN": RiseupVPN over OpenVPN (RiseupManager), run instead of Xray. */
+    OPENVPN(600, AppConfig.OPENVPN),
     POLICYGROUP(101, AppConfig.CUSTOM),
     PROXYCHAIN(102, AppConfig.CUSTOM);
 

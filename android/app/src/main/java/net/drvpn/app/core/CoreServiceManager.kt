@@ -52,6 +52,12 @@ object CoreServiceManager {
 
     /** Emergency extra hop: how long each option gets to connect (Aether may scan first, Tor is slow). */
     private const val EMERGENCY_TRY_MS = 90_000L
+
+    /**
+     * Tor gets longer: where it is blocked it starts from bridges (Snowflake, meek), which take a
+     * few minutes to come up. It is tried last, so the others are not slowed down.
+     */
+    private const val EMERGENCY_TOR_TRY_MS = 240_000L
     private const val EMERGENCY_CHECK_MS = 5_000L
 
 
@@ -85,6 +91,37 @@ object CoreServiceManager {
      * @return True if the service is running, false otherwise.
      */
     fun isRunning() = coreController.isRunning
+
+    /** Dr Open VPN: OpenVPN (OpenVpnSession) runs instead of Xray. Set by CoreVpnService. */
+    @Volatile
+    var isOpenVpnRunning = false
+        private set
+
+    /** The selected server is Dr Open VPN. */
+    fun isOpenVpnSelected(): Boolean =
+        MmkvManager.getSelectServer()?.let { MmkvManager.decodeServerConfig(it) }?.configType == EConfigType.OPENVPN
+
+    /** Dr Open VPN is starting: the service listens for stop requests and shows its notification. */
+    fun startOpenVpnLoop(service: Service) {
+        val mFilter = IntentFilter(AppConfig.BROADCAST_ACTION_SERVICE)
+        mFilter.addAction(Intent.ACTION_SCREEN_ON)
+        mFilter.addAction(Intent.ACTION_SCREEN_OFF)
+        mFilter.addAction(Intent.ACTION_USER_PRESENT)
+        ContextCompat.registerReceiver(service, mMsgReceive, mFilter, Utils.receiverFlags())
+        currentConfig = MmkvManager.getSelectServer()?.let { MmkvManager.decodeServerConfig(it) }
+        isOpenVpnRunning = true
+        MmkvManager.encodeSettings(AppConfig.PREF_EXTRA_HOP_ACTIVE, "")
+        NotificationManager.showNotification(currentConfig)
+    }
+
+    fun onOpenVpnConnected(service: Service) {
+        MessageHelper.sendMsg2UI(service, AppConfig.MSG_STATE_START_SUCCESS, "")
+        net.drvpn.app.handler.StatsManager.countConnect()
+    }
+
+    fun onOpenVpnFailed(service: Service, message: String) {
+        MessageHelper.sendMsg2UI(service, AppConfig.MSG_STATE_START_FAILURE, message)
+    }
 
     /**
      * Gets the name of the currently running server.
@@ -161,7 +198,8 @@ object CoreServiceManager {
                     val reloaded = withContext(Dispatchers.Main) { reloadCore() }
                     if (!reloaded) return@launch
                 }
-                if (waitForConnection()) {
+                val tryMs = if (kind == ExtraHopKind.TOR) EMERGENCY_TOR_TRY_MS else EMERGENCY_TRY_MS
+                if (waitForConnection(tryMs)) {
                     LogUtil.i(AppConfig.TAG, "Emergency: connected with ${kind.value}")
                     MmkvManager.encodeSettings(AppConfig.PREF_EMERGENCY_STATE, "ok")
                     return@launch
@@ -175,9 +213,9 @@ object CoreServiceManager {
         }
     }
 
-    /** Whether the connection answers within [EMERGENCY_TRY_MS]. */
-    private suspend fun waitForConnection(): Boolean {
-        val deadline = System.currentTimeMillis() + EMERGENCY_TRY_MS
+    /** Whether the connection answers within [timeoutMs]. */
+    private suspend fun waitForConnection(timeoutMs: Long): Boolean {
+        val deadline = System.currentTimeMillis() + timeoutMs
         while (System.currentTimeMillis() < deadline) {
             delay(EMERGENCY_CHECK_MS)
             if (!isRunning()) return false
@@ -254,7 +292,7 @@ object CoreServiceManager {
         val subId = MmkvManager.decodeServerConfig(current)?.subscriptionId.orEmpty()
         return MmkvManager.decodeServerList(subId)
             .asSequence()
-            .filter { it != current }
+            .filter { it != current && !net.drvpn.app.handler.BuiltinServers.isBuiltin(it) }
             .mapNotNull { guid -> MmkvManager.decodeServerAffiliationInfo(guid)?.testDelayMillis?.takeIf { it > 0L }?.let { guid to it } }
             .minByOrNull { it.second }
             ?.first
@@ -350,6 +388,7 @@ object CoreServiceManager {
         networkMonitor?.unregister()
         networkMonitor = null
         currentVpnInterface = null
+        isOpenVpnRunning = false
 
         if (isRunning()) {
             CoroutineScope(Dispatchers.IO).launch {
@@ -619,7 +658,7 @@ object CoreServiceManager {
             val serviceControl = serviceControl?.get() ?: return
             when (intent?.getIntExtra("key", 0)) {
                 AppConfig.MSG_REGISTER_CLIENT -> {
-                    if (isRunning()) {
+                    if (isRunning() || isOpenVpnRunning) {
                         MessageHelper.sendMsg2UI(serviceControl.getService(), AppConfig.MSG_STATE_RUNNING, "")
                     } else {
                         MessageHelper.sendMsg2UI(serviceControl.getService(), AppConfig.MSG_STATE_NOT_RUNNING, "")

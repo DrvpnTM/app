@@ -157,6 +157,15 @@ object CoreConfigManager {
             }
         }
 
+        // A custom config without inbounds (e.g. Dr Serverless) gets the app's own: SOCKS/HTTP on
+        // the app's ports and, in VPN mode, the tun inbound.
+        val inbounds = json.get("inbounds")
+        if (inbounds == null || (inbounds.isJsonArray && inbounds.asJsonArray.isEmpty)) {
+            val templateConfig = initV2rayConfig(configContext)
+            configureInbounds(templateConfig)
+            json.add("inbounds", JsonUtil.parseString(JsonUtil.toJson(templateConfig.inbounds)))
+        }
+
         if (!needTun()) {
             return JsonUtil.toJsonPretty(json)?.let { ConfigResult(true, configContext.guid, it) } ?: result
         }

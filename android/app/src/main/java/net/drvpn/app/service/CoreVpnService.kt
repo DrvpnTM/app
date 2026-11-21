@@ -16,7 +16,10 @@ import net.drvpn.app.AppConfig.LOOPBACK
 import net.drvpn.app.BuildConfig
 import net.drvpn.app.contracts.ServiceControl
 import net.drvpn.app.contracts.Tun2SocksControl
+import net.drvpn.app.R
 import net.drvpn.app.core.CoreServiceManager
+import net.drvpn.app.core.OpenVpnSession
+import net.drvpn.app.core.RiseupManager
 import net.drvpn.app.handler.AppLocaleManager
 import net.drvpn.app.handler.MmkvManager
 import net.drvpn.app.handler.NotificationManager
@@ -33,6 +36,10 @@ class CoreVpnService : VpnService(), ServiceControl {
     private var isRunning = false
     private var tun2SocksService: Tun2SocksControl? = null
     private val isStartingLock = AtomicBoolean(false)
+
+    /** Dr Open VPN: the OpenVPN program that runs instead of Xray, null otherwise. */
+    @Volatile
+    private var openVpn: OpenVpnSession? = null
 
     override fun onCreate() {
         super.onCreate()
@@ -87,6 +94,14 @@ class CoreVpnService : VpnService(), ServiceControl {
             return START_NOT_STICKY
         }
         LogUtil.i(AppConfig.TAG, "StartCore-VPN: Service command received, systemVpnStart=$isSystemVpnStart")
+        if (CoreServiceManager.isOpenVpnSelected()) {
+            if (!startOpenVpn()) {
+                unlockStart()
+                stopSelf()
+                return START_NOT_STICKY
+            }
+            return START_STICKY
+        }
         if (!setupVpnService()) {
             unlockStart()
             // Stop service if setup fails to avoid infinite restart loops (START_STICKY)
@@ -131,6 +146,75 @@ class CoreVpnService : VpnService(), ServiceControl {
     override fun attachBaseContext(newBase: Context?) {
         val context = newBase?.let(AppLocaleManager::localizedContext)
         super.attachBaseContext(context)
+    }
+
+    /**
+     * Dr Open VPN: gets Riseup's gateways and certificate (RiseupManager, off the main thread) and
+     * starts OpenVPN. The VPN interface is made later, when OpenVPN asks for it ([openVpnListener]).
+     */
+    private fun startOpenVpn(): Boolean {
+        if (prepare(this) != null) {
+            LogUtil.e(AppConfig.TAG, "StartCore-VPN: Permission not granted")
+            return false
+        }
+        if (!OpenVpnSession.isSupported(this)) {
+            CoreServiceManager.onOpenVpnFailed(this, getString(R.string.openvpn_not_supported))
+            return false
+        }
+        CoreServiceManager.startOpenVpnLoop(this)
+        isRunning = true
+        Thread({
+            try {
+                val provider = RiseupManager.provider()
+                val session = OpenVpnSession(this, openVpnListener)
+                val config = RiseupManager.buildConfig(provider, session.managementPath)
+                if (!isRunning) return@Thread
+                openVpn = session
+                session.start(config)
+            } catch (e: Exception) {
+                LogUtil.e(AppConfig.TAG, "StartCore-VPN: Dr Open VPN could not start", e)
+                if (isRunning) {
+                    CoreServiceManager.onOpenVpnFailed(this, getString(R.string.openvpn_error_provider))
+                    stopAllService()
+                }
+            }
+        }, "openvpn-start").start()
+        return true
+    }
+
+    private val openVpnListener = object : OpenVpnSession.Listener {
+        override fun openTun(tun: OpenVpnSession.TunConfig): ParcelFileDescriptor? {
+            val builder = Builder()
+            builder.setSession(getString(R.string.openvpn_name))
+            builder.setMtu(tun.mtu)
+            tun.ipv4?.let { builder.addAddress(it, tun.prefix4) }
+            tun.ipv6?.let { builder.addAddress(it, tun.prefix6) }
+            OpenVpnSession.tunnelRoutes(tun).forEach { (net, prefix) -> builder.addRoute(net, prefix) }
+            if (tun.ipv6 != null) tun.routes6.forEach { (net, prefix) -> builder.addRoute(net, prefix) }
+            tun.dns.filter { tun.ipv6 != null || !it.contains(':') }.forEach { builder.addDnsServer(it) }
+            tun.domain?.takeIf { it.isNotBlank() }?.let { builder.addSearchDomain(it) }
+            configurePerAppProxy(builder)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) builder.setMetered(false)
+            val pfd = builder.establish() ?: return null
+            val old = if (::mInterface.isInitialized) mInterface else null
+            mInterface = pfd
+            runCatching { old?.close() }
+            LogUtil.i(AppConfig.TAG, "StartCore-VPN: Dr Open VPN interface ${tun.ipv4}/${tun.prefix4}")
+            return pfd
+        }
+
+        override fun protect(fd: Int): Boolean = this@CoreVpnService.protect(fd)
+
+        override fun onConnected() {
+            CoreServiceManager.onOpenVpnConnected(this@CoreVpnService)
+        }
+
+        override fun onExit(error: String?) {
+            if (error != null && isRunning) {
+                CoreServiceManager.onOpenVpnFailed(this@CoreVpnService, error)
+                stopAllService()
+            }
+        }
     }
 
     /**
@@ -324,6 +408,9 @@ class CoreVpnService : VpnService(), ServiceControl {
 //        saveVpnNetworkInfo(configName, info)
         unlockStart()
         isRunning = false
+
+        openVpn?.stop()
+        openVpn = null
 
         tun2SocksService?.stopTun2Socks()
         tun2SocksService = null
