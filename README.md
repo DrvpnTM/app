@@ -148,7 +148,7 @@ cd android && ./gradlew assemblePlaystoreRelease
 
 ## 📜 مجوز
 
-کد این برنامه متن‌باز و تحت مجوز **GPL-3.0** است ([LICENSE](LICENSE)) و از هسته [Xray-core](https://github.com/XTLS/Xray-core) استفاده می‌کند. هسته‌ی وارپ [Aether](https://github.com/patterniha/Aether) (مجوز AGPL-3.0، نسخه‌ی مشخص در `aether-version.txt`) هم همراه برنامه است. Dr Open VPN برنامه‌ی [OpenVPN](https://openvpn.net) (مجوز GPL-2.0، به‌صورت برنامه‌ی جدا، همراه OpenSSL؛ ساخته‌شده با `compile-openvpn.sh`) را اجرا می‌کند و به [RiseupVPN](https://riseup.net/vpn) وصل می‌شود که رایگان است و با کمک‌های مردمی اداره می‌شود.
+کد این برنامه متن‌باز و تحت مجوز **GPL-3.0** است ([LICENSE](LICENSE)) و از هسته [Xray-core](https://github.com/XTLS/Xray-core) استفاده می‌کند. هسته‌ی وارپ [Aether](https://github.com/patterniha/Aether) (مجوز AGPL-3.0، نسخه‌ی مشخص در `aether-version.txt`) هم همراه برنامه است. Dr Open VPN برنامه‌ی [OpenVPN](https://openvpn.net) (مجوز GPL-2.0، به‌صورت برنامه‌ی جدا، همراه OpenSSL؛ ساخته‌شده با `compile-openvpn.sh`) را اجرا می‌کند و به [RiseupVPN](https://riseup.net/vpn) وصل می‌شود که رایگان است و با کمک‌های مردمی اداره می‌شود. حلقهٔ «ضد DPI دکتر» برنامهٔ [ByeDPI](https://github.com/hufrea/byedpi) (مجوز MIT، ساخته‌شده با `compile-byedpi.sh`) را اجرا می‌کند.
 
 ---
 

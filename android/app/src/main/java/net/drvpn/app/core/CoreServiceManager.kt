@@ -331,6 +331,8 @@ object CoreServiceManager {
         MmkvManager.encodeSettings(AppConfig.PREF_EXTRA_HOP_ACTIVE, hop?.let { ExtraHopManager.activeLabel(it) }.orEmpty())
         val aetherHop = hop?.takeIf { it.configType == EConfigType.AETHER }
         if (!LanternManager.isHop(hop)) LanternManager.stop()
+        // ByeDPI starts before Xray, so the first connections to the server already find it.
+        if (ByeDpiManager.isHop(hop)) ByeDpiManager.start(service) else ByeDpiManager.stop()
         if (!AetherManager.isAether(config) && aetherHop == null) AetherManager.stop(service)
         coreController.startLoop(result.content, tunFd)
         // The hop programs start after Xray: Aether sends its traffic (and Psiphon's) through
@@ -402,6 +404,7 @@ object CoreServiceManager {
 
         AetherManager.stopInBackground()
         LanternManager.stopInBackground()
+        ByeDpiManager.stopInBackground()
         MmkvManager.encodeSettings(AppConfig.PREF_EXTRA_HOP_ACTIVE, "")
 
         // Close existing browser dialer

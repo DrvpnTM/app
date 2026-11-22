@@ -79,6 +79,8 @@ object AppConfig {
     const val PREF_EXTRA_HOP_KIND = "pref_extra_hop_kind"
     /** The WireGuard config (wg-quick text or wireguard:// link) of the "tunnel" extra hop. */
     const val PREF_EXTRA_HOP_WIREGUARD = "pref_extra_hop_wireguard"
+    /** ByeDPI's options for the "Dr Anti-DPI" extra hop; empty for ByeDpiManager.DEFAULT_ARGS. */
+    const val PREF_BYEDPI_ARGS = "pref_byedpi_args"
     /** Written by the VPN process: "<kind>|<mode>" of the hop the running connection uses, or empty. */
     const val PREF_EXTRA_HOP_ACTIVE = "pref_extra_hop_active"
     /** Written by the VPN process during an emergency search: "searching", "ok" or "failed". */
@@ -210,6 +212,8 @@ object AppConfig {
 
     /** Lantern ("Silk Road" extra hop): the SOCKS port lantern-hop listens on. */
     const val PORT_LANTERN_SOCKS = 10830
+    /** ByeDPI's SOCKS listener, the "Dr Anti-DPI" extra hop (ByeDpiManager). */
+    const val PORT_BYEDPI_SOCKS = 10831
     const val WIREGUARD_LOCAL_ADDRESS_V4 = "172.16.0.2/32"
     const val WIREGUARD_LOCAL_ADDRESS_V6 = "2606:4700:110:8f81:d551:a0:532e:a2b3/128"
     const val WIREGUARD_LOCAL_MTU = "1420"

@@ -747,6 +747,10 @@
     <string name="hop_black_cdn_desc">رایگان · کند · بیشترین ناشناسی</string>
     <string name="hop_dr_tunnel">تونل دکتر</string>
     <string name="hop_dr_tunnel_desc">کانفیگ WireGuard خودتان (پایین)</string>
+    <string name="hop_anti_dpi">ضد DPI دکتر</string>
+    <string name="hop_anti_dpi_desc">رایگان · سرور شما را از فیلترینگ DPI پنهان می‌کند · همیشه قبل از سرور</string>
+    <string name="title_byedpi_args">گزینه‌های ضد DPI (پیشرفته)</string>
+    <string name="byedpi_args_invalid">این گزینه‌ها معتبر نیستند یا آدرس و پورت را تعیین می‌کنند (این‌ها را برنامه تعیین می‌کند)</string>
     <string name="hop_silk_road">جادهٔ ابریشم</string>
     <string name="hop_silk_road_desc">رایگان · همیشه قبل از سرور</string>
     <string name="hop_emergency">حالت اضطراری (اختلال و نت ملی)</string>
@@ -787,9 +791,12 @@
     <string name="gaming_mode_title">حالت گیمینگ</string>
     <string name="gaming_mode_summary">فقط سرورهای وایرگارد با کمترین پینگ؛ بدون حلقهٔ اضافه</string>
     <string name="title_stats">آمار ناشناس استفاده</string>
-    <string name="summary_stats">روزی یک بار: یک شناسهٔ تصادفی، نسخهٔ برنامه، منطقه، قابلیت‌های استفاده‌شده و مدل گوشی. بدون IP، بدون ترافیک، بدون سرورها.</string>
+    <string name="summary_stats">روزی یک بار: یک شناسهٔ تصادفی، نسخهٔ برنامه، منطقه، قابلیت‌های استفاده‌شده، نوع سرور (نه آدرسش) و مدل گوشی. بدون IP، بدون ترافیک، بدون آدرس سرورها.</string>
     <!-- Dr Open VPN (RiseupVPN over OpenVPN) -->
     <string name="openvpn_name">Dr Open VPN</string>
+    <string name="openvpn_card_desc">رایگان · جداگانه و بدون سرور شما اجرا می‌شود (OpenVPN قابل زنجیر شدن نیست) · برای استفاده بزنید</string>
+    <string name="openvpn_card_selected">Dr Open VPN انتخاب شد. دکمهٔ اتصال را بزنید.</string>
+    <string name="openvpn_card_missing">Dr Open VPN دیگر در «سرورهای من» نیست</string>
     <string name="openvpn_needs_vpn_mode">Dr Open VPN فقط در حالت VPN کار می‌کند. حالت VPN را در تنظیمات روشن کنید.</string>
     <string name="openvpn_not_supported">Dr Open VPN روی این گوشی در دسترس نیست</string>
     <string name="openvpn_error_provider">سرورهای Dr Open VPN دریافت نشد. یک بار به سرور دیگری وصل شوید و دوباره امتحان کنید.</string>
