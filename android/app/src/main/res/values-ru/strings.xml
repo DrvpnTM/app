@@ -794,7 +794,7 @@
     <string name="gaming_mode_title">Игровой режим</string>
     <string name="gaming_mode_summary">Только серверы WireGuard, минимальный пинг; без доп. узла</string>
     <string name="title_stats">Анонимная статистика</string>
-    <string name="summary_stats">Раз в день: случайный ID, версия приложения, регион, используемые функции, тип сервера (не его адрес) и модель телефона. Без IP, без трафика, без адресов серверов.</string>
+    <string name="summary_stats">Раз в день: случайный ID, версия приложения, регион, используемые функции, тип сервера (не его адрес), объём использованных данных (только сумма), название провайдера и модель телефона. Без IP, без сайтов и содержимого трафика, без адресов серверов.</string>
     <string name="openvpn_name">Dr Open VPN</string>
     <string name="openvpn_card_desc">Бесплатно · работает отдельно, без вашего сервера (OpenVPN нельзя добавить в цепочку) · нажмите, чтобы использовать</string>
     <string name="openvpn_card_selected">Dr Open VPN выбран. Нажмите кнопку подключения.</string>

@@ -8,9 +8,13 @@ import java.util.Locale
 /**
  * Dr VPN daily traffic totals. The VPN process adds each speed-sample delta here; the app reads them
  * for the Usage screen. Stored in the multi-process settings MMKV as "up,down" per day.
+ *
+ * The bytes since the last anonymous stats ping are also kept apart ([pending]), so the daily ping
+ * can send how much was used (only the total, never what or where) and nothing is counted twice.
  */
 object UsageStats {
     private const val KEY_PREFIX = "drvpn_usage_"
+    private const val KEY_PENDING = "drvpn_usage_pending"
     private const val KEEP_DAYS = 62
 
     data class Day(val date: Date, val up: Long, val down: Long) {
@@ -32,7 +36,28 @@ object UsageStats {
         val today = Date()
         val (u, d) = read(today)
         MmkvManager.encodeSettings(dayKey(today), "${u + up.coerceAtLeast(0)},${d + down.coerceAtLeast(0)}")
+        if (StatsManager.isEnabled()) {
+            val (pu, pd) = pending()
+            MmkvManager.encodeSettings(KEY_PENDING, "${pu + up.coerceAtLeast(0)},${pd + down.coerceAtLeast(0)}")
+        }
         pruneOld(today)
+    }
+
+    /** Bytes (up, down) used since the last stats ping that reached the server. */
+    fun pending(): Pair<Long, Long> {
+        val parts = MmkvManager.decodeSettingsString(KEY_PENDING).orEmpty().split(',')
+        return (parts.getOrNull(0)?.toLongOrNull() ?: 0L) to (parts.getOrNull(1)?.toLongOrNull() ?: 0L)
+    }
+
+    /** The ping carrying [up] and [down] was counted: keep only what was added since it was read. */
+    fun markSent(up: Long, down: Long) {
+        val (pu, pd) = pending()
+        MmkvManager.encodeSettings(KEY_PENDING, "${(pu - up).coerceAtLeast(0)},${(pd - down).coerceAtLeast(0)}")
+    }
+
+    /** Stats were turned off: what was used meanwhile is never sent. */
+    fun clearPending() {
+        MmkvManager.encodeSettings(KEY_PENDING, "")
     }
 
     private var lastPruneDay = ""

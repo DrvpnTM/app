@@ -2,12 +2,23 @@ name = "drvpn-stats"
 main = "worker.js"
 compatibility_date = "2026-10-01"
 
+# The dashboard's browser script is served as it is (GET /app.js), not bundled into the Worker.
+[[rules]]
+type = "Text"
+globs = ["**/client/*.js"]
+fallthrough = false
+
+[vars]
+# The panel's address, for the link in the daily Telegram report.
+PANEL_URL = "https://drvpn-stats.cdn-1-4cf.workers.dev"
+
 [[d1_databases]]
 binding = "DB"
 database_name = "drvpn-stats"
 # Filled in by: npx wrangler d1 create drvpn-stats
 database_id = "cf6cf514-e4f3-424a-9691-a694206dd847"
 
-# Every night at 03:17 UTC: deletes data older than the panel's "auto-delete" setting (off by default).
+# Every hour at :17 UTC: Telegram alerts; at 03:17 old data is deleted (when "auto-delete" is set in
+# the panel's settings, off by default); at 04:17 (07:47 Tehran) the daily Telegram report.
 [triggers]
-crons = ["17 3 * * *"]
+crons = ["17 * * * *"]

@@ -788,7 +788,7 @@
     <string name="gaming_mode_title">游戏模式</string>
     <string name="gaming_mode_summary">仅 WireGuard 服务器，最低延迟；不使用额外跳板</string>
     <string name="title_stats">匿名使用统计</string>
-    <string name="summary_stats">每天一次：随机 ID、应用版本、地区、使用的功能、服务器类型（不含地址）和手机型号。不含 IP、流量或服务器地址。</string>
+    <string name="summary_stats">每天一次：随机 ID、应用版本、地区、使用的功能、服务器类型（不含地址）、使用的流量（仅总量）、网络运营商名称和手机型号。不含 IP、访问的网站或流量内容、服务器地址。</string>
     <string name="openvpn_name">Dr Open VPN</string>
     <string name="openvpn_card_desc">免费 · 独立运行，不经过你的服务器（OpenVPN 无法串联）· 点按使用</string>
     <string name="openvpn_card_selected">已选择 Dr Open VPN。请点按连接按钮。</string>

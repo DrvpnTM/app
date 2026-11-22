@@ -29,7 +29,12 @@ import java.util.concurrent.TimeUnit
 /**
  * Anonymous usage stats: once a day the app sends a random install ID (made here, tied to nothing),
  * the app version, the region picked in the app, the extra hop in use, gaming mode, how many
- * times it connected that day, and the phone's maker, model and Android version. Nothing else: no IP is kept by the server, no traffic, no servers.
+ * times it connected (and failed to) and how many bytes it moved since the last ping (only the totals), and the
+ * phone's maker, model and Android version. Nothing else: no IP is kept by the server, no traffic
+ * content or destinations, no servers.
+ *
+ * Connections and bytes are counted since the last ping that reached the server, not "today so
+ * far": the ping usually goes out when the app opens, before that day's connections.
  * Off in Settings (PREF_STATS_ENABLED). The server's address comes from "stats_url" in notice.json,
  * so nothing is sent until the owner sets one (stats-worker/ in the repo).
  */
@@ -37,7 +42,8 @@ object StatsManager {
 
     private const val PREF_ID = "pref_drvpn_stats_id"
     private const val PREF_LAST_SENT = "pref_drvpn_stats_last_sent"
-    private const val PREF_CONNECTS = "pref_drvpn_stats_connects"
+    private const val PREF_CONNECTS = "pref_drvpn_stats_connects_pending"
+    private const val PREF_FAILS = "pref_drvpn_stats_fails_pending"
     private const val WORK_NAME = "drvpn_stats_ping"
     private const val NOTICE_URL = "https://raw.githubusercontent.com/DrvpnTM/app/main/notice.json"
 
@@ -46,13 +52,16 @@ object StatsManager {
     private fun today(): String = SimpleDateFormat("yyyy-MM-dd", Locale.US)
         .apply { timeZone = TimeZone.getTimeZone("UTC") }.format(Date())
 
-    /** Counts a connection for today (VPN process). Stored as "day|count". */
+    /** Counts a connection since the last ping (VPN process). */
     fun countConnect() {
-        val day = today()
-        val (stored, count) = MmkvManager.decodeSettingsString(PREF_CONNECTS).orEmpty().split('|').let {
-            it.getOrNull(0).orEmpty() to (it.getOrNull(1)?.toIntOrNull() ?: 0)
-        }
-        MmkvManager.encodeSettings(PREF_CONNECTS, "$day|${if (stored == day) count + 1 else 1}")
+        if (!isEnabled()) return
+        MmkvManager.encodeSettings(PREF_CONNECTS, MmkvManager.decodeSettingsInt(PREF_CONNECTS, 0) + 1)
+    }
+
+    /** Counts a connection that failed to start since the last ping (VPN process). */
+    fun countFail() {
+        if (!isEnabled()) return
+        MmkvManager.encodeSettings(PREF_FAILS, MmkvManager.decodeSettingsInt(PREF_FAILS, 0) + 1)
     }
 
     /** Once a day, in the background (kept when already scheduled). */
@@ -66,14 +75,21 @@ object StatsManager {
 
     /** Sends today's ping unless it was sent, stats are off, or no server is set. Blocking. */
     fun sendIfDue() {
-        if (!isEnabled()) return
+        if (!isEnabled()) {
+            // Nothing from while stats were off is sent once they are back on.
+            MmkvManager.encodeSettings(PREF_CONNECTS, 0)
+            MmkvManager.encodeSettings(PREF_FAILS, 0)
+            UsageStats.clearPending()
+            return
+        }
         val day = today()
         if (MmkvManager.decodeSettingsString(PREF_LAST_SENT) == day) return
         val url = statsUrl() ?: return
         val id = MmkvManager.decodeSettingsString(PREF_ID)?.takeIf { it.length >= 16 }
             ?: UUID.randomUUID().toString().replace("-", "").also { MmkvManager.encodeSettings(PREF_ID, it) }
-        val connects = MmkvManager.decodeSettingsString(PREF_CONNECTS).orEmpty().split('|')
-            .takeIf { it.getOrNull(0) == day }?.getOrNull(1)?.toIntOrNull() ?: 0
+        val connects = MmkvManager.decodeSettingsInt(PREF_CONNECTS, 0)
+        val fails = MmkvManager.decodeSettingsInt(PREF_FAILS, 0)
+        val (up, down) = UsageStats.pending()
         val hop = if (ExtraHopManager.mode() == ExtraHopMode.OFF) "off" else ExtraHopManager.kind().value
         val body = JSONObject()
             .put("id", id)
@@ -83,21 +99,30 @@ object StatsManager {
             .put("gaming", MmkvManager.decodeSettingsBool(AppConfig.PREF_GAMING_MODE, false))
             .put("server", serverKind())
             .put("connects", connects)
+            .put("fails", fails)
+            // Bytes through the VPN since the last ping, the same totals as the Usage screen.
+            .put("up", up)
+            .put("down", down)
             // The phone, for the owner's "which phones" chart: maker, model, Android version.
             .put("brand", android.os.Build.MANUFACTURER.orEmpty().replaceFirstChar { it.uppercase() })
             .put("model", android.os.Build.MODEL.orEmpty())
             .put("android", android.os.Build.VERSION.RELEASE.orEmpty())
-            .toString()
-        // Through the VPN when it runs (the server may be filtered), else directly.
+        // Through the VPN when it runs (the server may be filtered), else directly. The server is
+        // told which, since through the VPN the place and network it sees are the VPN server's.
         val ports = listOfNotNull(SettingsManager.getHttpPort().takeIf { it > 0 }, 0).distinct()
         for (port in ports) {
+            val payload = body.put("via", if (port > 0) "vpn" else "direct").toString()
             val ok = runCatching {
                 HttpUtil.buildOkHttpClient(10_000, port, SettingsManager.getSocksUsername(), SettingsManager.getSocksPassword(), true)
-                    .newCall(Request.Builder().url(url).post(body.toRequestBody("application/json".toMediaType())).build())
+                    .newCall(Request.Builder().url(url).post(payload.toRequestBody("application/json".toMediaType())).build())
                     .execute().use { it.isSuccessful }
             }.getOrDefault(false)
             if (ok) {
                 MmkvManager.encodeSettings(PREF_LAST_SENT, day)
+                // Connections made while the ping was on its way stay for the next one.
+                MmkvManager.encodeSettings(PREF_CONNECTS, (MmkvManager.decodeSettingsInt(PREF_CONNECTS, 0) - connects).coerceAtLeast(0))
+                MmkvManager.encodeSettings(PREF_FAILS, (MmkvManager.decodeSettingsInt(PREF_FAILS, 0) - fails).coerceAtLeast(0))
+                UsageStats.markSent(up, down)
                 return
             }
         }

@@ -791,7 +791,7 @@
     <string name="gaming_mode_title">Gaming mode</string>
     <string name="gaming_mode_summary">WireGuard servers only, the lowest ping; no extra hop</string>
     <string name="title_stats">Anonymous usage stats</string>
-    <string name="summary_stats">Once a day: a random ID, app version, region, features used, the kind of server (not its address) and phone model. No IP, no traffic, no server addresses.</string>
+    <string name="summary_stats">Once a day: a random ID, app version, region, features used, the kind of server (not its address), how much data was used (total only), the internet provider\'s name and phone model. No IP, no sites or traffic content, no server addresses.</string>
     <!-- Dr Open VPN (RiseupVPN over OpenVPN) -->
     <string name="openvpn_name">Dr Open VPN</string>
     <string name="openvpn_card_desc">Free · runs on its own, without your server (OpenVPN cannot be chained) · tap to use it</string>

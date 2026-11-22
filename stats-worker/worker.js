@@ -1,84 +1,53 @@
-// Dr VPN anonymous usage stats (Cloudflare Worker + D1).
-//   POST /ping    {"id","v","region","hop","gaming","connects","brand","model","android","server"}  from the app, once a day
-//   GET  /badge   shields.io endpoint JSON: active installs in the last 30 days (public)
-//   GET  /        the admin panel (login with ADMIN_USER / ADMIN_PASSWORD, secrets of the Worker)
-//   GET  /stats   the panel's data as JSON (logged in only)
-//   GET  /health  database health for the settings page (logged in only)
-// Nothing about the person is kept: the request's IP address is never read or stored.
+// Dr VPN anonymous usage stats and admin panel (Cloudflare Worker + D1).
+//   POST /ping       {"id","v","region","hop","gaming","connects","fails","up","down","via","brand","model","android","server"}
+//                    from the app, once a day; connects, fails and bytes are counted since its last ping (0.2.8 on)
+//   GET  /badge      shields.io endpoint JSON: active installs in the last 30 days (public)
+//   GET  /           the admin panel (login with ADMIN_USER / ADMIN_PASSWORD, secrets of the Worker)
+//   GET  /settings   the panel's settings page
+//   GET  /stats      the dashboard's numbers (?days=7|30|90, &f=<filter>&v=<value>)
+//   GET  /users      weekly cohorts and versions per day        GET /live       newest pings
+//   GET  /downloads  APK downloads from GitHub                 GET|POST /notice the in-app announcement
+//   GET  /health     database health and settings for the settings page
+// Nothing about the person is kept: the request's IP address is never stored. The network it came
+// from is kept by name and number (e.g. "AS44244 Irancell"), never the address. Of the traffic, only
+// two byte totals are sent: nothing about what was visited or where.
 //
 // D1's free plan reads at most 5 million rows a day; past that every query fails until midnight UTC,
-// pings included. So the panel's numbers are computed in a few cheap queries and kept for
-// STATS_TTL_MS, past days are rolled up once (table daily), each install's first day is kept in
-// table installs, and the badge is recomputed every few hours.
+// pings included. So the panel's numbers are kept for a while, past days are rolled up once, and the
+// panel stops reading after STATS_DAILY_READS rows a day (see db.js).
 import { loginPage, dashboardPage, settingsPage } from './pages.js';
+import clientJs from './client/panel.js';
+import { ensureSchema, dbGet, dbSet, dbDel, parse, charge, overBudget, readsToday, day, now, describe, json, STATS_DAILY_READS } from './db.js';
+import { computeStats, computeUsers, computeLive, parseFilter } from './stats.js';
+import { downloads, readNotice, writeNotice, githubToken, telegramConfig, telegramSend, dailyReport, checkAlerts } from './extras.js';
 
 const SESSION_DAYS = 30;
 const STATS_TTL_MS = 15 * 60 * 1000;
+const USERS_TTL_MS = 6 * 60 * 60 * 1000;
+const LIVE_TTL_MS = 20 * 1000;
 /** A "refresh now" click recomputes only when the kept numbers are older than this. */
 const FRESH_MIN_MS = 60 * 1000;
 const BADGE_TTL_MS = 6 * 60 * 60 * 1000;
-/**
- * Rows the panel may read in one UTC day (of D1's 5 million). Past it the panel shows its kept
- * numbers until midnight, so the app's pings always have room.
- */
-const STATS_DAILY_READS = 2_000_000;
+/** Wrong passwords from one address before it waits LOCK_MS. */
+const LOCK_TRIES = 5;
+const LOCK_MS = 15 * 60 * 1000;
+/** A ping's byte totals are capped at this (10 TB), so one broken counter cannot swamp the charts. */
+const MAX_BYTES = 10 * 1024 ** 4;
 
 const html = (body, status = 200, headers = {}) =>
-  new Response(body, { status, headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store', ...headers } });
+  new Response(body, {
+    status,
+    headers: {
+      'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store',
+      'x-frame-options': 'DENY', 'referrer-policy': 'same-origin', ...headers,
+    },
+  });
 
 const b64url = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 const fromB64url = (s) => Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/')), (c) => c.charCodeAt(0));
 
-// ---------- Schema ----------
-
-/** Columns pings has gained over time; a database made with an older schema.sql gets them added. */
-const PING_COLUMNS = {
-  brand: "TEXT NOT NULL DEFAULT '?'",
-  model: "TEXT NOT NULL DEFAULT '?'",
-  android: "TEXT NOT NULL DEFAULT '?'",
-  country: "TEXT NOT NULL DEFAULT '??'",
-  lat: 'REAL',
-  lon: 'REAL',
-  city: "TEXT NOT NULL DEFAULT '?'",
-  server: "TEXT NOT NULL DEFAULT '?'",
-};
-
-let schemaReady = null;
-/** Brings the database up to date, once per Worker instance. */
-function ensureSchema(env) {
-  if (!schemaReady) schemaReady = migrate(env).catch((e) => { schemaReady = null; throw e; });
-  return schemaReady;
-}
-
-async function migrate(env) {
-  await env.DB.batch([
-    env.DB.prepare(`CREATE TABLE IF NOT EXISTS pings (day TEXT NOT NULL, id TEXT NOT NULL, version TEXT NOT NULL,
-      region TEXT NOT NULL, hop TEXT NOT NULL, gaming INTEGER NOT NULL, connects INTEGER NOT NULL, PRIMARY KEY (day, id))`),
-    env.DB.prepare('CREATE INDEX IF NOT EXISTS pings_day ON pings(day)'),
-    env.DB.prepare('CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT NOT NULL)'),
-    env.DB.prepare('CREATE TABLE IF NOT EXISTS installs (id TEXT PRIMARY KEY, first TEXT NOT NULL)'),
-    env.DB.prepare('CREATE INDEX IF NOT EXISTS installs_first ON installs(first)'),
-    env.DB.prepare('CREATE TABLE IF NOT EXISTS daily (day TEXT PRIMARY KEY, active INTEGER NOT NULL, connects INTEGER NOT NULL)'),
-  ]);
-  const have = new Set((await env.DB.prepare('PRAGMA table_info(pings)').all()).results.map((c) => c.name));
-  for (const [name, type] of Object.entries(PING_COLUMNS)) {
-    if (!have.has(name)) await env.DB.prepare(`ALTER TABLE pings ADD COLUMN ${name} ${type}`).run();
-  }
-  // The installs table came later: fill it once from the pings already there.
-  if ((await dbGet(env, 'installs_filled')) !== '1') {
-    await env.DB.prepare('INSERT OR IGNORE INTO installs (id, first) SELECT id, MIN(day) FROM pings GROUP BY id').run();
-    await dbSet(env, 'installs_filled', '1');
-  }
-}
-
-// A small key/value table for settings and kept results.
-async function dbGet(env, key) {
-  try { return (await env.DB.prepare('SELECT value FROM settings WHERE key = ?').bind(key).first())?.value ?? null; } catch { return null; }
-}
-async function dbSet(env, key, value) {
-  await env.DB.prepare('INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT (key) DO UPDATE SET value = excluded.value').bind(key, value).run();
-}
-const parse = (text) => { try { return text ? JSON.parse(text) : null; } catch { return null; } };
+/** A short version tag of the dashboard script, so browsers fetch it again after a deploy. */
+const CLIENT_TAG = (() => { let h = 5381; for (let i = 0; i < clientJs.length; i++) h = ((h * 33) ^ clientJs.charCodeAt(i)) >>> 0; return h.toString(36); })();
 
 // ---------- Login ----------
 
@@ -103,7 +72,7 @@ async function verifyPassword(env, password) {
 const sessionSecret = async (env) => (await storedPassword(env)) || env.ADMIN_PASSWORD || '';
 const loginEnabled = async (env) => !!(env.ADMIN_USER && (await sessionSecret(env)));
 
-async function sign(env, text) {
+async function hmac(env, text) {
   const key = await crypto.subtle.importKey('raw', new TextEncoder().encode((await sessionSecret(env)) + '|' + env.ADMIN_USER),
     { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
   return b64url(await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(text)));
@@ -112,7 +81,7 @@ async function sign(env, text) {
 /** "expiry.signature": valid until expiry; a new password ends every session. */
 async function newSession(env) {
   const expiry = String(Date.now() + SESSION_DAYS * 86400000);
-  return `${expiry}.${await sign(env, expiry)}`;
+  return `${expiry}.${await hmac(env, expiry)}`;
 }
 const sessionCookie = async (env) => `drvpn_admin=${await newSession(env)}; Path=/; Max-Age=${SESSION_DAYS * 86400}; HttpOnly; Secure; SameSite=Strict`;
 
@@ -122,7 +91,7 @@ async function loggedIn(request, env) {
   if (!cookie) return false;
   const [expiry, signature] = cookie[1].split('.');
   if (!expiry || !signature || Number(expiry) < Date.now()) return false;
-  return same(signature, await sign(env, expiry));
+  return same(signature, await hmac(env, expiry));
 }
 
 /** Compares without leaking where the strings differ through timing. */
@@ -133,29 +102,57 @@ function same(a, b) {
   return diff === 0;
 }
 
-const json = (body, status = 200, extra = {}) =>
-  new Response(JSON.stringify(body), {
-    status,
-    headers: { 'content-type': 'application/json', 'access-control-allow-origin': '*', 'cache-control': 'no-store', ...extra },
-  });
+/** The login attempts of one address, under a keyed hash of it (the address itself is not kept). */
+async function triesKey(env, request) {
+  return 'lf_' + (await hmac(env, 'login|' + (request.headers.get('cf-connecting-ip') || '?'))).slice(0, 22);
+}
 
-// Device names have spaces and brackets ("Galaxy A54 5G"); keep letters, digits and a few signs.
-const cleanName = (value, max) => String(value ?? '').replace(/[^\p{L}\p{N} ._+()\-]/gu, '').trim().slice(0, max);
-const clean = (value, max) => String(value ?? '').replace(/[^\w.\-]/g, '').slice(0, max);
-const day = (offset = 0) => new Date(Date.now() - offset * 86400000).toISOString().slice(0, 10);
-const short = (n) => (n >= 1e6 ? (n / 1e6).toFixed(1) + 'M' : n >= 1e3 ? (n / 1e3).toFixed(1) + 'K' : String(n)).replace('.0', '');
+/** Browser and system from the User-Agent, for the login log. */
+function device(ua) {
+  ua = ua || '';
+  const os = /Android/.test(ua) ? 'Android' : /iPhone|iPad/.test(ua) ? 'iOS' : /Windows/.test(ua) ? 'Windows' : /Mac OS/.test(ua) ? 'macOS' : /Linux/.test(ua) ? 'Linux' : '?';
+  const br = /Edg\//.test(ua) ? 'Edge' : /OPR\//.test(ua) ? 'Opera' : /Firefox\//.test(ua) ? 'Firefox' : /Chrome\//.test(ua) ? 'Chrome' : /Safari\//.test(ua) ? 'Safari' : '?';
+  return br + ' / ' + os;
+}
 
-/** What went wrong, in words the owner can act on. */
-function describe(e) {
-  const m = String(e?.message || e || '');
-  if (/limit|exceeded|quota|too many/i.test(m)) {
-    return 'سقف روزانهٔ رایگان پایگاه‌داده (D1) تمام شده است. تا ساعت ۰۰:۰۰ UTC (۳:۳۰ بامداد تهران) صبر کنید. ' + m.slice(0, 160);
+/** The last 30 logins (and failed tries): when, from which country and city, on what. */
+async function logLogin(env, request, ok) {
+  const list = parse(await dbGet(env, 'login_log')) || [];
+  const cf = request.cf || {};
+  list.unshift({ at: Date.now(), ok, cc: String(cf.country || '??').slice(0, 2), city: String(cf.city || '').slice(0, 40), dev: device(request.headers.get('user-agent')) });
+  await dbSet(env, 'login_log', JSON.stringify(list.slice(0, 30)));
+}
+
+async function login(request, env) {
+  if (!(await loginEnabled(env))) return html(loginPage('off'), 503);
+  const key = await triesKey(env, request);
+  const tries = parse(await dbGet(env, key));
+  const fresh = tries && Date.now() - tries.first < LOCK_MS;
+  if (fresh && tries.n >= LOCK_TRIES) {
+    const minutes = Math.ceil((tries.first + LOCK_MS - Date.now()) / 60000);
+    return html(loginPage('locked', minutes), 429);
   }
-  if (/no such table|no such column/i.test(m)) return 'جدول‌های پایگاه‌داده کامل نیستند: ' + m.slice(0, 160);
-  return m.slice(0, 200) || 'خطای ناشناخته';
+  const form = await request.formData();
+  if (same(form.get('user'), env.ADMIN_USER) && (await verifyPassword(env, form.get('password') || ''))) {
+    await dbDel(env, key).catch(() => {});
+    await logLogin(env, request, true).catch(() => {});
+    return new Response(null, { status: 303, headers: { location: '/', 'set-cookie': await sessionCookie(env) } });
+  }
+  await dbSet(env, key, JSON.stringify(fresh ? { first: tries.first, n: tries.n + 1 } : { first: Date.now(), n: 1 })).catch(() => {});
+  await logLogin(env, request, false).catch(() => {});
+  // A short pause makes guessing slow.
+  await new Promise((r) => setTimeout(r, 1500));
+  return html(loginPage('failed'), 401);
 }
 
 // ---------- Ping ----------
+
+// Device names have spaces and brackets ("Galaxy A54 5G"); keep letters, digits and a few signs.
+const cleanName = (value, max) => String(value ?? '').replace(/[^\p{L}\p{N} ._+()&,\-]/gu, '').trim().slice(0, max);
+const clean = (value, max) => String(value ?? '').replace(/[^\w.\-]/g, '').slice(0, max);
+const short = (n) => (n >= 1e6 ? (n / 1e6).toFixed(1) + 'M' : n >= 1e3 ? (n / 1e3).toFixed(1) + 'K' : String(n)).replace('.0', '');
+/** A count or byte total since the app's last ping; null when the version does not send it. */
+const amount = (v, max) => (v == null || v === '' || isNaN(Number(v)) ? null : Math.min(Math.max(Math.floor(Number(v)), 0), max));
 
 async function ping(request, env) {
   let body;
@@ -166,28 +163,39 @@ async function ping(request, env) {
   }
   const id = clean(body.id, 40);
   if (id.length < 16) return json({ ok: false }, 400);
-  // Approximate location from the request IP, added by Cloudflare. Country level, and lat/lon
-  // rounded to ~11 km, for the world map. No street, no address, no GPS.
+  // Approximate location and network from Cloudflare: country, city area (lat/lon rounded to
+  // ~11 km, for the map) and the network's name and number. Not the address, no street, no GPS.
   const cf = request.cf || {};
   const country = clean(cf.country, 2).toUpperCase() || '??';
   const city = cleanName(cf.city, 40) || '?';
   const round1 = (v) => (v == null || v === '' || isNaN(parseFloat(v)) ? null : Math.round(parseFloat(v) * 10) / 10);
   const lat = round1(cf.latitude), lon = round1(cf.longitude);
+  const asn = parseInt(cf.asn) || null;
+  const isp = cleanName(cf.asOrganization, 60) || '?';
+  const via = ['vpn', 'direct'].includes(body.via) ? body.via : '?';
   const today = day();
   try {
     await ensureSchema(env);
+    // A second ping the same day only comes when the first one's answer was lost: it repeats the
+    // first one's totals plus what came since, so the larger is kept (adding would count it twice).
     await env.DB.batch([
       env.DB.prepare(
-        `INSERT INTO pings (day, id, version, region, hop, gaming, connects, brand, model, android, country, lat, lon, city, server)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `INSERT INTO pings (day, id, version, region, hop, gaming, connects, brand, model, android, country, lat, lon, city, server,
+           up, down, fails, asn, isp, at, via)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
          ON CONFLICT (day, id) DO UPDATE SET version = excluded.version, region = excluded.region,
            hop = excluded.hop, gaming = excluded.gaming, connects = MAX(pings.connects, excluded.connects),
            brand = excluded.brand, model = excluded.model, android = excluded.android,
-           country = excluded.country, lat = excluded.lat, lon = excluded.lon, city = excluded.city, server = excluded.server`
+           country = excluded.country, lat = excluded.lat, lon = excluded.lon, city = excluded.city, server = excluded.server,
+           up = CASE WHEN excluded.up IS NULL THEN pings.up ELSE MAX(COALESCE(pings.up, 0), excluded.up) END,
+           down = CASE WHEN excluded.down IS NULL THEN pings.down ELSE MAX(COALESCE(pings.down, 0), excluded.down) END,
+           fails = CASE WHEN excluded.fails IS NULL THEN pings.fails ELSE MAX(COALESCE(pings.fails, 0), excluded.fails) END,
+           asn = excluded.asn, isp = excluded.isp, at = excluded.at, via = excluded.via`
       ).bind(today, id, clean(body.v, 16) || '?', clean(body.region, 8) || 'other', clean(body.hop, 12) || 'off',
-        body.gaming ? 1 : 0, Math.min(Math.max(parseInt(body.connects) || 0, 0), 10000),
+        body.gaming ? 1 : 0, amount(body.connects, 10000) ?? 0,
         cleanName(body.brand, 30) || '?', cleanName(body.model, 40) || '?', clean(body.android, 8) || '?',
-        country, lat, lon, city, clean(body.server, 12) || '?'),
+        country, lat, lon, city, clean(body.server, 12) || '?',
+        amount(body.up, MAX_BYTES), amount(body.down, MAX_BYTES), amount(body.fails, 10000), asn, isp, now(), via),
       env.DB.prepare('INSERT OR IGNORE INTO installs (id, first) VALUES (?, ?)').bind(id, today),
     ]);
   } catch (e) {
@@ -198,139 +206,43 @@ async function ping(request, env) {
   return json({ ok: true });
 }
 
-// ---------- Panel numbers ----------
+// ---------- Panel data ----------
 
 /**
- * Everything the dashboard shows for the last [rangeDays] days. The breakdowns use each install's
- * latest day in the window (its current version, hop, phone, place), read in one pass.
+ * A result kept in settings under [key] for [ttl]; [compute] makes a fresh one (it returns its
+ * rowsRead). The last good one is shown when the database fails or the day's reads are spent.
  */
-async function computeStats(env, rangeDays) {
-  let rowsRead = 0;
-  const all = async (stmt) => { const r = await stmt.all(); rowsRead += r.meta?.rows_read || 0; return r.results; };
-  const first = async (stmt) => (await all(stmt))[0] || {};
-
-  const today = day();
-  const span = Math.max(rangeDays, 30); // active week/month come from the same pass
-  const start = day(rangeDays - 1);
-  const prevStart = day(2 * rangeDays - 1);
-  const prevEnd = day(rangeDays);
-
-  const latest = await all(env.DB.prepare(
-    `SELECT p.day, p.version, p.region, p.hop, p.gaming, p.brand, p.model, p.android, p.country, p.city,
-       p.lat, p.lon, p.server, i.first
-     FROM (SELECT id, MAX(day) AS d FROM pings WHERE day >= ? GROUP BY id) l
-     JOIN pings p ON p.id = l.id AND p.day = l.d
-     LEFT JOIN installs i ON i.id = l.id`
-  ).bind(day(span - 1)));
-
-  // Days before today never change: they are rolled up once into daily.
-  const from = prevStart < start ? prevStart : start;
-  const kept = await all(env.DB.prepare('SELECT day, active, connects FROM daily WHERE day >= ? AND day < ?').bind(from, today));
-  const have = new Set(kept.map((r) => r.day));
-  const missing = [];
-  for (let i = 2 * rangeDays - 1; i >= 1; i--) if (!have.has(day(i))) missing.push(day(i));
-  if (missing.length) {
-    const rolled = await all(env.DB.prepare(
-      'SELECT day, COUNT(*) AS active, COALESCE(SUM(connects), 0) AS connects FROM pings WHERE day BETWEEN ? AND ? GROUP BY day'
-    ).bind(missing[0], missing[missing.length - 1]));
-    const byDay = Object.fromEntries(rolled.map((r) => [r.day, r]));
-    const rows = missing.map((d) => byDay[d] || { day: d, active: 0, connects: 0 });
-    // A day with nothing yet is kept too, except yesterday: late pings can still land for it.
-    const writes = rows.filter((r) => r.active > 0 || r.day < day(1))
-      .map((r) => env.DB.prepare('INSERT OR REPLACE INTO daily (day, active, connects) VALUES (?, ?, ?)').bind(r.day, r.active, r.connects));
-    for (let i = 0; i < writes.length; i += 50) await env.DB.batch(writes.slice(i, i + 50));
-    kept.push(...rows);
-  }
-  const now = await first(env.DB.prepare('SELECT COUNT(*) AS active, COALESCE(SUM(connects), 0) AS connects FROM pings WHERE day = ?').bind(today));
-  const newByDay = Object.fromEntries((await all(env.DB.prepare(
-    'SELECT first AS day, COUNT(*) AS n FROM installs WHERE first >= ? GROUP BY first'
-  ).bind(from))).map((r) => [r.day, r.n]));
-
-  const perDay = Object.fromEntries(kept.map((r) => [r.day, r]));
-  perDay[today] = { day: today, active: now.active || 0, connects: now.connects || 0 };
-  const series = [];
-  for (let i = rangeDays - 1; i >= 0; i--) {
-    const d = day(i), r = perDay[d] || { active: 0, connects: 0 };
-    series.push({ day: d, active: r.active, connects: r.connects, newUsers: newByDay[d] || 0 });
-  }
-  const sumIn = (a, b, f) => Object.values(perDay).filter((r) => r.day >= a && r.day <= b).reduce((s, r) => s + (r[f] || 0), 0);
-  const newIn = (a, b) => Object.entries(newByDay).filter(([d]) => d >= a && d <= b).reduce((s, [, n]) => s + n, 0);
-
-  // Distinct installs in the window before: it is all in the past, so it is counted once and kept.
-  const prevKey = `win_${prevStart}_${prevEnd}`;
-  const keptPrev = await dbGet(env, prevKey);
-  let prevUsers = Number(keptPrev);
-  if (!keptPrev) {
-    prevUsers = (await first(env.DB.prepare('SELECT COUNT(DISTINCT id) AS n FROM pings WHERE day BETWEEN ? AND ?').bind(prevStart, prevEnd))).n || 0;
-    await dbSet(env, prevKey, String(prevUsers));
-  }
-
-  const inRange = latest.filter((r) => r.day >= start);
-  const count = (rows, key, top) => {
-    const m = new Map();
-    for (const r of rows) { const k = key(r); m.set(k, (m.get(k) || 0) + 1); }
-    const out = [...m].map(([k, n]) => ({ k, n })).sort((a, b) => b.n - a.n);
-    return top ? out.slice(0, top) : out;
-  };
-  const points = count(inRange.filter((r) => r.lat != null && r.lon != null), (r) => r.lat + ',' + r.lon)
-    .map(({ k, n }) => { const [lat, lon] = k.split(','); return { lat: Number(lat), lon: Number(lon), n }; });
-
-  // Week-1 retention: of installs first seen 7 to 13 days ago, how many were back in the last 7 days.
-  const cohort = latest.filter((r) => r.first && r.first >= day(13) && r.first <= day(7));
-  const retention = { cohort: cohort.length, back: cohort.filter((r) => r.day >= day(6)).length };
-
-  const totalUsers = (await first(env.DB.prepare('SELECT COUNT(*) AS n FROM installs'))).n || 0;
-
-  return {
-    rangeDays,
-    updated: new Date().toISOString(),
-    totalUsers,
-    active: {
-      day: latest.filter((r) => r.day === today).length,
-      week: latest.filter((r) => r.day >= day(6)).length,
-      month: latest.filter((r) => r.day >= day(29)).length,
-    },
-    period: { users: inRange.length, newUsers: newIn(start, today), connects: sumIn(start, today, 'connects') },
-    prev: { users: prevUsers, newUsers: newIn(prevStart, prevEnd), connects: sumIn(prevStart, prevEnd, 'connects') },
-    retention,
-    series,
-    breakdown: {
-      byVersion: count(inRange, (r) => r.version),
-      byRegion: count(inRange, (r) => r.region),
-      byHop: count(inRange, (r) => r.hop),
-      byServer: count(inRange, (r) => r.server || '?'),
-      gaming: count(inRange, (r) => r.gaming),
-      byBrand: count(inRange, (r) => r.brand),
-      byModel: count(inRange, (r) => r.brand + ' ' + r.model, 15),
-      byAndroid: count(inRange, (r) => r.android),
-      byCountry: count(inRange.filter((r) => r.country && r.country !== '??'), (r) => r.country, 20),
-      byCity: count(inRange.filter((r) => r.city && r.city !== '?'), (r) => r.country + '|' + r.city, 20),
-    },
-    // One point per user area (approximate IP location, rounded to ~11 km), for the map.
-    points,
-    rowsRead,
-  };
-}
-
-/** The panel's numbers, kept for STATS_TTL_MS; the last good ones when the database fails. */
-async function stats(env, rangeDays, fresh) {
-  const key = 'stats_' + rangeDays;
+async function kept(env, key, ttl, fresh, compute) {
   const cached = parse(await dbGet(env, key));
   const age = cached ? Date.now() - cached.at : Infinity;
-  if (cached && (age < (fresh ? FRESH_MIN_MS : STATS_TTL_MS))) return json({ ...cached.data, cachedAt: cached.at });
-  const budgetKey = 'reads_' + day();
-  const readToday = Number(await dbGet(env, budgetKey)) || 0;
-  if (cached && readToday >= STATS_DAILY_READS) return json({ ...cached.data, cachedAt: cached.at, limited: true });
+  if (cached && age < (fresh ? FRESH_MIN_MS : ttl)) return json({ ...cached.data, cachedAt: cached.at });
+  if (cached && (await overBudget(env))) return json({ ...cached.data, cachedAt: cached.at, limited: true });
   try {
     await ensureSchema(env);
-    const data = await computeStats(env, rangeDays);
+    const data = await compute();
     await dbSet(env, key, JSON.stringify({ at: Date.now(), data }));
-    await dbSet(env, budgetKey, String(readToday + (data.rowsRead || 0)));
-    await dbSet(env, 'last_compute', JSON.stringify({ at: Date.now(), rangeDays, rowsRead: data.rowsRead }));
+    await charge(env, data.rowsRead || 0);
+    await dbSet(env, 'last_compute', JSON.stringify({ at: Date.now(), what: key, rowsRead: data.rowsRead }));
     return json(data);
   } catch (e) {
-    console.error('stats failed', e);
+    console.error(key + ' failed', e);
     if (cached) return json({ ...cached.data, cachedAt: cached.at, stale: true, error: describe(e) });
+    return json({ ok: false, error: describe(e) }, 503);
+  }
+}
+
+// The live feed is asked for every 30 s by each open panel: one read per LIVE_TTL_MS per Worker.
+let liveCache = null;
+async function live(env) {
+  if (liveCache && Date.now() - liveCache.at < LIVE_TTL_MS) return json(liveCache.data);
+  if (await overBudget(env)) return json(liveCache ? { ...liveCache.data, limited: true } : { ok: false, error: 'سهمیهٔ خواندن امروز تمام شده' }, liveCache ? 200 : 503);
+  try {
+    await ensureSchema(env);
+    const data = await computeLive(env);
+    await charge(env, data.rowsRead);
+    liveCache = { at: Date.now(), data };
+    return json(data);
+  } catch (e) {
     return json({ ok: false, error: describe(e) }, 503);
   }
 }
@@ -358,7 +270,7 @@ async function badge(env) {
   }
 }
 
-/** Database health for the settings page: all cheap queries. */
+/** Database health and the settings page's state: all cheap queries. */
 async function health(env) {
   const out = { ok: true };
   try {
@@ -373,10 +285,15 @@ async function health(env) {
     out.error = describe(e);
   }
   out.lastCompute = parse(await dbGet(env, 'last_compute'));
-  out.readsToday = Number(await dbGet(env, 'reads_' + day())) || 0;
+  out.readsToday = await readsToday(env);
   out.readsBudget = STATS_DAILY_READS;
   out.keepDays = Number(await dbGet(env, 'keep_days')) || 0;
   out.statsTtlMinutes = STATS_TTL_MS / 60000;
+  out.logins = parse(await dbGet(env, 'login_log')) || [];
+  const tg = await telegramConfig(env);
+  out.telegram = { set: !!(tg.token && tg.chat), chat: tg.chat, daily: tg.daily, alerts: tg.alerts, fromSecrets: !!env.TELEGRAM_BOT_TOKEN };
+  out.github = { set: !!(await githubToken(env)), fromSecret: !!env.GITHUB_TOKEN };
+  out.lock = { tries: LOCK_TRIES, minutes: LOCK_MS / 60000 };
   return json(out);
 }
 
@@ -385,95 +302,144 @@ async function prune(env, keep) {
   return r.meta?.changes ?? 0;
 }
 
+// ---------- Settings ----------
+
+async function settings(path, request, env) {
+  const form = await request.formData();
+  if (path === '/settings/password') {
+    const next = String(form.get('next') || '');
+    if (!(await verifyPassword(env, form.get('current') || ''))) return json({ ok: false, error: 'رمز فعلی اشتباه است' }, 400);
+    if (next.length < 8) return json({ ok: false, error: 'رمز جدید باید حداقل ۸ نویسه باشد' }, 400);
+    await setPassword(env, next);
+    // The signing key changed, so re-issue this session's cookie.
+    return json({ ok: true }, 200, { 'set-cookie': await sessionCookie(env) });
+  }
+  if (path === '/settings/reset') {
+    const r = await env.DB.prepare('DELETE FROM pings').run();
+    await env.DB.batch([
+      env.DB.prepare('DELETE FROM installs'),
+      env.DB.prepare('DELETE FROM daily'),
+      env.DB.prepare('DELETE FROM daily_dim'),
+      env.DB.prepare("DELETE FROM settings WHERE key LIKE 'stats\\_%' ESCAPE '\\' OR key LIKE 'win\\_%' ESCAPE '\\' OR key IN ('badge', 'last_compute', 'users')"),
+    ]);
+    return json({ ok: true, deleted: r.meta?.changes ?? 0 });
+  }
+  if (path === '/settings/prune') {
+    const keep = Math.min(Math.max(parseInt(form.get('days')) || 90, 7), 365);
+    return json({ ok: true, deleted: await prune(env, keep) });
+  }
+  if (path === '/settings/autoprune') {
+    // 0 = off; otherwise data older than this many days is deleted every night.
+    const raw = parseInt(form.get('days')) || 0;
+    const keep = raw <= 0 ? 0 : Math.min(Math.max(raw, 30), 365);
+    await dbSet(env, 'keep_days', String(keep));
+    return json({ ok: true, keepDays: keep });
+  }
+  if (path === '/settings/telegram') {
+    const saved = parse(await dbGet(env, 'telegram')) || {};
+    const token = String(form.get('token') || '').trim();
+    const chat = String(form.get('chat') || '').trim();
+    if (token && !/^\d+:[\w-]{20,}$/.test(token)) return json({ ok: false, error: 'توکن ربات درست نیست (شکلش این است: 123456:ABC...)' }, 400);
+    if (chat && !/^(-?\d+|@\w{4,})$/.test(chat)) return json({ ok: false, error: 'شناسهٔ چت باید عدد (مثل -100123...) یا @نام_کانال باشد' }, 400);
+    const next = { token: token || saved.token || '', chat: chat || saved.chat || '', daily: form.get('daily') === '1', alerts: form.get('alerts') === '1' };
+    if (form.get('clear') === '1') { await dbDel(env, 'telegram'); return json({ ok: true }); }
+    await dbSet(env, 'telegram', JSON.stringify(next));
+    return json({ ok: true });
+  }
+  if (path === '/settings/telegram/test') {
+    const report = await dailyReport(env, new URL(request.url).origin);
+    await charge(env, report.rowsRead);
+    const res = await telegramSend(env, '✅ پنل دکتر وی پی ان به این چت وصل است.\n\nنمونهٔ گزارش روزانه:\n\n' + report.text);
+    return json(res, res.ok ? 200 : 400);
+  }
+  if (path === '/settings/github') {
+    const token = String(form.get('token') || '').trim();
+    if (form.get('clear') === '1') { await dbDel(env, 'github_token'); return json({ ok: true }); }
+    if (!/^(github_pat_|ghp_)[\w]{20,}$/.test(token)) return json({ ok: false, error: 'توکن گیت‌هاب باید با github_pat_ یا ghp_ شروع شود' }, 400);
+    await dbSet(env, 'github_token', token);
+    try {
+      const { canEdit } = await readNotice(env);
+      return json({ ok: true, canEdit });
+    } catch (e) {
+      await dbDel(env, 'github_token');
+      return json({ ok: false, error: 'گیت‌هاب این توکن را قبول نکرد: ' + String(e.message).slice(0, 120) }, 400);
+    }
+  }
+  if (path === '/settings/logins/clear') {
+    await dbDel(env, 'login_log');
+    return json({ ok: true });
+  }
+  return json({ ok: false }, 404);
+}
+
+// ---------- Routes ----------
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    const path = url.pathname;
 
-    if (request.method === 'POST' && url.pathname === '/ping') return ping(request, env);
-    if (url.pathname === '/badge') return badge(env);
-
-    if (url.pathname === '/login' && request.method === 'POST') {
-      const form = await request.formData();
-      if ((await loginEnabled(env)) && same(form.get('user'), env.ADMIN_USER) && (await verifyPassword(env, form.get('password') || ''))) {
-        return new Response(null, { status: 303, headers: { location: '/', 'set-cookie': await sessionCookie(env) } });
-      }
-      // A short pause makes guessing slow.
-      await new Promise((r) => setTimeout(r, 1500));
-      return html(loginPage(true), 401);
-    }
-
-    if (url.pathname === '/logout') {
+    if (request.method === 'POST' && path === '/ping') return ping(request, env);
+    if (path === '/badge') return badge(env);
+    if (path === '/login' && request.method === 'POST') return login(request, env);
+    if (path === '/logout') {
       return new Response(null, { status: 303, headers: { location: '/', 'set-cookie': 'drvpn_admin=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Strict' } });
     }
+    if (path === '/app.js') {
+      return new Response(clientJs, { headers: { 'content-type': 'text/javascript; charset=utf-8', 'cache-control': 'public, max-age=31536000, immutable' } });
+    }
 
-    // ---- Settings (logged in only) ----
-    if (url.pathname === '/settings' && request.method === 'GET') {
-      return (await loggedIn(request, env)) ? html(settingsPage()) : Response.redirect(new URL('/', url), 303);
-    }
-    if (url.pathname === '/health') {
-      return (await loggedIn(request, env)) ? health(env) : json({ ok: false, error: 'login' }, 401);
-    }
-    if (url.pathname.startsWith('/settings/') && request.method === 'POST') {
-      if (!(await loggedIn(request, env))) return json({ ok: false, error: 'login' }, 401);
-      const form = await request.formData();
-      try {
-        if (url.pathname === '/settings/password') {
-          const next = String(form.get('next') || '');
-          if (!(await verifyPassword(env, form.get('current') || ''))) return json({ ok: false, error: 'رمز فعلی اشتباه است' }, 400);
-          if (next.length < 8) return json({ ok: false, error: 'رمز جدید باید حداقل ۸ نویسه باشد' }, 400);
-          await setPassword(env, next);
-          // The signing key changed, so re-issue this session's cookie.
-          return json({ ok: true }, 200, { 'set-cookie': await sessionCookie(env) });
-        }
-        if (url.pathname === '/settings/reset') {
-          const r = await env.DB.prepare('DELETE FROM pings').run();
-          await env.DB.batch([
-            env.DB.prepare('DELETE FROM installs'),
-            env.DB.prepare('DELETE FROM daily'),
-            env.DB.prepare("DELETE FROM settings WHERE key LIKE 'stats\\_%' ESCAPE '\\' OR key LIKE 'win\\_%' ESCAPE '\\' OR key IN ('badge', 'last_compute')"),
-          ]);
-          return json({ ok: true, deleted: r.meta?.changes ?? 0 });
-        }
-        if (url.pathname === '/settings/prune') {
-          const keep = Math.min(Math.max(parseInt(form.get('days')) || 90, 7), 365);
-          return json({ ok: true, deleted: await prune(env, keep) });
-        }
-        if (url.pathname === '/settings/autoprune') {
-          // 0 = off; otherwise data older than this many days is deleted every night.
-          const raw = parseInt(form.get('days')) || 0;
-          const keep = raw <= 0 ? 0 : Math.min(Math.max(raw, 30), 365);
-          await dbSet(env, 'keep_days', String(keep));
-          return json({ ok: true, keepDays: keep });
-        }
-      } catch (e) {
-        console.error('settings failed', e);
-        return json({ ok: false, error: describe(e) }, 503);
+    const authed = await loggedIn(request, env);
+    if (path === '/' && request.method === 'GET') return html(authed ? dashboardPage(CLIENT_TAG) : loginPage(null));
+    if (path === '/settings' && request.method === 'GET') return authed ? html(settingsPage(CLIENT_TAG)) : Response.redirect(new URL('/', url), 303);
+    if (!authed) return json({ ok: false, error: 'login' }, 401);
+
+    try {
+      if (path === '/stats') {
+        const rangeDays = [7, 30, 90, 180].includes(Number(url.searchParams.get('days'))) ? Number(url.searchParams.get('days')) : 30;
+        const filter = parseFilter(url.searchParams);
+        const key = 'stats_' + rangeDays + (filter ? '_' + filter.tag : '');
+        return kept(env, key, STATS_TTL_MS, url.searchParams.get('fresh') === '1', () => computeStats(env, rangeDays, filter));
       }
-      return json({ ok: false }, 404);
+      if (path === '/users') return kept(env, 'users', USERS_TTL_MS, url.searchParams.get('fresh') === '1', () => computeUsers(env));
+      if (path === '/live') return live(env);
+      if (path === '/health') return health(env);
+      if (path === '/downloads') return json(await downloads(env, url.searchParams.get('fresh') === '1'));
+      if (path === '/notice' && request.method === 'GET') return json({ ok: true, ...(await readNotice(env)) });
+      if (path === '/notice' && request.method === 'POST') return json({ ok: true, ...(await writeNotice(env, await request.json())) });
+      if (path.startsWith('/settings/') && request.method === 'POST') return settings(path, request, env);
+    } catch (e) {
+      console.error(path + ' failed', e);
+      return json({ ok: false, error: e.status ? String(e.message).slice(0, 240) : describe(e) }, 503);
     }
-
-    if (url.pathname === '/' && request.method === 'GET') {
-      return html((await loggedIn(request, env)) ? dashboardPage() : loginPage(false));
-    }
-
-    if (url.pathname === '/stats') {
-      if (!(await loggedIn(request, env))) return json({ ok: false, error: 'login' }, 401);
-      const rangeDays = [7, 30, 90].includes(Number(url.searchParams.get('days'))) ? Number(url.searchParams.get('days')) : 30;
-      return stats(env, rangeDays, url.searchParams.get('fresh') === '1');
-    }
-
     return json({ ok: false }, 404);
   },
 
-  // Every night (wrangler.toml [triggers]): delete old data when the owner turned that on.
-  async scheduled(event, env) {
+  // Every hour (wrangler.toml [triggers]): alerts; at 03 UTC old data; at 04 UTC (07:30 Tehran) the daily report.
+  async scheduled(event, env, ctx) {
+    const hour = new Date(event.scheduledTime).getUTCHours();
     try {
       await ensureSchema(env);
-      const keep = Number(await dbGet(env, 'keep_days')) || 0;
-      if (keep > 0) console.log('pruned', await prune(env, keep));
-      // Kept counts of windows long gone are not needed any more.
-      await env.DB.prepare("DELETE FROM settings WHERE key LIKE 'win\\_%' ESCAPE '\\' AND key < ?").bind('win_' + day(200)).run();
-      await env.DB.prepare("DELETE FROM settings WHERE key LIKE 'reads\\_%' ESCAPE '\\' AND key < ?").bind('reads_' + day(7)).run();
+      if (hour === 3) {
+        const keep = Number(await dbGet(env, 'keep_days')) || 0;
+        if (keep > 0) console.log('pruned', await prune(env, keep));
+        // Kept results that are not needed any more.
+        await env.DB.prepare("DELETE FROM settings WHERE key LIKE 'win\\_%' ESCAPE '\\' AND key < ?").bind('win_' + day(200)).run();
+        await env.DB.prepare("DELETE FROM settings WHERE key LIKE 'reads\\_%' ESCAPE '\\' AND key < ?").bind('reads_' + day(7)).run();
+        await env.DB.prepare("DELETE FROM settings WHERE key LIKE 'lf\\_%' ESCAPE '\\'").run();
+        // Filtered results are kept only for a day.
+        await env.DB.prepare("DELETE FROM settings WHERE key LIKE 'stats\\_%\\_%' ESCAPE '\\'").run();
+        await env.DB.prepare('DELETE FROM daily_dim WHERE day < ?').bind(day(120)).run();
+      }
+      const tg = await telegramConfig(env);
+      if (!tg.token || !tg.chat) return;
+      if (tg.alerts) await charge(env, (await checkAlerts(env, tg)).rowsRead);
+      if (tg.daily && hour === 4) {
+        const report = await dailyReport(env, env.PANEL_URL || '');
+        await charge(env, report.rowsRead);
+        const res = await telegramSend(env, report.text, tg);
+        if (!res.ok) console.error('daily report failed', res.error);
+      }
     } catch (e) {
       console.error('scheduled failed', e);
     }

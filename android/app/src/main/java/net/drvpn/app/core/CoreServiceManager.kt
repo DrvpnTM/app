@@ -120,6 +120,7 @@ object CoreServiceManager {
     }
 
     fun onOpenVpnFailed(service: Service, message: String) {
+        net.drvpn.app.handler.StatsManager.countFail()
         MessageHelper.sendMsg2UI(service, AppConfig.MSG_STATE_START_FAILURE, message)
     }
 
@@ -152,6 +153,7 @@ object CoreServiceManager {
         } catch (e: Exception) {
             val message = e.message?.takeUnless { it.isBlank() } ?: e.javaClass.simpleName
             LogUtil.e(AppConfig.TAG, "StartCore-Manager: $message", e)
+            net.drvpn.app.handler.StatsManager.countFail()
             MessageHelper.sendMsg2UI(service, AppConfig.MSG_STATE_START_FAILURE, message)
             NotificationManager.cancelNotification()
             return false

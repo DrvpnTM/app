@@ -71,6 +71,9 @@ class OpenVpnSession(private val context: Context, private val listener: Listene
     /** The configuration of the VPN interface OpenVPN has now, null before the first OPENTUN. */
     private var openedSignature: String? = null
     private var lastError: String? = null
+    /** OpenVPN's running byte totals at its last BYTECOUNT, for the Usage screen's deltas. */
+    private var lastBytesIn = 0L
+    private var lastBytesOut = 0L
     private val pendingFds = ArrayDeque<FileDescriptor>()
 
     val managementPath: String get() = socketFile.absolutePath
@@ -129,6 +132,8 @@ class OpenVpnSession(private val context: Context, private val listener: Listene
             client = socket
             LogUtil.i(AppConfig.TAG, "OpenVPN: management connected")
             send("state on")
+            // Running totals every few seconds, for the Usage screen and the daily stats.
+            send("bytecount $BYTECOUNT_SECONDS")
             send("hold release")
             val input = socket.inputStream
             val buffer = ByteArray(4096)
@@ -157,6 +162,7 @@ class OpenVpnSession(private val context: Context, private val listener: Listene
             line.startsWith(">HOLD:") -> send("hold release")
             line.startsWith(">NEED-OK:") -> needOk(line)
             line.startsWith(">STATE:") -> state(line.removePrefix(">STATE:"))
+            line.startsWith(">BYTECOUNT:") -> byteCount(line.removePrefix(">BYTECOUNT:"))
             line.startsWith(">FATAL:") -> {
                 lastError = line.removePrefix(">FATAL:")
                 LogUtil.e(AppConfig.TAG, "OpenVPN: $lastError")
@@ -173,6 +179,18 @@ class OpenVpnSession(private val context: Context, private val listener: Listene
         val name = body.split(',').getOrNull(1) ?: return
         LogUtil.i(AppConfig.TAG, "OpenVPN: state $name")
         if (name == "CONNECTED" && connected.compareAndSet(false, true)) listener.onConnected()
+    }
+
+    /** "in,out": bytes since OpenVPN started; a restart of its counters starts from zero again. */
+    private fun byteCount(body: String) {
+        val parts = body.split(',')
+        val bytesIn = parts.getOrNull(0)?.trim()?.toLongOrNull() ?: return
+        val bytesOut = parts.getOrNull(1)?.trim()?.toLongOrNull() ?: return
+        val down = if (bytesIn >= lastBytesIn) bytesIn - lastBytesIn else bytesIn
+        val up = if (bytesOut >= lastBytesOut) bytesOut - lastBytesOut else bytesOut
+        lastBytesIn = bytesIn
+        lastBytesOut = bytesOut
+        net.drvpn.app.handler.UsageStats.add(up, down)
     }
 
     /** ">NEED-OK:Need 'TYPE' confirmation MSG:argument" */
@@ -304,6 +322,7 @@ class OpenVpnSession(private val context: Context, private val listener: Listene
     companion object {
         const val BINARY = "libopenvpn.so"
         private const val ROOT_DIR = "openvpn"
+        private const val BYTECOUNT_SECONDS = 5
 
         /** Folders of sessions that ended without cleaning up (the process was killed); never a running one's. */
         private fun removeLeftovers(root: File?) {
