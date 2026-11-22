@@ -53,16 +53,39 @@ object RiseupManager {
         val age = System.currentTimeMillis() - MmkvManager.decodeSettingsLong(PREF_FETCHED_AT, 0L)
         if (cached != null && age < REFRESH_MS) return cached
         return try {
-            fetch().also {
-                MmkvManager.encodeSettings(PREF_EIP, it.eip)
-                MmkvManager.encodeSettings(PREF_CA, it.ca)
-                MmkvManager.encodeSettings(PREF_CERT, it.cert)
-                MmkvManager.encodeSettings(PREF_FETCHED_AT, System.currentTimeMillis())
-            }
+            fetch().also(::store)
         } catch (e: Exception) {
             LogUtil.w(AppConfig.TAG, "Riseup: API not reachable (${e.javaClass.simpleName})")
             if (cached != null && age < MAX_AGE_MS) cached else throw e
         }
+    }
+
+    private fun store(p: Provider) {
+        MmkvManager.encodeSettings(PREF_EIP, p.eip)
+        MmkvManager.encodeSettings(PREF_CA, p.ca)
+        MmkvManager.encodeSettings(PREF_CERT, p.cert)
+        MmkvManager.encodeSettings(PREF_FETCHED_AT, System.currentTimeMillis())
+    }
+
+    /**
+     * While another server is connected: refresh the data through it, in the background, when it is
+     * older than three days. Where api.black.riseup.net is filtered, Dr Open VPN then still has
+     * gateways and a certificate the next time it is chosen. Only when Dr Open VPN is in the list.
+     */
+    fun prefetchThroughProxy(httpPort: Int, user: String?, pass: String?) {
+        if (httpPort <= 0) return
+        if (MmkvManager.decodeServerConfig(net.drvpn.app.handler.BuiltinServers.OPENVPN_GUID) == null) return
+        val age = System.currentTimeMillis() - MmkvManager.decodeSettingsLong(PREF_FETCHED_AT, 0L)
+        if (cachedProvider() != null && age < REFRESH_MS) return
+        Thread({
+            try {
+                Thread.sleep(20_000) // let the connection settle first
+                store(fetch(HttpUtil.buildOkHttpClient(TIMEOUT_MS, httpPort, user, pass, followRedirects = true)))
+                LogUtil.i(AppConfig.TAG, "Riseup: data refreshed through the running connection")
+            } catch (e: Exception) {
+                LogUtil.w(AppConfig.TAG, "Riseup: refresh through the connection failed (${e.javaClass.simpleName})")
+            }
+        }, "riseup-prefetch").apply { isDaemon = true }.start()
     }
 
     /** A gateway to time for the server list's ping, from the cached list. */
@@ -80,8 +103,7 @@ object RiseupManager {
         return if (eip.isBlank() || ca.isBlank() || cert.isBlank()) null else Provider(eip, ca, cert)
     }
 
-    private fun fetch(): Provider {
-        val client = HttpUtil.buildOkHttpClient(TIMEOUT_MS, 0, null, null, followRedirects = true)
+    private fun fetch(client: okhttp3.OkHttpClient = HttpUtil.buildOkHttpClient(TIMEOUT_MS, 0, null, null, followRedirects = true)): Provider {
         fun get(url: String): String = client.newCall(Request.Builder().url(url).get().build()).execute().use {
             if (!it.isSuccessful) error("HTTP ${it.code} from $url")
             it.body.string()

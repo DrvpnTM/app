@@ -369,6 +369,7 @@ object CoreServiceManager {
         if (!isReload) {
             MessageHelper.sendMsg2UI(service, AppConfig.MSG_STATE_START_SUCCESS, "")
             net.drvpn.app.handler.StatsManager.countConnect()
+            RiseupManager.prefetchThroughProxy(SettingsManager.getHttpPort(), SettingsManager.getSocksUsername(), SettingsManager.getSocksPassword())
         }
         NotificationManager.startSpeedNotification()
         LogUtil.i(AppConfig.TAG, "StartCore-Manager: Core started successfully")

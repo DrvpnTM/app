@@ -713,4 +713,87 @@
     <string name="update_try_again">重试</string>
     <string name="update_later">稍后</string>
     <string name="group_my_servers">我的服务器</string>
+    <!-- Extra hop, rescue, gaming, Dr Open VPN, Dr Anti-DPI -->
+    <string name="theme_ocean">海洋</string>
+    <string name="theme_forest">森林</string>
+    <string name="theme_sunset">日落</string>
+    <string name="theme_midnight">午夜</string>
+    <string name="title_extra_hop">额外跳板</string>
+    <string name="title_extra_hop_mode">链路模式</string>
+    <string name="title_extra_hop_kind">额外跳板</string>
+    <string name="title_extra_hop_tunnel_config">博士隧道配置（WireGuard）</string>
+    <string name="extra_hop_tunnel_config_invalid">此 WireGuard 配置无效</string>
+    <string-array name="extra_hop_mode">
+        <item>关闭</item>
+        <item>在服务器之前（先连接额外跳板）</item>
+        <item>在服务器之后（最终 IP 来自额外跳板）</item>
+    </string-array>
+    <string-array name="extra_hop_kind">
+        <item>长城（免费）</item>
+        <item>PS Pro（免费）</item>
+        <item>黑色不安全 CDN（免费，较慢）</item>
+        <item>博士隧道（你自己的配置）</item>
+        <item>丝绸之路（免费，仅限服务器之前）</item>
+        <item>紧急模式（逐个尝试直到连上）</item>
+    </string-array>
+    <string name="hop_great_wall">长城</string>
+    <string name="hop_great_wall_desc">免费 · 快速 · 自动寻找可用线路</string>
+    <string name="hop_ps_pro">PS Pro</string>
+    <string name="hop_ps_pro_desc">免费 · 专为严格过滤设计</string>
+    <string name="hop_black_cdn">黑色不安全 CDN</string>
+    <string name="hop_black_cdn_desc">免费 · 较慢 · 隐藏效果最好</string>
+    <string name="hop_dr_tunnel">博士隧道</string>
+    <string name="hop_dr_tunnel_desc">你自己的 WireGuard 配置（见下方）</string>
+    <string name="hop_anti_dpi">博士反 DPI</string>
+    <string name="hop_anti_dpi_desc">免费 · 让 DPI 识别不出你的服务器 · 始终在服务器之前</string>
+    <string name="title_byedpi_args">反 DPI 选项（高级）</string>
+    <string name="byedpi_args_invalid">这些选项无效，或设置了地址/端口（这些由应用设置）</string>
+    <string name="hop_silk_road">丝绸之路</string>
+    <string name="hop_silk_road_desc">免费 · 始终在服务器之前</string>
+    <string name="hop_emergency">紧急模式（断网与局域网化）</string>
+    <string name="hop_emergency_desc">逐个尝试，直到有一个能连上</string>
+    <string name="extra_hop_intro">为你的服务器再串联一个跳板：当服务器本身被封锁，或你想要另一个最终 IP 时使用。</string>
+    <string name="extra_hop_mode_off">关闭</string>
+    <string name="extra_hop_mode_before">之前</string>
+    <string name="extra_hop_mode_after">之后</string>
+    <string name="extra_hop_mode_off_desc">你的服务器单独连接。</string>
+    <string name="extra_hop_mode_before_desc">手机 → 额外跳板 → 你的服务器。服务器被封锁时有帮助。</string>
+    <string name="extra_hop_mode_after_desc">手机 → 你的服务器 → 额外跳板。网站看到的是额外跳板的 IP。</string>
+    <string name="extra_hop_role_entry">在你的服务器之前</string>
+    <string name="extra_hop_role_exit">最终 IP</string>
+    <string name="extra_hop_connecting">正在连接…</string>
+    <string name="extra_hop_emergency_using">紧急：%1$s</string>
+    <string name="rescue_offer_title">无法连接？</string>
+    <string name="rescue_offer_text">你的网络似乎被严重过滤。要开启紧急模式吗？Dr VPN 会尝试所有方法，直到有一个能连上。</string>
+    <string name="rescue_offer_accept">开启紧急模式</string>
+    <string name="rescue_not_now">暂不</string>
+    <string name="rescue_hide">隐藏</string>
+    <string name="rescue_searching_title">正在寻找出路…</string>
+    <string name="rescue_searching_trying">正在尝试 %1$s，可能需要几分钟。</string>
+    <string name="rescue_success_title">已连接！</string>
+    <string name="rescue_success_text">%1$s 帮你连上了。</string>
+    <string name="rescue_success_text_plain">紧急模式帮你连上了。</string>
+    <string name="rescue_great">太好了</string>
+    <string name="rescue_premium_title">你的网络受到严重限制</string>
+    <string name="rescue_premium_text">所有免费方式都无法通过。请访问 drvpn.net 注册并购买高级订阅：高级服务器正是为此而设。</string>
+    <string name="rescue_premium_button">前往 drvpn.net</string>
+    <string name="rescue_close">关闭</string>
+    <string name="extra_hop_off_row">额外跳板：关闭 · 点按添加</string>
+    <string name="home_button_brand">Dr VPN</string>
+    <string name="gaming_mode">游戏</string>
+    <string name="gaming_on">游戏模式已开启：仅 WireGuard 服务器，最低延迟</string>
+    <string name="gaming_off">游戏模式已关闭</string>
+    <string name="gaming_no_servers">此列表中没有可用于游戏模式的 WireGuard 服务器</string>
+    <string name="extra_hop_off_gaming">额外跳板：游戏模式下关闭（最低延迟）</string>
+    <string name="gaming_mode_title">游戏模式</string>
+    <string name="gaming_mode_summary">仅 WireGuard 服务器，最低延迟；不使用额外跳板</string>
+    <string name="title_stats">匿名使用统计</string>
+    <string name="summary_stats">每天一次：随机 ID、应用版本、地区、使用的功能、服务器类型（不含地址）和手机型号。不含 IP、流量或服务器地址。</string>
+    <string name="openvpn_name">Dr Open VPN</string>
+    <string name="openvpn_card_desc">免费 · 独立运行，不经过你的服务器（OpenVPN 无法串联）· 点按使用</string>
+    <string name="openvpn_card_selected">已选择 Dr Open VPN。请点按连接按钮。</string>
+    <string name="openvpn_card_missing">“我的服务器”中已没有 Dr Open VPN</string>
+    <string name="openvpn_needs_vpn_mode">Dr Open VPN 仅在 VPN 模式下可用。请在设置中开启 VPN 模式。</string>
+    <string name="openvpn_not_supported">此手机无法使用 Dr Open VPN</string>
+    <string name="openvpn_error_provider">无法获取 Dr Open VPN 服务器。请先连接一次其他服务器，然后重试。</string>
 </resources>

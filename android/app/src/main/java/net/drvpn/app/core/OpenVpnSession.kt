@@ -52,7 +52,11 @@ class OpenVpnSession(private val context: Context, private val listener: Listene
         fun signature(): String = listOf(ipv4, prefix4, ipv6, prefix6, mtu, routes, routes6, dns, domain).joinToString("|")
     }
 
-    private val dir = File(context.noBackupFilesDir, "openvpn")
+    /**
+     * This session's own folder: a reconnect starts the next session while this one is still
+     * ending, and must not lose its socket or config to this one's clean-up.
+     */
+    private val dir = File(File(context.noBackupFilesDir, ROOT_DIR), java.util.UUID.randomUUID().toString().take(8))
     private val socketFile = File(dir, "mgmt")
     private val configFile = File(dir, "client.ovpn")
     private val stopping = AtomicBoolean(false)
@@ -73,6 +77,7 @@ class OpenVpnSession(private val context: Context, private val listener: Listene
 
     /** Starts OpenVPN with [config] (it must name [managementPath], see RiseupManager.buildConfig). */
     fun start(config: String) {
+        removeLeftovers(dir.parentFile)
         dir.mkdirs()
         socketFile.delete()
         configFile.writeText(config)
@@ -108,14 +113,13 @@ class OpenVpnSession(private val context: Context, private val listener: Listene
             val p = process
             if (p != null && !waitFor(p, 3000)) p.destroy()
             closeSockets()
-            configFile.delete()
             finish(null)
         }
     }
 
     private fun finish(error: String?) {
         if (!exited.compareAndSet(false, true)) return
-        configFile.delete()
+        dir.deleteRecursively()
         listener.onExit(if (stopping.get()) null else error)
     }
 
@@ -299,6 +303,13 @@ class OpenVpnSession(private val context: Context, private val listener: Listene
 
     companion object {
         const val BINARY = "libopenvpn.so"
+        private const val ROOT_DIR = "openvpn"
+
+        /** Folders of sessions that ended without cleaning up (the process was killed); never a running one's. */
+        private fun removeLeftovers(root: File?) {
+            val old = System.currentTimeMillis() - 10 * 60 * 1000
+            root?.listFiles()?.filter { it.lastModified() < old }?.forEach { it.deleteRecursively() }
+        }
 
         fun isSupported(context: Context): Boolean = File(context.applicationInfo.nativeLibraryDir, BINARY).exists()
 

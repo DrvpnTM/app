@@ -171,6 +171,8 @@ class CoreVpnService : VpnService(), ServiceControl {
                 if (!isRunning) return@Thread
                 openVpn = session
                 session.start(config)
+                // A disconnect between the check above and here would leave OpenVPN running alone.
+                if (!isRunning) session.stop()
             } catch (e: Exception) {
                 LogUtil.e(AppConfig.TAG, "StartCore-VPN: Dr Open VPN could not start", e)
                 if (isRunning) {
