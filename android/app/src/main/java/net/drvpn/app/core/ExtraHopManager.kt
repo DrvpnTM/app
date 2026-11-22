@@ -36,6 +36,9 @@ enum class ExtraHopKind(val value: String) {
     /** "Silk Road": Lantern (LanternManager). Free; works only before the server. */
     LANTERN("lantern"),
 
+    /** "Dr Anti-DPI": ByeDPI (ByeDpiManager) hides the server's protocol from DPI. Free; only before the server. */
+    BYEDPI("byedpi"),
+
     /** "Great Wall": Cloudflare WARP. */
     SHIELD("shield"),
 
@@ -85,6 +88,7 @@ object ExtraHopManager {
      * only when it has a config.
      */
     fun emergencyCandidates(): List<ExtraHopKind> = buildList {
+        add(ExtraHopKind.BYEDPI)
         add(ExtraHopKind.LANTERN)
         add(ExtraHopKind.SHIELD)
         add(ExtraHopKind.PSIPHON)
@@ -123,15 +127,19 @@ object ExtraHopManager {
             ExtraHopKind.TOR -> if (aether) aetherOnly { aetherTor = AetherTor.ONLY.type } else null
             ExtraHopKind.TUNNEL -> parseWireGuard(MmkvManager.decodeSettingsString(AppConfig.PREF_EXTRA_HOP_WIREGUARD).orEmpty())
             ExtraHopKind.LANTERN -> if (LanternManager.isSupported(context)) LanternManager.hopProfile() else null
+            ExtraHopKind.BYEDPI -> if (ByeDpiManager.isSupported(context)) ByeDpiManager.hopProfile() else null
             ExtraHopKind.EMERGENCY -> null
         }.also {
             if (it == null) LogUtil.w(AppConfig.TAG, "Extra hop: ${kind.value} is not usable, connecting without it")
         }
     }
 
+    /** Lantern and ByeDPI cannot be reached through the server: they always come first. */
+    fun isBeforeOnly(hop: ProfileItem?): Boolean = LanternManager.isHop(hop) || ByeDpiManager.isHop(hop)
+
     /** "<kind>|<mode>" of [hop] as it runs, for the Home screen (AppConfig.PREF_EXTRA_HOP_ACTIVE). */
     fun activeLabel(hop: ProfileItem): String {
-        val mode = if (LanternManager.isHop(hop)) ExtraHopMode.BEFORE else mode()
+        val mode = if (isBeforeOnly(hop)) ExtraHopMode.BEFORE else mode()
         return "${effectiveKind().value}|${mode.value}"
     }
 
@@ -191,7 +199,7 @@ object ExtraHopManager {
         val primary = configContext.resolvedOutbounds.firstOrNull() ?: return configContext
         if (primary.resolvedType == CoreResolvedType.POLICYGROUP || primary.resolvedProfiles.isEmpty()) return configContext
         // Lantern's own traffic cannot be sent through the server, so it always goes first.
-        val mode = if (LanternManager.isHop(hop)) ExtraHopMode.BEFORE else mode()
+        val mode = if (isBeforeOnly(hop)) ExtraHopMode.BEFORE else mode()
         val chain = when (mode) {
             ExtraHopMode.AFTER -> listOf(hop) + primary.resolvedProfiles
             ExtraHopMode.BEFORE -> primary.resolvedProfiles + hop

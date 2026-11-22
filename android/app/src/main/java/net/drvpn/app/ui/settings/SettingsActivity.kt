@@ -37,6 +37,7 @@ import net.drvpn.app.AppConfig.VPN
 import net.drvpn.app.R
 import net.drvpn.app.core.ExtraHopKind
 import net.drvpn.app.core.ExtraHopManager
+import net.drvpn.app.core.ByeDpiManager
 import net.drvpn.app.ui.compose.ExtraHopPicker
 import net.drvpn.app.core.ExtraHopMode
 import net.drvpn.app.extension.toastError
@@ -177,6 +178,7 @@ fun SettingsScreen(
     var extraHopMode by rememberMmkvString(AppConfig.PREF_EXTRA_HOP_MODE, ExtraHopMode.OFF.value)
     var extraHopKind by rememberMmkvString(AppConfig.PREF_EXTRA_HOP_KIND, ExtraHopKind.LANTERN.value)
     var extraHopWireGuard by rememberMmkvString(AppConfig.PREF_EXTRA_HOP_WIREGUARD, "")
+    var byeDpiArgs by rememberMmkvString(AppConfig.PREF_BYEDPI_ARGS, "")
     val extraHopContext = LocalContext.current
     var dynamicColor by rememberMmkvBool(AppConfig.PREF_DYNAMIC_COLOR, false)
 
@@ -372,6 +374,21 @@ fun SettingsScreen(
                             extraHopWireGuard = it.trim()
                         } else {
                             extraHopContext.toastError(R.string.extra_hop_tunnel_config_invalid)
+                        }
+                    }
+                )
+                // Shows the defaults when nothing is set; saving the defaults (or nothing) keeps "default".
+                SettingsEditItem(
+                    title = stringResource(R.string.title_byedpi_args),
+                    value = byeDpiArgs.ifBlank { ByeDpiManager.DEFAULT_ARGS },
+                    enabled = extraHopMode != ExtraHopMode.OFF.value &&
+                        (extraHopKind == ExtraHopKind.BYEDPI.value || extraHopKind == ExtraHopKind.EMERGENCY.value),
+                    onValueChanged = {
+                        val text = it.trim()
+                        when {
+                            text.isEmpty() || text == ByeDpiManager.DEFAULT_ARGS -> byeDpiArgs = ""
+                            ByeDpiManager.parseArgs(text) != null -> byeDpiArgs = text
+                            else -> extraHopContext.toastError(R.string.byedpi_args_invalid)
                         }
                     }
                 )

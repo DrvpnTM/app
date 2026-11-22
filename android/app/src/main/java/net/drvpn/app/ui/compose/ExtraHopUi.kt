@@ -52,6 +52,8 @@ import net.drvpn.app.R
 import net.drvpn.app.core.ExtraHopKind
 import net.drvpn.app.core.ExtraHopMode
 import net.drvpn.app.handler.MmkvManager
+import net.drvpn.app.extension.toastError
+import net.drvpn.app.extension.toastSuccess
 import net.drvpn.app.handler.SpeedtestManager
 
 /** How one extra hop looks: its own name (never the provider's), icon and color. */
@@ -67,6 +69,7 @@ fun hopStyle(kind: ExtraHopKind): HopStyle = when (kind) {
     ExtraHopKind.PSIPHON -> HopStyle(R.string.hop_ps_pro, R.string.hop_ps_pro_desc, R.drawable.ic_hop_ps_pro, Color(0xFFF59E0B))
     ExtraHopKind.TOR -> HopStyle(R.string.hop_black_cdn, R.string.hop_black_cdn_desc, R.drawable.ic_hop_black_cdn, Color(0xFF1F2937))
     ExtraHopKind.TUNNEL -> HopStyle(R.string.hop_dr_tunnel, R.string.hop_dr_tunnel_desc, R.drawable.ic_hop_dr_tunnel, Color(0xFF2563EB))
+    ExtraHopKind.BYEDPI -> HopStyle(R.string.hop_anti_dpi, R.string.hop_anti_dpi_desc, R.drawable.ic_hop_anti_dpi, Color(0xFFEA580C))
     ExtraHopKind.LANTERN -> HopStyle(R.string.hop_silk_road, R.string.hop_silk_road_desc, R.drawable.ic_hop_silk_road, Color(0xFF0D9488))
     ExtraHopKind.EMERGENCY -> HopStyle(R.string.hop_emergency, R.string.hop_emergency_desc, R.drawable.ic_hop_emergency, Color(0xFFDB2777))
 }
@@ -126,6 +129,51 @@ fun ExtraHopPicker(
         ExtraHopKind.entries.forEach { k ->
             HopCard(k, selected = k.value == kind, enabled = enabled, onClick = { onKindChange(k.value) })
             Spacer(Modifier.height(8.dp))
+        }
+        OpenVpnCard()
+    }
+}
+
+/**
+ * Dr Open VPN next to the hops, so it is found here too. OpenVPN needs the VPN interface for itself,
+ * so it cannot be chained to another server: tapping it selects the built-in Dr Open VPN server.
+ */
+@Composable
+private fun OpenVpnCard() {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val guid = net.drvpn.app.handler.BuiltinServers.OPENVPN_GUID
+    var selected by remember { mutableStateOf(MmkvManager.getSelectServer() == guid) }
+    val color = Color(0xFF16A34A)
+    val shape = RoundedCornerShape(16.dp)
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(if (selected) color.copy(alpha = 0.08f) else MaterialTheme.colorScheme.surface)
+            .border(if (selected) 2.dp else 1.dp, if (selected) color else MaterialTheme.colorScheme.outlineVariant, shape)
+            .clickable(role = Role.Button) {
+                if (MmkvManager.decodeServerConfig(guid) == null) {
+                    context.toastError(R.string.openvpn_card_missing)
+                } else {
+                    MmkvManager.setSelectServer(guid)
+                    selected = true
+                    context.toastSuccess(R.string.openvpn_card_selected)
+                }
+            }
+            .padding(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(Modifier.size(40.dp).clip(CircleShape).background(color), contentAlignment = Alignment.Center) {
+            Icon(painterResource(R.drawable.ic_hop_dr_tunnel), contentDescription = null, tint = Color.White, modifier = Modifier.size(22.dp))
+        }
+        Spacer(Modifier.width(12.dp))
+        Column(Modifier.weight(1f)) {
+            Text(stringResource(R.string.openvpn_name), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+            Text(
+                stringResource(R.string.openvpn_card_desc),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
 }

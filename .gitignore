@@ -74,6 +74,7 @@ drvpn-release.jks
 libs-aether/
 libs-lantern/
 libs-openvpn/
+libs-byedpi/
 build-aether-src/
 _site/
 _mkdocs/

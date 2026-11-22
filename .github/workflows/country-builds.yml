@@ -124,6 +124,23 @@ jobs:
             echo "::warning::No OpenVPN build for compile-openvpn.sh; Dr Open VPN is left out."
           fi
 
+      - name: Get ByeDPI
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # The ByeDPI the main build made for compile-byedpi.sh (the "byedpi" job in build.yml).
+          # Without it the country edition still works; the Dr Anti-DPI hop then cannot be used.
+          hash=$(sha256sum compile-byedpi.sh | cut -c1-12)
+          if gh release download "byedpi-$hash" --repo "$GITHUB_REPOSITORY" -p libs-byedpi.tar.gz; then
+            tar xzf libs-byedpi.tar.gz
+            for abi in libs-byedpi/*/; do
+              mkdir -p "android/app/libs/$(basename "$abi")"
+              cp "$abi"*.so "android/app/libs/$(basename "$abi")/"
+            done
+          else
+            echo "::warning::No ByeDPI build for compile-byedpi.sh; Dr Anti-DPI is left out."
+          fi
+
       - name: Download libv2ray.aar
         env:
           GH_TOKEN: ${{ github.token }}

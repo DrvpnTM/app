@@ -747,6 +747,10 @@
     <string name="hop_black_cdn_desc">Free · slow · hides you best</string>
     <string name="hop_dr_tunnel">Dr Tunnel</string>
     <string name="hop_dr_tunnel_desc">Your own WireGuard config (below)</string>
+    <string name="hop_anti_dpi">Dr Anti-DPI</string>
+    <string name="hop_anti_dpi_desc">Free · hides your server from DPI filtering · always before the server</string>
+    <string name="title_byedpi_args">Dr Anti-DPI options (advanced)</string>
+    <string name="byedpi_args_invalid">These options are not valid, or set the address or port (the app sets those)</string>
     <string name="hop_silk_road">Silk Road</string>
     <string name="hop_silk_road_desc">Free · always before the server</string>
     <string name="hop_emergency">Emergency (disruption &amp; national internet)</string>
@@ -790,6 +794,9 @@
     <string name="summary_stats">Once a day: a random ID, app version, region, features used, the kind of server (not its address) and phone model. No IP, no traffic, no server addresses.</string>
     <!-- Dr Open VPN (RiseupVPN over OpenVPN) -->
     <string name="openvpn_name">Dr Open VPN</string>
+    <string name="openvpn_card_desc">Free · runs on its own, without your server (OpenVPN cannot be chained) · tap to use it</string>
+    <string name="openvpn_card_selected">Dr Open VPN is selected. Tap the connect button.</string>
+    <string name="openvpn_card_missing">Dr Open VPN is not in "My servers" any more</string>
     <string name="openvpn_needs_vpn_mode">Dr Open VPN works only in VPN mode. Turn on VPN mode in Settings.</string>
     <string name="openvpn_not_supported">Dr Open VPN is not available on this phone</string>
     <string name="openvpn_error_provider">Could not get the Dr Open VPN servers. Connect to another server once, then try again.</string>

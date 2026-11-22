@@ -178,10 +178,10 @@ td.rank{color:var(--faint);width:26px;font-size:13px}
 <script>
 const fa = (n) => Number(n || 0).toLocaleString('fa-IR');
 const REGION = { ir: 'ایران', cn: 'چین', ru: 'روسیه', other: 'سایر کشورها' };
-const HOP = { off: 'بدون حلقه', lantern: 'جادهٔ ابریشم', shield: 'دیوار چین', psiphon: 'PS Pro', tunnel: 'تونل دکتر', tor: 'CDN سیاه نا امن', emergency: 'حالت اضطراری' };
+const HOP = { off: 'بدون حلقه', lantern: 'جادهٔ ابریشم', shield: 'دیوار چین', psiphon: 'PS Pro', tunnel: 'تونل دکتر', byedpi: 'ضد DPI دکتر', tor: 'CDN سیاه نا امن', emergency: 'حالت اضطراری' };
 const SERVER = { xray: 'سرور Xray', aether: 'Aether WARP', openvpn: 'Dr Open VPN', serverless: 'Dr Serverless', custom: 'کانفیگ دستی', group: 'گروه/زنجیر', '?': 'نسخهٔ قدیمی' };
 const SERVER_COLOR = { xray: '#2563eb', aether: '#f59e0b', openvpn: '#16a34a', serverless: '#7c3aed', custom: '#0d9488', group: '#db2777', '?': '#94a3b8' };
-const HOP_COLOR = { off: '#94a3b8', lantern: '#0d9488', shield: '#c62828', psiphon: '#f59e0b', tunnel: '#2563eb', tor: '#334155', emergency: '#db2777' };
+const HOP_COLOR = { off: '#94a3b8', lantern: '#0d9488', shield: '#c62828', psiphon: '#f59e0b', tunnel: '#2563eb', byedpi: '#ea580c', tor: '#334155', emergency: '#db2777' };
 const PALETTE = ['#2563eb', '#7c3aed', '#16a34a', '#f59e0b', '#db2777', '#0d9488', '#64748b', '#ea580c', '#0891b2'];
 const CNAME = { IR: 'ایران', CN: 'چین', RU: 'روسیه', US: 'آمریکا', DE: 'آلمان', TR: 'ترکیه', AE: 'امارات', GB: 'انگلیس', FR: 'فرانسه', NL: 'هلند', CA: 'کانادا', IN: 'هند', IQ: 'عراق', AF: 'افغانستان', PK: 'پاکستان', SE: 'سوئد', FI: 'فنلاند', IT: 'ایتالیا', ES: 'اسپانیا', PL: 'لهستان', AZ: 'آذربایجان', AM: 'ارمنستان', GE: 'گرجستان', QA: 'قطر', OM: 'عمان', KW: 'کویت', SA: 'عربستان', MY: 'مالزی', ID: 'اندونزی', JP: 'ژاپن', KR: 'کره جنوبی', AU: 'استرالیا', BR: 'برزیل', UA: 'اوکراین', BY: 'بلاروس', CH: 'سوئیس', AT: 'اتریش', BE: 'بلژیک', NO: 'نروژ', DK: 'دانمارک', CZ: 'چک', RO: 'رومانی' };
 const flag = (cc) => (cc && cc.length === 2 && /^[A-Z]{2}$/.test(cc)) ? String.fromCodePoint(...[...cc].map((c) => 0x1f1e6 + c.charCodeAt(0) - 65)) : '🏳️';
