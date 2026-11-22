@@ -109,7 +109,15 @@ object ByeDpiManager {
                 break
             }
         }
-        if (alive(p)) p.destroyForcibly()
+        if (alive(p)) {
+            // destroyForcibly() needs Android 8; on 7 the process is killed by its pid.
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                p.destroyForcibly()
+            } else {
+                runCatching { p.javaClass.getDeclaredField("pid").apply { isAccessible = true }.getInt(p) }
+                    .getOrNull()?.let { android.os.Process.killProcess(it) }
+            }
+        }
     }
 
     fun isRunning(): Boolean = process?.let(::alive) == true

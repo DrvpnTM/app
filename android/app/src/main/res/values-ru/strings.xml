@@ -719,4 +719,87 @@
     <string name="update_try_again">Повторить</string>
     <string name="update_later">Позже</string>
     <string name="group_my_servers">Мои серверы</string>
+    <!-- Extra hop, rescue, gaming, Dr Open VPN, Dr Anti-DPI -->
+    <string name="theme_ocean">Океан</string>
+    <string name="theme_forest">Лес</string>
+    <string name="theme_sunset">Закат</string>
+    <string name="theme_midnight">Полночь</string>
+    <string name="title_extra_hop">Дополнительный узел</string>
+    <string name="title_extra_hop_mode">Режим цепочки</string>
+    <string name="title_extra_hop_kind">Дополнительный узел</string>
+    <string name="title_extra_hop_tunnel_config">Конфиг «Туннеля доктора» (WireGuard)</string>
+    <string name="extra_hop_tunnel_config_invalid">Этот конфиг WireGuard недействителен</string>
+    <string-array name="extra_hop_mode">
+        <item>Выкл.</item>
+        <item>Перед сервером (сначала подключиться к доп. узлу)</item>
+        <item>После сервера (итоговый IP — доп. узла)</item>
+    </string-array>
+    <string-array name="extra_hop_kind">
+        <item>Великая стена (бесплатно)</item>
+        <item>PS Pro (бесплатно)</item>
+        <item>Чёрная небезопасная CDN (бесплатно, медленно)</item>
+        <item>Туннель доктора (ваш конфиг)</item>
+        <item>Шёлковый путь (бесплатно, только перед сервером)</item>
+        <item>Экстренный режим (пробует всё, пока не подключится)</item>
+    </string-array>
+    <string name="hop_great_wall">Великая стена</string>
+    <string name="hop_great_wall_desc">Бесплатно · быстро · сам находит рабочий путь</string>
+    <string name="hop_ps_pro">PS Pro</string>
+    <string name="hop_ps_pro_desc">Бесплатно · для жёсткой фильтрации</string>
+    <string name="hop_black_cdn">Чёрная небезопасная CDN</string>
+    <string name="hop_black_cdn_desc">Бесплатно · медленно · лучше всего скрывает вас</string>
+    <string name="hop_dr_tunnel">Туннель доктора</string>
+    <string name="hop_dr_tunnel_desc">Ваш собственный конфиг WireGuard (ниже)</string>
+    <string name="hop_anti_dpi">Анти-DPI доктора</string>
+    <string name="hop_anti_dpi_desc">Бесплатно · скрывает ваш сервер от DPI · всегда перед сервером</string>
+    <string name="title_byedpi_args">Параметры Анти-DPI (для опытных)</string>
+    <string name="byedpi_args_invalid">Параметры недействительны или задают адрес/порт (их задаёт приложение)</string>
+    <string name="hop_silk_road">Шёлковый путь</string>
+    <string name="hop_silk_road_desc">Бесплатно · всегда перед сервером</string>
+    <string name="hop_emergency">Экстренный режим (сбои и «суверенный интернет»)</string>
+    <string name="hop_emergency_desc">Пробует все способы, пока один не подключится</string>
+    <string name="extra_hop_intro">Добавьте к серверу ещё один узел — когда сам сервер заблокирован или нужен другой итоговый IP.</string>
+    <string name="extra_hop_mode_off">Выкл.</string>
+    <string name="extra_hop_mode_before">Перед</string>
+    <string name="extra_hop_mode_after">После</string>
+    <string name="extra_hop_mode_off_desc">Ваш сервер подключается сам по себе.</string>
+    <string name="extra_hop_mode_before_desc">Телефон → доп. узел → ваш сервер. Помогает, когда сервер заблокирован.</string>
+    <string name="extra_hop_mode_after_desc">Телефон → ваш сервер → доп. узел. Сайты видят IP доп. узла.</string>
+    <string name="extra_hop_role_entry">Перед вашим сервером</string>
+    <string name="extra_hop_role_exit">Итоговый IP</string>
+    <string name="extra_hop_connecting">Подключение…</string>
+    <string name="extra_hop_emergency_using">Экстренно: %1$s</string>
+    <string name="rescue_offer_title">Не удаётся подключиться?</string>
+    <string name="rescue_offer_text">Похоже, ваш интернет сильно фильтруется. Включить экстренный режим? Dr VPN перепробует все способы, пока один не сработает.</string>
+    <string name="rescue_offer_accept">Включить экстренный режим</string>
+    <string name="rescue_not_now">Не сейчас</string>
+    <string name="rescue_hide">Скрыть</string>
+    <string name="rescue_searching_title">Ищем путь…</string>
+    <string name="rescue_searching_trying">Пробуем %1$s. Это может занять несколько минут.</string>
+    <string name="rescue_success_title">Подключено!</string>
+    <string name="rescue_success_text">Помог %1$s.</string>
+    <string name="rescue_success_text_plain">Экстренный режим помог подключиться.</string>
+    <string name="rescue_great">Отлично</string>
+    <string name="rescue_premium_title">Ваш интернет сильно ограничен</string>
+    <string name="rescue_premium_text">Ни один бесплатный способ не прошёл. Зайдите на drvpn.net, зарегистрируйтесь и купите премиум-подписку: премиум-серверы созданы именно для этого.</string>
+    <string name="rescue_premium_button">Перейти на drvpn.net</string>
+    <string name="rescue_close">Закрыть</string>
+    <string name="extra_hop_off_row">Доп. узел: выкл. · нажмите, чтобы добавить</string>
+    <string name="home_button_brand">Dr VPN</string>
+    <string name="gaming_mode">Игры</string>
+    <string name="gaming_on">Игровой режим вкл.: только серверы WireGuard, минимальный пинг</string>
+    <string name="gaming_off">Игровой режим выкл.</string>
+    <string name="gaming_no_servers">В этом списке нет серверов WireGuard для игрового режима</string>
+    <string name="extra_hop_off_gaming">Доп. узел: выкл. в игровом режиме (минимальный пинг)</string>
+    <string name="gaming_mode_title">Игровой режим</string>
+    <string name="gaming_mode_summary">Только серверы WireGuard, минимальный пинг; без доп. узла</string>
+    <string name="title_stats">Анонимная статистика</string>
+    <string name="summary_stats">Раз в день: случайный ID, версия приложения, регион, используемые функции, тип сервера (не его адрес) и модель телефона. Без IP, без трафика, без адресов серверов.</string>
+    <string name="openvpn_name">Dr Open VPN</string>
+    <string name="openvpn_card_desc">Бесплатно · работает отдельно, без вашего сервера (OpenVPN нельзя добавить в цепочку) · нажмите, чтобы использовать</string>
+    <string name="openvpn_card_selected">Dr Open VPN выбран. Нажмите кнопку подключения.</string>
+    <string name="openvpn_card_missing">Dr Open VPN больше нет в «Моих серверах»</string>
+    <string name="openvpn_needs_vpn_mode">Dr Open VPN работает только в режиме VPN. Включите режим VPN в настройках.</string>
+    <string name="openvpn_not_supported">Dr Open VPN недоступен на этом телефоне</string>
+    <string name="openvpn_error_provider">Не удалось получить серверы Dr Open VPN. Один раз подключитесь к другому серверу и попробуйте снова.</string>
 </resources>
