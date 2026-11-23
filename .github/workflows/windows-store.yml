@@ -14,6 +14,9 @@ on:
       tag:
         description: "satelite-proxy release tag (empty = latest)"
         required: false
+      store_version:
+        description: "Store package version x.y.z (empty = the build's version); use when the Store already has this version"
+        required: false
 
 permissions:
   contents: read
@@ -38,6 +41,7 @@ jobs:
         run: |
           $Zip = Get-ChildItem dl\*_x64_portable.zip | Select-Object -First 1
           $Version = [regex]::Match($Zip.Name, '_(\d+\.\d+\.\d+)_').Groups[1].Value
+          if ("${{ inputs.store_version }}") { $Version = "${{ inputs.store_version }}" }
           if (-not $Version) { throw "No version in $($Zip.Name)" }
 
           Expand-Archive $Zip.FullName -DestinationPath unzip
