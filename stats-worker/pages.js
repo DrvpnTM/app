@@ -529,7 +529,8 @@ ${card('همهٔ نسخه‌ها', '<div id="tDl" class="scroll"></div>', '<span
 <div class="card">
 <h3>اعلان داخل برنامه <em id="nState"></em></h3>
 <div id="nNoToken" class="banner warn" hidden>برای ذخیره از همین‌جا، یک توکن گیت‌هاب در <a href="/settings#github">تنظیمات</a> بگذارید. تا آن وقت اعلان فعلی فقط نمایش داده می‌شود.</div>
-<label class="switch"><input type="checkbox" id="nEnabled"> نمایش اعلان به کاربران</label>
+<div style="display:flex;gap:22px;flex-wrap:wrap"><label class="switch"><input type="checkbox" id="nEnabled"> نمایش اعلان به کاربران</label>
+<label class="switch" title="یک بار در نوار اعلان‌های گوشی هم نشان داده می‌شود (از نسخهٔ ۰٫۲٫۸ اپ؛ هر ۶ ساعت بررسی می‌شود)"><input type="checkbox" id="nNotify"> ارسال به‌صورت نوتیفیکیشن هم</label></div>
 <label class="f">عنوان</label>
 <div class="langs">${langs('Title', 'input', 120)}</div>
 <label class="f">متن</label>
@@ -538,7 +539,7 @@ ${card('همهٔ نسخه‌ها', '<div id="tDl" class="scroll"></div>', '<span
 <div style="margin-top:14px"><label class="switch"><input type="checkbox" id="nRenew" checked> به کسانی که اعلان قبلی را بسته‌اند هم دوباره نشان بده</label></div>
 <div style="display:flex;gap:10px;margin-top:18px;flex-wrap:wrap"><button class="btn" id="nSave">ذخیره و انتشار</button><button class="btn ghost" id="nReload">بارگذاری دوباره</button></div>
 <div class="msg" id="nMsg"></div>
-<p style="color:var(--faint);font-size:12px;line-height:1.8;margin:14px 0 0">اعلان در فایل <code>notice.json</code> مخزن گیت‌هاب ذخیره می‌شود و برنامه‌ها چند دقیقه بعد آن را می‌بینند (کش گیت‌هاب تا ۵ دقیقه). زبان‌های دیگر برنامه متن فارسی را نشان می‌دهند. نشانی آمار (stats_url) دست نمی‌خورد.</p>
+<p style="color:var(--faint);font-size:12px;line-height:1.8;margin:14px 0 0">اعلان در فایل <code>notice.json</code> مخزن گیت‌هاب ذخیره می‌شود و برنامه‌ها چند دقیقه بعد آن را می‌بینند (کش گیت‌هاب تا ۵ دقیقه). نوتیفیکیشن را اپ (از نسخهٔ ۰٫۲٫۸) هر ۶ ساعت یک بار بررسی می‌کند و هر اعلان را فقط یک بار نشان می‌دهد؛ برای فرستادن دوباره، گزینهٔ «دوباره نشان بده» را روشن بگذارید. زبان‌های دیگر برنامه متن فارسی را نشان می‌دهند. نشانی آمار (stats_url) دست نمی‌خورد.</p>
 </div>
 <div class="card"><h3>پیش‌نمایش <em>صفحهٔ اول برنامه</em></h3>
 <div class="seg" id="nLang" style="width:max-content;margin:0 auto 14px"><button data-l="fa" class="on">فا</button><button data-l="en">EN</button><button data-l="ru">RU</button><button data-l="zh">中</button></div>

@@ -704,6 +704,7 @@
     <string name="aether_command_hint">Một dòng lệnh Aether đầy đủ chạy thay cho các cài đặt ở trên. Thường để trống.</string>
     <string name="aether_not_supported">Loại bộ xử lý của điện thoại này không có Aether trong phiên bản này.</string>
     <string name="update_channel_name">Cập nhật ứng dụng</string>
+    <string name="announcement_channel_name">Thông báo</string>
     <string name="update_title">Đã có Dr VPN %1$s</string>
     <string name="update_notification_text">Chạm để cập nhật phiên bản mới</string>
     <string name="update_message">Phiên bản mới, tốt hơn đã sẵn sàng. Cập nhật ngay, chỉ mất một lát.</string>

@@ -648,7 +648,7 @@ const LANGS = ['fa', 'en', 'ru', 'zh'];
 let previewLang = 'fa', noticeSha = null;
 function noticeForm() {
   const pick = (field) => Object.fromEntries(LANGS.map((l) => [l, $('n' + field + '_' + l).value.trim()]).filter(([, v]) => v));
-  return { enabled: $('nEnabled').checked, title: pick('Title'), message: pick('Message'), link: $('nLink').value.trim(), renew: $('nRenew').checked, sha: noticeSha };
+  return { enabled: $('nEnabled').checked, notify: $('nNotify').checked, title: pick('Title'), message: pick('Message'), link: $('nLink').value.trim(), renew: $('nRenew').checked, sha: noticeSha };
 }
 function preview() {
   const n = noticeForm();
@@ -657,7 +657,10 @@ function preview() {
   $('nPreview').innerHTML = n.enabled && (t || m)
     ? '<div class="notice" dir="' + (rtl ? 'rtl' : 'ltr') + '"><b>' + esc(t) + '</b><p>' + esc(m) + '</p>' + (n.link ? '<span>' + (rtl ? 'باز کردن' : 'Open') + ' ↗</span>' : '') + '</div>'
     : '<div class="off">اعلان خاموش است؛<br>کاربران چیزی نمی‌بینند.</div>';
-  $('nState').textContent = n.enabled ? 'روشن' : 'خاموش';
+  $('nState').textContent = n.enabled ? (n.notify ? 'روشن · با نوتیفیکیشن' : 'روشن') : 'خاموش';
+  if (n.enabled && n.notify && (t || m)) {
+    $('nPreview').insertAdjacentHTML('afterbegin', '<div class="notice" style="margin-top:6px;background:#1e293b;padding:10px 12px;border-radius:14px" dir="' + (rtl ? 'rtl' : 'ltr') + '"><b style="font-size:13px">🔔 ' + esc(t || 'Dr VPN') + '</b><p style="font-size:12px;opacity:.85">' + esc(m).slice(0, 140) + '</p></div>');
+  }
 }
 async function loadNotice() {
   try {
@@ -666,6 +669,7 @@ async function loadNotice() {
     noticeSha = r.sha;
     const n = r.notice || {};
     $('nEnabled').checked = !!n.enabled;
+    $('nNotify').checked = !!n.notify;
     for (const l of LANGS) { $('nTitle_' + l).value = (n.title || {})[l] || ''; $('nMessage_' + l).value = (n.message || {})[l] || ''; }
     $('nLink').value = n.link || '';
     $('nNoToken').hidden = !!r.canEdit;
@@ -679,7 +683,7 @@ $('nReload').addEventListener('click', loadNotice);
 $('nSave').addEventListener('click', async () => {
   const btn = $('nSave'), msg = $('nMsg'), n = noticeForm();
   if (n.enabled && !n.title.fa && !n.message.fa && !n.title.en && !n.message.en) return show(msg, false, 'برای اعلان روشن، دست‌کم عنوان یا متن فارسی یا انگلیسی لازم است.');
-  if (!confirm(n.enabled ? 'اعلان برای همهٔ کاربران منتشر شود؟' : 'اعلان خاموش شود؟')) return;
+  if (!confirm(n.enabled ? (n.notify ? 'اعلان منتشر و برای همهٔ کاربران نوتیفیکیشن فرستاده شود؟' : 'اعلان برای همهٔ کاربران منتشر شود؟') : 'اعلان خاموش شود؟')) return;
   btn.disabled = true;
   try {
     const r = await getJson('/notice', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(n) });

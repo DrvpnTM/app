@@ -198,6 +198,8 @@ class MainViewModel(
         viewModelScope.launch(ioDispatcher) {
             val lang = runCatching { localizedContext.resources.configuration.locales[0].language }.getOrDefault("fa")
             val notice = runCatching { AnnouncementManager.fetch(lang) }.getOrNull() ?: return@launch
+            // Seen as the card: the background check must not notify it again.
+            AnnouncementManager.markSeen(notice.id)
             _uiState.update { it.copy(announcement = notice) }
         }
     }

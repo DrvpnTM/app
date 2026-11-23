@@ -99,6 +99,8 @@ export async function writeNotice(env, input) {
   if (input.sha && input.sha !== sha) throw new Error('اعلان در این فاصله روی گیت‌هاب عوض شده است. صفحه را تازه کنید.');
   const next = { ...notice };
   next.enabled = !!input.enabled;
+  // Also a system notification, once per id (app 0.2.8 on).
+  if (input.notify) next.notify = true; else delete next.notify;
   for (const field of ['title', 'message']) {
     const obj = {};
     for (const lang of LANGS) {

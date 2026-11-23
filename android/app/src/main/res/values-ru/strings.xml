@@ -710,6 +710,7 @@
     <string name="aether_command_hint">Вместо настроек выше запускается целая командная строка Aether. Обычно оставьте пустым.</string>
     <string name="aether_not_supported">Для процессора этого телефона в этой версии нет Aether.</string>
     <string name="update_channel_name">Обновления приложения</string>
+    <string name="announcement_channel_name">Объявления</string>
     <string name="update_title">Вышел Dr VPN %1$s</string>
     <string name="update_notification_text">Нажмите, чтобы обновиться</string>
     <string name="update_message">Готова новая, улучшенная версия. Обновитесь сейчас — это займёт минуту.</string>
