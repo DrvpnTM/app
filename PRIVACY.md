@@ -34,3 +34,28 @@ Dr VPN is an open-source app. It does not collect, store or send any personal da
 - **Subscriptions:** subscription links you add are downloaded directly from their own address.
 
 Source code: [github.com/DrvpnTM/app](https://github.com/DrvpnTM/app) · Contact: [drvpn.net](https://drvpn.net) · Telegram [@drVPN_net](https://t.me/drVPN_net)
+
+---
+
+## Dr VPN for Windows (desktop app, including the Microsoft Store version)
+
+**Last updated: November 27, 2026**
+
+The Windows app (DrVPN, source code: [github.com/DrvpnTM/satelite-proxy](https://github.com/DrvpnTM/satelite-proxy)) follows the same rules as the Android app, with these Windows-specific details:
+
+- **No telemetry:** the Windows app sends no usage statistics, analytics or crash reports to us.
+- **Your traffic** goes only through the servers you add (subscription link or config) or the built-in free server list. We cannot see it and do not log it.
+- **Data stored on your PC:** settings, your servers and subscriptions, generated proxy-core configuration, rule sets and logs. In the Microsoft Store version they are kept in the app's own package folder (`%LOCALAPPDATA%\Packages\DrVPN.DrVPN_<id>\LocalState`) and Windows deletes them when you uninstall the app. In the installer and portable versions they are in `%APPDATA%\net.drvpn.desktop` (or next to the program in the portable version); delete that folder to remove them.
+- **Logs** stay on your PC only. They can include the addresses of sites the proxy connected to, for troubleshooting. Log files older than 7 days are deleted automatically, and the total is capped.
+- **Elevated component (TUN mode only):** when you choose TUN mode and press Start, Windows asks for administrator permission (UAC) to start the bundled proxy core, which creates the Wintun virtual network adapter. It reads only the app's own configuration, writes only the app's own log, and stops when you disconnect or quit. Nothing elevated is installed permanently.
+- **System proxy mode:** the app sets the Windows proxy for your user to its local port (127.0.0.1) while connected and turns it off when you disconnect or quit.
+- **Launch at login (Microsoft Store version):** off by default; you turn it on or off in Windows Settings > Apps > Startup. Windows removes it when you uninstall the app.
+- **External services the app contacts:**
+  - the subscription links you add, and the built-in free server list (`raw.githubusercontent.com/DrvpnTM/vpn`);
+  - connectivity checks (`www.gstatic.com/generate_204`) and, to show your current IP and country, one of `api.ip.sb`, `api.myip.com`, `ipwho.is` or `ip-api.com`;
+  - encrypted DNS servers (Quad9, Cloudflare, Google, AdGuard) used by the proxy core;
+  - routing rule-set downloads from GitHub / jsDelivr;
+  - installer and portable versions only: GitHub releases pages, to check for new versions of the app and its proxy cores, and to download a core update when you ask for one. The Microsoft Store version does neither; the Store updates the app and the cores ship inside it.
+  None of these requests include personal data from us; each service receives your request like any website you visit.
+
+Contact: [drvpn.net](https://drvpn.net) · Telegram [@drVPN_net](https://t.me/drVPN_net)
