@@ -10,12 +10,18 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -115,6 +121,7 @@ fun SettingsScreen(
     var uiSettingsExpanded by rememberSaveable { mutableStateOf(true) }
     var vpnSettingsExpanded by rememberSaveable { mutableStateOf(true) }
     var extraHopExpanded by rememberSaveable { mutableStateOf(true) }
+    var relayExpanded by rememberSaveable { mutableStateOf(false) }
     var coreSettingsExpanded by rememberSaveable { mutableStateOf(true) }
     var muxSettingsExpanded by rememberSaveable { mutableStateOf(false) }
     var fragmentSettingsExpanded by rememberSaveable { mutableStateOf(false) }
@@ -175,6 +182,8 @@ fun SettingsScreen(
     var themeStyle by rememberMmkvString(AppConfig.PREF_DRVPN_THEME, "default")
     var autoReconnect by rememberMmkvBool(AppConfig.PREF_DRVPN_AUTO_RECONNECT, true)
     var statsEnabled by rememberMmkvBool(AppConfig.PREF_STATS_ENABLED, true)
+    var relayEnabled by rememberMmkvBool(AppConfig.PREF_P2P_RELAY_ENABLED, false)
+    var showRelayConsent by remember { mutableStateOf(false) }
     var extraHopMode by rememberMmkvString(AppConfig.PREF_EXTRA_HOP_MODE, ExtraHopMode.OFF.value)
     var extraHopKind by rememberMmkvString(AppConfig.PREF_EXTRA_HOP_KIND, ExtraHopKind.LANTERN.value)
     var extraHopWireGuard by rememberMmkvString(AppConfig.PREF_EXTRA_HOP_WIREGUARD, "")
@@ -390,6 +399,23 @@ fun SettingsScreen(
                             ByeDpiManager.parseArgs(text) != null -> byeDpiArgs = text
                             else -> extraHopContext.toastError(R.string.byedpi_args_invalid)
                         }
+                    }
+                )
+            }
+
+            CollapsiblePreferenceGroupHeader(
+                title = stringResource(R.string.title_community_relay),
+                expanded = relayExpanded,
+                onExpandedChange = { relayExpanded = it }
+            )
+            if (relayExpanded) SettingsGroup {
+                SettingsSwitchItem(
+                    title = stringResource(R.string.title_community_relay_enabled),
+                    summary = stringResource(R.string.summary_community_relay),
+                    checked = relayEnabled,
+                    // Turning on requires the consent dialog; turning off is immediate.
+                    onCheckedChange = { want ->
+                        if (want) showRelayConsent = true else relayEnabled = false
                     }
                 )
             }
@@ -810,5 +836,37 @@ fun SettingsScreen(
             Spacer(modifier = Modifier.height(24.dp))
             NavigationBarsSpacer()
         }
+    }
+
+    if (showRelayConsent) {
+        val consentScroll = rememberScrollState()
+        AlertDialog(
+            onDismissRequest = { showRelayConsent = false },
+            title = { Text(stringResource(R.string.relay_consent_title)) },
+            text = {
+                Text(
+                    text = stringResource(R.string.relay_consent_body),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 360.dp)
+                        .verticalScroll(consentScroll)
+                        .verticalScrollbar(consentScroll)
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    relayEnabled = true
+                    showRelayConsent = false
+                }) {
+                    Text(stringResource(R.string.relay_consent_accept))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showRelayConsent = false }) {
+                    Text(stringResource(R.string.action_cancel))
+                }
+            },
+            containerColor = MaterialTheme.colorScheme.surface
+        )
     }
 }

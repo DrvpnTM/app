@@ -792,6 +792,12 @@
     <string name="gaming_mode_summary">WireGuard servers only, the lowest ping; no extra hop</string>
     <string name="title_stats">Anonymous usage stats</string>
     <string name="summary_stats">Once a day: a random ID, app version, region, features used, the kind of server (not its address) and phone model. No IP, no traffic, no server addresses.</string>
+    <string name="title_community_relay">Community relay</string>
+    <string name="title_community_relay_enabled">Help other users connect</string>
+    <string name="summary_community_relay">Off by default. When on, your device helps other users reach Dr VPN\'s servers. It never becomes an exit, and no one can see your traffic.</string>
+    <string name="relay_consent_title">Become a community relay?</string>
+    <string name="relay_consent_body">If you turn this on, your device becomes a helper node for other Dr VPN users, similar to Tor Snowflake.\n\nWhat this means:\n• Other users can connect to Dr VPN\'s servers through your device. It helps keep the service reachable where it is blocked.\n• Your device is only a relay, never an exit. Websites and services other users visit never see your IP address, and your IP is never blamed for their traffic.\n• The relayed traffic is encrypted. No one — not other users, not Dr VPN — can read it, and no one can choose whose traffic goes through your device.\n• It uses some of your data and battery while the app is connected.\n\nThis is completely optional. You can turn it off any time, and it stays off unless you turn it on.</string>
+    <string name="relay_consent_accept">Turn on</string>
     <!-- Dr Open VPN (RiseupVPN over OpenVPN) -->
     <string name="openvpn_name">Dr Open VPN</string>
     <string name="openvpn_card_desc">Free · runs on its own, without your server (OpenVPN cannot be chained) · tap to use it</string>

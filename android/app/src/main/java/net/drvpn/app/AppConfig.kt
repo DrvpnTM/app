@@ -89,6 +89,16 @@ object AppConfig {
     const val PREF_GAMING_MODE = "pref_gaming_mode"
     /** Anonymous daily usage ping (StatsManager); on unless the user turns it off. */
     const val PREF_STATS_ENABLED = "pref_drvpn_stats_enabled"
+    /**
+     * Community relay (Snowflake-style). OFF by default; the user opts in from
+     * Settings after an explicit consent dialog. When on, the device acts only
+     * as an encrypted relay that helps other users reach Dr VPN's servers: it is
+     * never an exit node (destinations never see this device's IP), no one —
+     * including the operator — can read, target or remotely toggle the relayed
+     * traffic, and the matching of who relays for whom is blind. See the relay
+     * section of PRIVACY.md.
+     */
+    const val PREF_P2P_RELAY_ENABLED = "pref_p2p_relay_enabled"
     const val PREF_UI_MODE_NIGHT = "pref_ui_mode_night"
     const val PREF_DYNAMIC_COLOR = "pref_dynamic_color"
     const val PREF_IPV6_ENABLED = "pref_ipv6_enabled"
