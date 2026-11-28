@@ -626,6 +626,9 @@
     <string name="home_fastest_testing">در حال تست سرورها…</string>
     <string name="home_fastest_selected">سریع‌ترین سرور انتخاب شد</string>
     <string name="home_fastest_none">سرور سالمی پیدا نشد</string>
+    <string name="title_static_ip">IP ثابت</string>
+    <string name="title_google_flow_unlocker">باز کردن Google Flow</string>
+    <string name="title_gemini_unlocker">باز کردن Gemini</string>
     <string name="home_download">دانلود</string>
     <string name="home_upload">آپلود</string>
     <string name="kill_switch_title">کیل‌سوییچ (جلوگیری از لو رفتن IP)</string>

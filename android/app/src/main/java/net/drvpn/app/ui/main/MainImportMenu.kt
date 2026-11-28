@@ -28,6 +28,9 @@ internal enum class ImportMenuAction(@StringRes val labelRes: Int, val action: M
 }
 
 enum class MainMoreMenuAction(@StringRes val labelRes: Int) {
+    StaticIp(R.string.title_static_ip),
+    GoogleFlowUnlocker(R.string.title_google_flow_unlocker),
+    GeminiUnlocker(R.string.title_gemini_unlocker),
     RestartService(R.string.title_service_restart),
     DeleteAll(R.string.title_del_all_config),
     DeleteDuplicate(R.string.title_del_duplicate_config),
