@@ -626,6 +626,9 @@
     <string name="home_fastest_testing">Testing servers…</string>
     <string name="home_fastest_selected">Fastest server selected</string>
     <string name="home_fastest_none">No working server found</string>
+    <string name="title_static_ip">Static IP</string>
+    <string name="title_google_flow_unlocker">Google Flow unlocker</string>
+    <string name="title_gemini_unlocker">Gemini unlocker</string>
     <string name="home_download">Download</string>
     <string name="home_upload">Upload</string>
     <string name="kill_switch_title">Kill switch (prevent IP leaks)</string>

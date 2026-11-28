@@ -88,6 +88,12 @@ sealed interface MainAction {
     data class Search(val query: String) : MainAction
     data class SetShowServersWithoutPing(val show: Boolean) : MainAction
     data object SelectFastest : MainAction
+
+    /**
+     * Pick the fastest free-list server that can reach [probeUrl] and connect to it.
+     * Used by the Static IP / Google Flow / Gemini unlocker menu items.
+     */
+    data class SmartUnlock(val probeUrl: String) : MainAction
     data class DismissAnnouncement(val id: String) : MainAction
     data class ShareQRCode(val guid: String) : MainAction
     data class ShareClipboard(val guid: String) : MainAction

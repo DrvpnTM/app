@@ -222,6 +222,12 @@ fun MainScreen(
                     onAction = onAction,
                     onMoreMenuAction = { action ->
                         when (action) {
+                            MainMoreMenuAction.StaticIp ->
+                                onAction(MainAction.SmartUnlock("https://www.gstatic.com/generate_204"))
+                            MainMoreMenuAction.GoogleFlowUnlocker ->
+                                onAction(MainAction.SmartUnlock("https://labs.google/fx/tools/flow"))
+                            MainMoreMenuAction.GeminiUnlocker ->
+                                onAction(MainAction.SmartUnlock("https://gemini.google.com"))
                             MainMoreMenuAction.RestartService -> onAction(MainAction.RestartService)
                             MainMoreMenuAction.DeleteAll -> showDelAllConfirm = true
                             MainMoreMenuAction.DeleteDuplicate -> showDelDuplicateConfirm = true

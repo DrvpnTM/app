@@ -46,6 +46,7 @@ class RealPingWorkerService(
     private val context: Context,
     private val guids: List<String>,
     private val onlyTcp: Boolean = false,
+    private val probeUrl: String? = null,
     private val onEvent: (RealPingEvent) -> Unit = {}
 ) {
     private val job = SupervisorJob()
@@ -130,7 +131,10 @@ class RealPingWorkerService(
             return retFailure
         }
         return RealPingExecutionLimiter.run(config.configType) {
-            CoreNativeManager.measureOutboundDelay(configResult.content, SettingsManager.getDelayTestUrl())
+            CoreNativeManager.measureOutboundDelay(
+                configResult.content,
+                probeUrl?.takeIf { it.isNotBlank() } ?: SettingsManager.getDelayTestUrl()
+            )
         }
     }
 

@@ -447,6 +447,7 @@ class MainViewModel(
             }
             MainAction.TestAllServers -> testAllRealPing(true)
             MainAction.TestRealAllServers -> testAllRealPing()
+            is MainAction.SmartUnlock -> smartUnlock(action.probeUrl)
             MainAction.CancelTesting -> cancelAllPing()
             MainAction.RemoveAllServers -> removeAllServerAsync()
             MainAction.RemoveDuplicateServers -> removeDuplicateServerAsync()
@@ -1127,7 +1128,7 @@ class MainViewModel(
         }
     }
 
-    fun testAllRealPing(onlyTcp: Boolean = false) {
+    fun testAllRealPing(onlyTcp: Boolean = false, probeUrl: String? = null) {
         cancelAllPing()
         val groupId = uiState.value.selectedGroupId
         val servers = currentServers()
@@ -1153,7 +1154,8 @@ class MainViewModel(
             key = AppConfig.MSG_MEASURE_CONFIG_START,
             subscriptionId = groupId,
             serverGuids = if (keywordFilter.isNotEmpty()) serverGuids else emptyList(),
-            onlyTcp = onlyTcp
+            onlyTcp = onlyTcp,
+            probeUrl = probeUrl
         )
         _uiState.update {
             it.copy(
@@ -1412,6 +1414,35 @@ class MainViewModel(
             pendingSelectFastest = true
             toast(R.string.home_fastest_testing)
             testAllRealPing()
+        }
+    }
+
+    /**
+     * Service-unlock menu (Static IP / Google Flow / Gemini): from the free server
+     * list, test every server against [probeUrl] and connect to the fastest one that
+     * can actually reach it. A server that cannot reach the target scores -1 and is
+     * skipped, so only "working" servers for that service are chosen.
+     */
+    private fun smartUnlock(probeUrl: String) {
+        if (uiState.value.isTesting) return
+        if (uiState.value.selectedGroupId != AppConfig.FREE_SUBSCRIPTION_ID) {
+            subscriptionIdChanged(AppConfig.FREE_SUBSCRIPTION_ID)
+        }
+        pendingSelectFastest = true
+        toast(R.string.home_fastest_testing)
+        viewModelScope.launch {
+            // The free group may still be loading right after the switch; wait briefly.
+            var tries = 0
+            while (currentServers().isEmpty() && tries < 30) {
+                delay(100)
+                tries++
+            }
+            if (currentServers().isEmpty()) {
+                pendingSelectFastest = false
+                toastError(R.string.home_fastest_none)
+                return@launch
+            }
+            testAllRealPing(onlyTcp = false, probeUrl = probeUrl)
         }
     }
 
